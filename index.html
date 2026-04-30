@@ -2,1733 +2,1394 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Darts Scorecard</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ══════════════════════════════════════════
-   DESIGN TOKENS
-══════════════════════════════════════════ */
 :root {
-  --bg:          #020408;
-  --panel:       #060d16;
-  --panel2:      #0a1525;
-  --border:      #0d2845;
-  --border2:     #1a4a7a;
-  --cyan:        #00e5ff;
-  --cyan-dim:    #0099bb;
-  --cyan-glow:   rgba(0,229,255,0.15);
-  --cyan-glow2:  rgba(0,229,255,0.06);
-  --blue:        #1565ff;
-  --blue-bright: #4d8aff;
-  --blue-glow:   rgba(21,101,255,0.2);
-  --text:        #e8f4ff;
-  --text-mid:    #7ab0d4;
-  --text-dim:    #3a6080;
-  --active:      #00e5ff;
-  --active-glow: rgba(0,229,255,0.3);
-  --closed:      #00ff88;
-  --closed-dim:  #006633;
-  --mark-open:   #4db8e8;
-  --mark-closed: #00ff88;
-  --gold:        #ffc800;
-  --red:         #ff3860;
-  --font-display: 'Orbitron', monospace;
-  --font-ui:      'Rajdhani', sans-serif;
+  --bg:           #000000;
+  --panel:        #0a0a0a;
+  --panel2:       #1a1a1a;
+  --border:       #2a2a2a;
+  --border-light: #3a3a3a;
+  --red:          #c41e1e;
+  --red-bright:   #e63030;
+  --red-dark:     #8a1414;
+  --yellow:       #f5c518;
+  --yellow-dim:   #c89e0e;
+  --green:        #2d8a3e;
+  --green-bright: #3aab50;
+  --white:        #ffffff;
+  --text:         #ffffff;
+  --text-mid:     #b0b0b0;
+  --text-dim:     #606060;
+  --text-inactive:#888888;
+  --numpad-key:   #f5f5f5;
+  --numpad-text:  #1a1a1a;
+  --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-ui:      'Roboto Condensed', sans-serif;
 }
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overscroll-behavior: none; }
 body {
   font-family: var(--font-ui);
   background: var(--bg);
   color: var(--text);
-  height: 100dvh;
   min-height: 100dvh;
   display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  align-items: center; justify-content: flex-start;
   overflow: hidden;
-  position: relative;
-  background-image:
-    radial-gradient(ellipse at 50% 0%,   rgba(0,100,200,0.12) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 100%, rgba(0,60,120,0.1)   0%, transparent 50%),
-    radial-gradient(circle, rgba(0,150,255,0.08) 1px, transparent 1px);
-  background-size: auto, auto, 28px 28px;
+  user-select: none; -webkit-user-select: none;
 }
-body::before {
-  content: '';
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0px, transparent 3px,
-    rgba(0,229,255,0.012) 3px, rgba(0,229,255,0.012) 4px
-  );
-}
-body::after {
-  content: '';
-  position: fixed;
-  top: 12px; left: 12px; right: 12px; bottom: 12px;
-  pointer-events: none; z-index: 1;
-  border: 1px solid rgba(0,229,255,0.06);
-  border-radius: 4px;
-}
+button { font-family: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
 
-/* ══════════════════════════════════════════
-   SETUP SCREEN
-══════════════════════════════════════════ */
+/* SETUP */
 #setup {
-  position: relative; z-index: 10;
-  display: flex; flex-direction: column; align-items: center;
-  gap: 20px; padding: 40px 32px; max-width: 480px; width: 96%;
-  background: var(--panel);
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  box-shadow:
-    0 0 0 1px var(--border),
-    0 0 60px rgba(0,100,200,0.15),
-    0 0 120px rgba(0,60,150,0.08),
-    inset 0 1px 0 rgba(0,229,255,0.08);
+  display: flex; flex-direction: column;
+  width: 100%; max-width: 600px;
+  min-height: 100dvh;
+  padding: 24px 20px 32px;
+  gap: 18px;
 }
-#setup::before, #setup::after {
-  content: '';
-  position: absolute;
-  width: 20px; height: 20px;
-  border-color: var(--cyan-dim);
-  border-style: solid;
-}
-#setup::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
-#setup::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
-
 .setup-title {
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 6vw, 2.4rem);
-  font-weight: 700;
-  letter-spacing: 6px;
-  text-transform: uppercase;
-  color: var(--cyan);
-  text-shadow: 0 0 20px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.2);
-  line-height: 1.1;
-  text-align: center;
+  font-size: clamp(1.8rem, 7vw, 2.6rem);
+  font-weight: 700; letter-spacing: 4px;
+  text-transform: uppercase; text-align: center;
+  color: var(--white); line-height: 1;
+  margin-top: 12px;
 }
+.setup-title span { color: var(--red-bright); }
 .setup-sub {
-  font-size: .75rem; font-weight: 500;
-  letter-spacing: 5px; text-transform: uppercase;
-  color: var(--text-dim); margin-top: -12px;
+  font-size: .82rem; font-weight: 500;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--text-dim); text-align: center;
+  margin-top: -8px;
 }
-.divider {
-  width: 100%; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border2), transparent);
+.section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 12px;
 }
 .slabel {
-  font-size: .72rem; font-weight: 600;
-  letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim);
-  align-self: flex-start;
+  font-size: .82rem; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text-mid);
 }
-
-/* Game mode buttons */
-.mode-row { display: flex; gap: 10px; width: 100%; }
+.mode-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .mode-btn {
-  font-family: var(--font-display); font-size: .95rem; font-weight: 700;
-  flex: 1; height: 52px;
-  border-radius: 5px; cursor: pointer;
-  border: 1px solid var(--border2);
+  font-family: var(--font-display); font-size: 1.1rem; font-weight: 600;
+  height: 56px; border-radius: 6px;
+  border: 2px solid var(--border-light);
   background: var(--panel2);
-  color: var(--text-dim);
-  letter-spacing: 2px;
-  transition: all .15s;
+  color: var(--text-mid);
+  letter-spacing: 2px; transition: all .15s;
 }
-.mode-btn:hover { border-color: var(--cyan-dim); color: var(--text-mid); }
+.mode-btn:active { transform: scale(.97); }
 .mode-btn.active {
-  border-color: var(--cyan);
-  color: var(--cyan);
-  background: rgba(0,229,255,0.07);
-  box-shadow: 0 0 18px rgba(0,229,255,0.2), inset 0 1px 0 rgba(0,229,255,0.1);
+  border-color: var(--red-bright);
+  color: var(--white);
+  background: var(--red-dark);
 }
-
-/* Team dropdowns */
-.team-row { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-.team-select-wrap { position: relative; width: 100%; }
-.team-label-inline {
-  font-size: .65rem; font-weight: 600; letter-spacing: 3px;
-  text-transform: uppercase; color: var(--text-dim);
-  margin-bottom: 4px; display: block;
+.team-row { display: flex; flex-direction: column; gap: 12px; }
+.team-label {
+  font-size: .72rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 4px;
 }
 .team-select {
-  font-family: var(--font-ui); font-size: 1rem; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  width: 100%; padding: 11px 36px 11px 14px;
-  background: rgba(0,0,0,0.45);
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  color: var(--text); outline: none;
-  appearance: none;
-  cursor: pointer;
-  transition: border-color .2s, box-shadow .2s;
+  font-family: var(--font-ui); font-size: 1.1rem; font-weight: 500;
+  width: 100%; padding: 14px 36px 14px 14px;
+  background: var(--panel2);
+  border: 2px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--white); outline: none;
+  appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'><path fill='%23f5c518' d='M7 10L2 5h10z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
-.team-select:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0,229,255,0.1); }
-.team-select option { background: #0a1525; color: var(--text); }
-.team-select-wrap::after {
-  content: '▾';
-  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-  color: var(--cyan-dim); pointer-events: none;
-  font-size: .9rem;
-}
-
+.team-select:focus { border-color: var(--yellow); }
+.team-select option { background: #1a1a1a; color: var(--white); }
 .start-btn {
-  font-family: var(--font-display); font-size: .95rem; font-weight: 700;
+  font-family: var(--font-display); font-size: 1.2rem; font-weight: 700;
   letter-spacing: 4px; text-transform: uppercase;
-  padding: 13px 48px;
-  background: linear-gradient(135deg, rgba(0,100,200,0.3), rgba(0,50,120,0.4));
-  border: 1px solid var(--cyan);
-  border-radius: 4px;
-  color: var(--cyan); cursor: pointer;
-  box-shadow: 0 0 20px rgba(0,229,255,0.15), inset 0 1px 0 rgba(0,229,255,0.1);
+  padding: 16px;
+  background: var(--green);
+  border: 2px solid var(--green-bright);
+  border-radius: 6px;
+  color: var(--white); transition: all .15s;
+  width: 100%;
+}
+.start-btn:active { transform: scale(.98); background: var(--green-bright); }
+.start-btn:disabled { opacity: .35; }
+.sched-launch-btn {
+  font-family: var(--font-ui); font-size: .9rem; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--text-mid);
   transition: all .15s;
 }
-.start-btn:hover { box-shadow: 0 0 32px rgba(0,229,255,0.3), inset 0 1px 0 rgba(0,229,255,0.15); }
-.start-btn:active { opacity: .8; transform: scale(.98); }
+.sched-launch-btn:active { transform: scale(.98); border-color: var(--yellow); color: var(--yellow); }
 
-/* ══════════════════════════════════════════
-   GAME SCREEN (shared wrapper)
-══════════════════════════════════════════ */
+/* GAME SHELL */
 #game {
-  display: none; position: relative; z-index: 10;
-  width: 98vw; height: 98dvh;
-  max-width: 980px; max-height: 760px;
+  display: none;
+  width: 100%; max-width: 700px;
+  height: 100dvh;
   flex-direction: column;
-}
-.exit-btn {
-  position: absolute; top: 0; right: 0; z-index: 50;
-  font-family: var(--font-ui); font-size: .62rem; font-weight: 600;
-  letter-spacing: 3px; text-transform: uppercase;
-  padding: 4px 10px;
-  background: rgba(2,4,8,0.9);
-  border: 1px solid rgba(0,229,255,0.1);
-  border-top: none; border-right: none;
-  border-bottom-left-radius: 4px;
-  color: rgba(0,229,255,0.25); cursor: pointer;
-  transition: all .2s;
-}
-.exit-btn:hover { color: var(--cyan-dim); border-color: rgba(0,229,255,0.3); }
-
-.main-panel {
-  flex: 1; display: flex; flex-direction: column;
-  background: var(--panel);
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  box-shadow: 0 0 0 1px var(--border), 0 0 80px rgba(0,80,160,0.2), inset 0 1px 0 rgba(0,229,255,0.06);
-  overflow: hidden;
   position: relative;
+  background: var(--bg);
 }
-.main-panel::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--cyan-dim), transparent);
-  opacity: .5;
+#game.active { display: flex; }
+.exit-btn {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 30;
+  width: 32px; height: 32px;
+  font-size: 1.2rem;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-mid);
 }
+.exit-btn:active { color: var(--white); }
 
-/* ── Score header (shared) ── */
 .score-header {
   flex-shrink: 0;
   display: flex; align-items: stretch;
-  background: linear-gradient(180deg, rgba(0,30,70,0.8) 0%, rgba(0,15,40,0.9) 100%);
-  border-bottom: 1px solid var(--border2);
-  min-height: 70px;
-  position: relative;
+  background: var(--bg);
+  padding: 8px 6px 6px;
+  gap: 6px;
 }
-.score-header::after {
-  content: '';
-  position: absolute; top: 20%; bottom: 20%; left: 50%;
-  width: 1px;
-  background: linear-gradient(180deg, transparent, var(--border2), transparent);
+.player-block {
+  flex: 1; display: flex; flex-direction: column;
+  min-width: 0;
 }
-.score-half { flex: 1; display: flex; }
-.score-half.left  { justify-content: flex-end; }
-.score-half.right { justify-content: flex-start; }
-.player-col {
+.pname {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 4.5vw, 1.6rem);
+  font-weight: 600;
+  letter-spacing: 1px; text-align: center;
+  padding: 4px 8px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  border-radius: 3px; line-height: 1.1;
+}
+.player-block.active .pname { background: var(--red); color: var(--white); }
+.player-block:not(.active) .pname { color: var(--text-inactive); }
+.pscore-row {
+  display: flex; align-items: stretch;
+  gap: 4px; margin-top: 3px;
+}
+.pscore-stats {
+  display: flex; flex-direction: column;
+  justify-content: center;
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(.7rem, 2.2vw, .95rem);
+  line-height: 1.1;
+  min-width: 30px;
+}
+.pscore-stats.left { align-items: flex-start; }
+.pscore-stats.right { align-items: flex-end; }
+.pstat-match { color: var(--red-bright); }
+.pstat-leg { color: var(--text-mid); }
+.pscore {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 10vw, 4.2rem);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1;
+  padding: 4px 0;
+  border-radius: 4px;
+  letter-spacing: -1px;
+}
+.player-block.active .pscore {
+  background: var(--white);
+  color: var(--numpad-text);
+}
+.player-block:not(.active) .pscore { color: var(--text-inactive); }
+.leg-badge {
+  flex-shrink: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 6px 20px;
-  transition: background .2s;
-  position: relative; min-width: 0;
-}
-.player-col.active-player { background: rgba(0,229,255,0.04); }
-.player-col.active-player::after {
-  content: '';
-  position: absolute; bottom: 0; left: 10%; right: 10%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-  box-shadow: 0 0 8px var(--cyan);
-}
-.sc-name {
-  font-family: var(--font-display);
-  font-size: clamp(.9rem, 2.5vw, 1.5rem);
-  font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  line-height: 1;
-}
-.player-col.active-player .sc-name { color: var(--cyan); text-shadow: 0 0 16px rgba(0,229,255,0.5); }
-.sc-pts {
-  font-family: var(--font-display);
-  font-size: clamp(1.6rem, 5vw, 3.2rem);
-  font-weight: 900; line-height: 1;
-  color: var(--text-mid); letter-spacing: 2px;
-}
-.player-col.active-player .sc-pts { color: var(--text); }
-.sc-legs {
-  font-family: var(--font-ui); font-size: .7rem; font-weight: 600;
-  letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;
-}
-
-/* ══════════════════════════════════════════
-   CRICKET SPECIFIC
-══════════════════════════════════════════ */
-.turn-bar {
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  padding: 4px 16px;
-  background: rgba(0,0,0,0.3);
-  border-bottom: 1px solid rgba(0,229,255,0.06);
-  font-size: .72rem; font-weight: 600;
-  letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim);
-}
-.dart-pips { display: flex; gap: 6px; }
-.dpip {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--border2); transition: all .2s;
-}
-.dpip.used { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
-
-.board { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.num-row {
-  display: flex; flex: 1; align-items: stretch;
-  border-bottom: 1px solid rgba(0,229,255,0.05);
-  min-height: 0; transition: background .15s;
-}
-.num-row:nth-child(odd) { background: rgba(0,229,255,0.012); }
-.marks-area {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 2px 6px;
-}
-.marks-area svg { width: 100%; height: 100%; max-height: 60px; overflow: visible; }
-.btn-wrap { display: flex; align-items: center; justify-content: center; padding: 4px 3px; flex-shrink: 0; }
-.dt-btn {
-  font-family: var(--font-ui); font-size: clamp(.62rem, 1.3vw, .88rem);
-  font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-  min-width: clamp(22px, 3.5vw, 36px);
-  height: clamp(24px, 4.5vh, 42px);
-  border-radius: 4px; cursor: pointer; user-select: none;
-  background: rgba(0,229,255,0.04);
-  border: 1px solid rgba(0,229,255,0.25);
-  color: var(--cyan-dim);
-  transition: all .1s;
-}
-.dt-btn:hover { background: rgba(0,229,255,0.1); border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,0.2); }
-.dt-btn:active { opacity: .7; transform: scale(.94); }
-.num-btn {
-  font-family: var(--font-display);
-  font-size: clamp(1.5rem, 5vw, 3.2rem);
-  font-weight: 900; letter-spacing: 1px;
-  min-width: clamp(50px, 9vw, 92px);
-  height: clamp(36px, 6.5vh, 62px);
-  border-radius: 5px; cursor: pointer; user-select: none;
-  background: rgba(0,50,120,0.2);
-  border: 1px solid rgba(0,229,255,0.2);
-  color: var(--text); transition: all .1s;
-}
-.num-btn:hover { background: rgba(0,100,200,0.25); border-color: var(--cyan); box-shadow: 0 0 16px rgba(0,229,255,0.15); }
-.num-btn:active { opacity: .75; transform: scale(.97); }
-.num-btn.all-closed {
-  background: rgba(0,255,136,0.04); border-color: rgba(0,255,136,0.2);
-  color: var(--closed); cursor: default;
-  box-shadow: 0 0 12px rgba(0,255,136,0.08);
-}
-.num-btn.all-closed:hover { background: rgba(0,255,136,0.04); box-shadow: 0 0 12px rgba(0,255,136,0.08); }
-
-/* One player has closed this number — highlight their marks side */
-.num-row.one-closed .marks-area { background: rgba(0,229,255,0.04); }
-
-/* Both players closed — full row greyed out with strikethrough */
-.num-row.both-closed {
-  opacity: 0.38;
-  position: relative;
-  pointer-events: none;
-}
-.num-row.both-closed .num-btn {
-  color: var(--text-dim); border-color: rgba(255,255,255,0.08);
-  background: transparent; cursor: default;
-  box-shadow: none;
-}
-.num-row.both-closed::after {
-  content: '';
-  position: absolute; left: 6px; right: 6px; top: 50%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ── Cricket footer ── */
-.g-footer {
-  flex-shrink: 0;
-  display: flex; gap: 8px; padding: 6px 10px;
-  align-items: stretch;
-  background: linear-gradient(0deg, rgba(0,10,25,0.95), rgba(0,20,50,0.8));
-  border-top: 1px solid var(--border2);
-}
-.foot-btn {
-  font-family: var(--font-ui); font-size: .82rem; font-weight: 700;
-  letter-spacing: 3px; text-transform: uppercase;
-  padding: 7px 18px;
-  border-radius: 4px; cursor: pointer; transition: all .12s;
-  flex-shrink: 0;
-}
-.foot-btn:active { transform: scale(.96); }
-.btn-undo { border: 1px solid rgba(255,200,0,0.3); background: rgba(255,180,0,0.04); color: rgba(255,200,0,0.6); }
-.btn-undo:hover { border-color: rgba(255,200,0,0.7); color: var(--gold); box-shadow: 0 0 12px rgba(255,200,0,0.15); }
-
-/* Throw log — center display area */
-.throw-log {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center;
-  gap: 8px;
-  padding: 4px 8px;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid var(--border2);
+  width: 52px;
+  background: var(--red);
   border-radius: 4px;
-  min-height: 40px;
-  overflow: hidden;
+  align-self: stretch;
+  margin-top: 27px;
 }
-.throw-log-empty {
-  font-family: var(--font-ui); font-size: .65rem; font-weight: 600;
-  letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim);
-}
-.throw-chip {
-  font-family: var(--font-display); font-size: clamp(.85rem, 2.8vw, 1.2rem);
-  font-weight: 700; letter-spacing: 1px;
-  color: var(--cyan);
-  text-shadow: 0 0 10px rgba(0,229,255,0.4);
-  white-space: nowrap;
-}
-.throw-chip + .throw-chip::before {
-  content: '·';
-  margin-right: 8px;
-  color: var(--text-dim);
-}
-
-.btn-miss { border: 1px solid rgba(0,229,255,0.25); background: rgba(0,100,200,0.08); color: var(--text-mid); }
-.btn-miss:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 12px rgba(0,229,255,0.12); }
-.btn-enter { border: 1px solid rgba(0,255,136,0.35); background: rgba(0,180,100,0.08); color: var(--closed); }
-.btn-enter:hover { border-color: var(--closed); color: var(--closed); box-shadow: 0 0 12px rgba(0,255,136,0.15); }
-
-/* ══════════════════════════════════════════
-   01 GAME SPECIFIC
-══════════════════════════════════════════ */
-#o1-game { display: none; flex: 1; flex-direction: column; overflow: hidden; }
-
-/* 01 turn bar */
-.o1-turn-bar {
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  padding: 5px 16px;
-  background: rgba(0,0,0,0.3);
-  border-bottom: 1px solid rgba(0,229,255,0.06);
-  font-size: .72rem; font-weight: 600;
-  letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim);
-  gap: 10px;
-}
-.o1-turn-indicator { font-size: .7rem; letter-spacing: 3px; color: var(--cyan-dim); }
-
-/* ── Turn history ── */
-.o1-history {
-  flex: 1; display: flex; overflow: hidden;
-  border-bottom: 1px solid rgba(0,229,255,0.06);
-  min-height: 0;
-}
-.o1-hist-col {
-  flex: 1; display: flex; flex-direction: column;
-  overflow-y: auto; padding: 6px 8px;
-  gap: 2px;
-}
-.o1-hist-col:first-child { border-right: 1px solid rgba(0,229,255,0.06); }
-.o1-hist-col::-webkit-scrollbar { width: 3px; }
-.o1-hist-col::-webkit-scrollbar-track { background: transparent; }
-.o1-hist-col::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-.o1-hist-entry {
-  font-family: var(--font-display);
-  font-size: clamp(1.2rem, 4vw, 2rem);
-  font-weight: 700; letter-spacing: 1px;
-  text-align: center; padding: 3px 4px;
-  border-radius: 3px;
-  color: var(--text-mid);
-  line-height: 1.3;
-  transition: color .2s;
-}
-.o1-hist-entry.latest {
-  color: var(--cyan);
-  text-shadow: 0 0 10px rgba(0,229,255,0.35);
-}
-.o1-hist-entry.bust-entry {
-  color: var(--red); font-size: clamp(.8rem, 2.5vw, 1rem); letter-spacing: 2px;
-  opacity: .7;
-}
-.o1-hist-entry.miss-entry {
-  color: var(--text-dim); font-size: clamp(.8rem, 2.5vw, 1rem); letter-spacing: 2px;
-  font-family: var(--font-ui); font-weight: 600;
-}
-
-/* 01 numpad area */
-.o1-body {
-  flex-shrink: 0; display: flex; flex-direction: column;
-  padding: 7px 10px; gap: 6px;
-}
-
-/* Bust/status message */
-.o1-status {
-  text-align: center;
-  font-family: var(--font-display); font-size: .75rem; font-weight: 700;
-  letter-spacing: 4px; text-transform: uppercase;
-  min-height: 20px; transition: all .3s;
-}
-.o1-status.bust { color: var(--red); text-shadow: 0 0 12px rgba(255,56,96,0.5); }
-.o1-status.win  { color: var(--closed); text-shadow: 0 0 12px rgba(0,255,136,0.5); }
-
-/* Numpad display bar */
-.o1-display-row { display: flex; gap: 7px; align-items: stretch; }
-.o1-undo-btn {
-  font-family: var(--font-ui); font-size: .72rem; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase;
-  padding: 0 10px; min-width: 64px;
-  border-radius: 4px; cursor: pointer;
-  border: 1px solid rgba(255,200,0,0.35);
-  background: rgba(255,180,0,0.05);
-  color: rgba(255,200,0,0.65);
-  transition: all .12s;
-}
-.o1-undo-btn:hover { border-color: rgba(255,200,0,0.7); color: var(--gold); box-shadow: 0 0 10px rgba(255,200,0,0.15); }
-.o1-undo-btn:active { transform: scale(.96); }
-
-.o1-display {
-  flex: 1;
-  font-family: var(--font-display); font-size: clamp(1.1rem, 4vw, 1.9rem);
-  font-weight: 900; letter-spacing: 2px; text-align: center;
-  padding: 6px 10px;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid var(--border2);
-  border-radius: 4px; color: var(--cyan);
-  min-height: 50px; display: flex; align-items: center; justify-content: center;
-  text-shadow: 0 0 20px rgba(0,229,255,0.3);
-  overflow: hidden; white-space: nowrap;
-}
-.o1-display.empty { color: var(--text-dim); font-size: .85rem; letter-spacing: 3px; }
-
-.o1-enter-btn {
-  font-family: var(--font-ui); font-size: .85rem; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  padding: 0 14px; min-width: 72px;
-  border-radius: 4px; cursor: pointer;
-  border: 1px solid rgba(0,255,136,0.4);
-  background: rgba(0,180,100,0.1);
-  color: var(--closed);
-  transition: all .12s;
-}
-.o1-enter-btn:hover { border-color: var(--closed); box-shadow: 0 0 10px rgba(0,255,136,0.2); }
-.o1-enter-btn:active { transform: scale(.96); }
-.o1-enter-btn:disabled { opacity: .3; cursor: default; }
-
-.o1-miss-btn {
-  font-family: var(--font-ui); font-size: .72rem; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 4px; cursor: pointer;
-  border: 1px solid rgba(0,229,255,0.2);
-  background: rgba(0,100,200,0.06);
-  color: var(--text-dim);
-  transition: all .12s; text-align: center;
-}
-.o1-miss-btn:hover { border-color: var(--cyan-dim); color: var(--text-mid); }
-.o1-miss-btn:active { transform: scale(.96); }
-.o1-bust-btn {
-  font-family: var(--font-ui); font-size: .72rem; font-weight: 700;
-  letter-spacing: 1px; text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 4px; cursor: pointer;
-  border: 1px solid rgba(255,56,96,0.35);
-  background: rgba(255,56,96,0.07);
-  color: rgba(255,56,96,0.7);
-  transition: all .12s; text-align: center;
-}
-.o1-bust-btn:hover { border-color: var(--red); color: var(--red); box-shadow: 0 0 10px rgba(255,56,96,0.2); }
-.o1-bust-btn:active { transform: scale(.96); }
-
-/* Numpad grid */
-.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-.np-btn {
-  font-family: var(--font-display); font-size: clamp(1rem, 3.8vw, 1.7rem);
-  font-weight: 700; letter-spacing: 1px;
-  height: clamp(38px, 7.5vh, 62px);
-  border-radius: 5px; cursor: pointer; user-select: none;
-  background: rgba(0,50,120,0.2);
-  border: 1px solid rgba(0,229,255,0.18);
-  color: var(--text); transition: all .1s;
-}
-.np-btn:hover { background: rgba(0,100,200,0.28); border-color: var(--cyan); box-shadow: 0 0 12px rgba(0,229,255,0.15); }
-.np-btn:active { opacity: .7; transform: scale(.96); }
-
-/* Quick entry / action bottom row */
-.np-quick-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-.np-quick {
-  font-family: var(--font-display); font-size: clamp(.9rem, 3.2vw, 1.4rem);
-  font-weight: 900; letter-spacing: 1px;
-  height: clamp(38px, 7.5vh, 62px);
-  border-radius: 5px; cursor: pointer; user-select: none;
-  transition: all .1s;
-}
-.np-quick:active { opacity: .7; transform: scale(.96); }
-
-/* Quick scores (empty state) */
-.np-q100 { background: rgba(0,180,100,0.18); border: 1px solid rgba(0,255,136,0.35); color: var(--closed); }
-.np-q100:hover { background: rgba(0,200,110,0.25); border-color: var(--closed); box-shadow: 0 0 12px rgba(0,255,136,0.2); }
-.np-q180 { background: rgba(0,100,220,0.22); border: 1px solid rgba(0,200,255,0.4); color: var(--cyan); }
-.np-q180:hover { background: rgba(0,120,240,0.3); border-color: var(--cyan); box-shadow: 0 0 14px rgba(0,229,255,0.2); }
-.np-q140 { background: rgba(0,180,100,0.18); border: 1px solid rgba(0,255,136,0.35); color: var(--closed); }
-.np-q140:hover { background: rgba(0,200,110,0.25); border-color: var(--closed); box-shadow: 0 0 12px rgba(0,255,136,0.2); }
-
-/* Input state bottom row */
-.np-undo-sm {
-  background: rgba(255,180,0,0.08); border: 1px solid rgba(255,200,0,0.3); color: rgba(255,200,0,0.7);
-  font-family: var(--font-ui); font-size: .75rem; font-weight: 700; letter-spacing: 2px;
-}
-.np-undo-sm:hover { border-color: rgba(255,200,0,0.7); color: var(--gold); }
-.np-zero { background: rgba(0,50,120,0.2); border: 1px solid rgba(0,229,255,0.18); color: var(--text); }
-.np-zero:hover { background: rgba(0,100,200,0.28); border-color: var(--cyan); }
-.np-plus {
-  background: rgba(0,100,220,0.18); border: 1px solid rgba(0,200,255,0.35); color: var(--cyan);
-  font-size: clamp(1rem,3.5vw,1.6rem);
-}
-.np-plus:hover { background: rgba(0,130,240,0.26); border-color: var(--cyan); box-shadow: 0 0 12px rgba(0,229,255,0.2); }
-
-/* ══════════════════════════════════════════
-   WIN SCREEN
-══════════════════════════════════════════ */
-#win-screen {
-  display: none; position: fixed; inset: 0;
-  background: rgba(2,4,8,0.94);
-  z-index: 300;
-  align-items: center; justify-content: center;
-  flex-direction: column; gap: 18px; text-align: center; padding: 24px;
-  backdrop-filter: blur(4px);
-}
-#win-screen.open { display: flex; }
-.win-ring {
-  width: 80px; height: 80px; border-radius: 50%;
-  border: 2px solid var(--cyan);
-  box-shadow: 0 0 30px var(--cyan-glow), inset 0 0 20px var(--cyan-glow2);
-  display: flex; align-items: center; justify-content: center;
-  animation: pulse-ring 1.6s ease-in-out infinite;
-}
-.win-ring-inner { font-size: 2.2rem; line-height: 1; }
-@keyframes pulse-ring {
-  0%,100% { box-shadow: 0 0 30px var(--cyan-glow), inset 0 0 20px var(--cyan-glow2); }
-  50%      { box-shadow: 0 0 60px rgba(0,229,255,0.35), inset 0 0 30px rgba(0,229,255,0.12); }
-}
-.win-label { font-size: .8rem; font-weight: 600; letter-spacing: 8px; text-transform: uppercase; color: var(--text-dim); }
-.win-name {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 8vw, 4.5rem);
-  font-weight: 900; letter-spacing: 4px; text-transform: uppercase;
-  color: var(--cyan);
-  text-shadow: 0 0 40px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2);
-}
-.win-sub { font-size: .75rem; letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim); }
-.win-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
-.win-btn {
-  font-family: var(--font-ui); font-size: .9rem; font-weight: 700;
-  letter-spacing: 4px; text-transform: uppercase;
-  padding: 12px 32px; border-radius: 4px; cursor: pointer; transition: all .15s;
-}
-.win-btn:active { transform: scale(.97); }
-.win-rematch { background: rgba(0,229,255,0.06); border: 1px solid var(--cyan); color: var(--cyan); box-shadow: 0 0 20px rgba(0,229,255,0.12); }
-.win-rematch:hover { box-shadow: 0 0 32px rgba(0,229,255,0.25); }
-.win-new { background: transparent; border: 1px solid var(--border2); color: var(--text-dim); }
-.win-new:hover { border-color: var(--text-dim); color: var(--text-mid); }
-.win-close-btn {
-  position: absolute; top: 16px; right: 16px;
-  font-size: 1.1rem; line-height: 1;
-  width: 34px; height: 34px;
-  border-radius: 50%; cursor: pointer;
-  border: 1px solid rgba(0,229,255,0.2);
-  background: rgba(0,0,0,0.5);
-  color: var(--text-dim);
-  transition: all .15s;
-}
-.win-close-btn:hover { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,0.2); }
-
-/* ══════════════════════════════════════════
-   SCHEDULER
-══════════════════════════════════════════ */
-#scheduler {
-  position: relative; z-index: 10;
-  display: flex; align-items: center; justify-content: center;
-  width: 100%; min-height: 100vh;
-  padding: 16px;
-}
-
-.sched-panel {
-  position: relative;
-  display: flex; flex-direction: column; align-items: center;
-  gap: 18px; padding: 40px 32px; max-width: 560px; width: 96%;
-  max-height: 96vh; overflow-y: auto;
-  background: var(--panel);
-  border: 1px solid var(--border2);
-  border-radius: 6px;
-  box-shadow:
-    0 0 0 1px var(--border),
-    0 0 60px rgba(0,100,200,0.15),
-    0 0 120px rgba(0,60,150,0.08),
-    inset 0 1px 0 rgba(0,229,255,0.08);
-  scrollbar-width: thin;
-  scrollbar-color: var(--border2) transparent;
-}
-.sched-panel::-webkit-scrollbar { width: 3px; }
-.sched-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-/* Corner accents matching setup panel */
-.sched-panel::before, .sched-panel::after {
-  content: '';
-  position: absolute;
-  width: 20px; height: 20px;
-  border-color: var(--cyan-dim);
-  border-style: solid;
-  pointer-events: none;
-}
-.sched-panel::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
-.sched-panel::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
-
-.sched-title {
+.leg-badge-num {
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 6vw, 2.4rem);
+  font-weight: 700; color: var(--white); line-height: 1;
+}
+.leg-badge-lbl {
+  font-size: .55rem; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+  margin-top: 2px;
+}
+.legs-banner {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 14px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.legs-count {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 4.5vw, 1.6rem);
   font-weight: 700;
-  letter-spacing: 6px;
+  color: var(--yellow);
+  min-width: 30px; text-align: center;
+}
+.legs-label {
+  font-family: var(--font-ui); font-size: .85rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--yellow);
+}
+
+/* 01 */
+#o1-game {
+  display: none; flex: 1; flex-direction: column;
+  overflow: hidden; min-height: 0;
+}
+#o1-game.show { display: flex; }
+.o1-play-area {
+  flex: 1;
+  display: flex;
+  background: var(--bg);
+  min-height: 80px;
+  padding: 8px 0;
+}
+.o1-darts-side {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: stretch;
+  padding: 4px 2px;
+  gap: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--text-inactive);
+  overflow-y: auto;
+  min-height: 0;
+}
+.o1-darts-side::-webkit-scrollbar { width: 3px; }
+.o1-darts-side::-webkit-scrollbar-track { background: transparent; }
+.o1-darts-side::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 2px; }
+.o1-turn-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+.o1-turn-row:last-child { border-bottom: none; }
+.o1-turn-score {
+  font-size: clamp(1.3rem, 5vw, 2rem);
+  font-weight: 600;
+  color: var(--text-inactive);
+  white-space: nowrap;
+}
+.o1-turn-remaining {
+  font-size: clamp(.85rem, 2.8vw, 1.05rem);
+  font-weight: 500;
+  color: var(--text-dim);
+  font-family: var(--font-ui);
+}
+.o1-turn-row.latest .o1-turn-score { color: var(--white); }
+.o1-turn-row.latest .o1-turn-remaining { color: var(--text-mid); }
+.o1-turn-row.bust .o1-turn-score { color: var(--red-bright); }
+.o1-turn-row.miss .o1-turn-score { color: var(--text-dim); font-style: italic; }
+.o1-turn-row.pending {
+  border-top: 1px dashed var(--yellow-dim);
+  border-bottom: 1px dashed var(--yellow-dim);
+  background: rgba(245,197,24,0.06);
+}
+.o1-turn-row.pending .o1-turn-score {
+  color: var(--yellow);
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.o1-turn-row.pending .o1-turn-remaining {
+  color: var(--yellow-dim);
+}
+.o1-turn-formula {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: clamp(.65rem, 2vw, .78rem);
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0;
+  margin-top: 1px;
+  font-style: italic;
+}
+.o1-dart-track {
+  flex-shrink: 0;
+  width: 60px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: 8px 0;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+.o1-dart-num {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  line-height: 1.4;
+  height: 1.4em;
+  display: flex; align-items: center;
+  position: relative;
+}
+.o1-dart-num.current {
+  color: var(--white);
+}
+.o1-dart-num.current::before {
+  content: '●';
+  position: absolute;
+  left: -16px;
+  color: var(--white);
+  font-size: .8rem;
+}
+.o1-numpad-area {
+  flex-shrink: 0;
+  display: flex; flex-direction: column;
+  background: var(--bg);
+  border-top: 2px solid var(--red);
+  padding: 6px 6px 8px;
+  gap: 5px;
+}
+.o1-rule-row {
+  display: flex; align-items: stretch;
+  gap: 3px;
+  height: 48px;
+}
+.o1-back-btn {
+  font-family: var(--font-display); font-size: .82rem; font-weight: 700;
+  letter-spacing: 1px;
+  width: 54px;
+  background: var(--yellow);
+  border: none;
+  border-radius: 5px;
+  color: var(--numpad-text);
+}
+.o1-back-btn:active { background: var(--yellow-dim); }
+.o1-bust-btn {
+  font-family: var(--font-display); font-size: .8rem; font-weight: 700;
+  letter-spacing: 1px;
+  width: 50px;
+  background: var(--red-dark);
+  border: 1px solid var(--red);
+  border-radius: 5px;
+  color: var(--white);
+  opacity: .85;
+}
+.o1-bust-btn:active { background: var(--red); opacity: 1; }
+.o1-rule-display {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 500;
+  color: var(--yellow);
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  min-width: 0;
+  line-height: 1.15;
+  overflow: hidden;
+}
+.o1-rule-display.has-input { color: var(--white); font-weight: 600; }
+.o1-rule-display.checkout {
+  border-color: var(--green-bright);
+  background: rgba(45,138,62,0.18);
+}
+.o1-checkout-target {
+  font-size: .65rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--green-bright);
   text-transform: uppercase;
-  color: var(--cyan);
-  text-shadow: 0 0 20px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.2);
-  line-height: 1.1;
+  line-height: 1;
+}
+.o1-checkout-route {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 4vw, 1.3rem);
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+.o1-checkout-route .ck-darts {
+  display: inline-block;
+  margin: 0 2px;
+}
+.o1-checkout-route .ck-sep {
+  color: var(--text-dim);
+  font-weight: 400;
+  margin: 0 3px;
+}
+.o1-miss-btn {
+  font-family: var(--font-display); font-size: .85rem; font-weight: 700;
+  letter-spacing: 1px;
+  width: 54px;
+  background: var(--red-dark);
+  border: 2px solid var(--red);
+  border-radius: 5px;
+  color: var(--white);
+}
+.o1-miss-btn:active { background: var(--red); }
+.o1-enter-btn {
+  font-family: var(--font-display); font-size: .85rem; font-weight: 700;
+  letter-spacing: 1px;
+  width: 60px;
+  background: var(--green);
+  border: 2px solid var(--green-bright);
+  border-radius: 5px;
+  color: var(--white);
+  box-shadow: 0 2px 0 #1a5028;
+  transition: all .05s;
+}
+.o1-enter-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 #1a5028; }
+.o1-enter-btn:disabled { opacity: .25; }
+.o1-pad-grid {
+  display: grid;
+  grid-template-columns: 48px 1fr 48px;
+  gap: 5px;
+}
+.o1-shortcuts {
+  display: flex; flex-direction: column;
+  gap: 4px;
+  justify-content: space-between;
+}
+.o1-shortcut {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 3.5vw, 1.3rem);
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  color: var(--text-mid);
+  min-height: 0;
+}
+.o1-shortcut:active:not(:disabled) { background: var(--panel2); color: var(--white); }
+.o1-shortcut:disabled { opacity: .35; }
+.o1-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 5px;
+}
+.np-btn {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  font-weight: 600;
+  background: var(--numpad-key);
+  border: none; border-radius: 6px;
+  color: var(--numpad-text);
+  min-height: 44px;
+  box-shadow: 0 2px 0 #888;
+  transition: all .05s;
+}
+.np-btn:active { transform: translateY(2px); box-shadow: 0 0 0 #888; }
+.np-quick {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 5vw, 1.7rem);
+  font-weight: 700;
+  border: none; border-radius: 6px;
+  color: var(--white);
+  min-height: 44px;
+  letter-spacing: 1px;
+  transition: all .05s;
+}
+.np-quick:active:not(:disabled) { transform: translateY(2px); opacity: .9; }
+.np-quick:disabled { opacity: .35; }
+.np-q100 { background: var(--green); box-shadow: 0 2px 0 #1a5028; }
+.np-q180 { background: var(--red-dark); box-shadow: 0 2px 0 #4a0a0a; }
+.np-q140 { background: var(--green); box-shadow: 0 2px 0 #1a5028; }
+.np-zero {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+  font-weight: 600;
+  background: var(--numpad-key);
+  border: none; border-radius: 6px;
+  color: var(--numpad-text);
+  min-height: 44px;
+  box-shadow: 0 2px 0 #888;
+}
+.np-zero:active { transform: translateY(2px); box-shadow: 0 0 0 #888; }
+.np-plus {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  font-weight: 700;
+  background: #4a90d9;
+  border: none; border-radius: 6px;
+  color: var(--white);
+  min-height: 44px;
+  box-shadow: 0 2px 0 #2c5d8c;
+}
+.np-plus:active { transform: translateY(2px); box-shadow: 0 0 0 #2c5d8c; }
+
+.np-dt {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 5.5vw, 1.9rem);
+  font-weight: 700;
+  background: var(--panel2);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--text-mid);
+  min-height: 44px;
+  box-shadow: 0 2px 0 #000;
+  letter-spacing: 1px;
+  transition: all .1s;
+}
+.np-dt:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 #000; }
+.np-dt.armed {
+  background: var(--green);
+  border-color: var(--green-bright);
+  color: var(--white);
+  box-shadow: 0 0 14px rgba(58,171,80,0.6), 0 2px 0 #1a5028;
+}
+.np-dt:disabled { opacity: .35; }
+
+.o1-plus-bottom {
+  background: #4a90d9 !important;
+  border-color: #2c5d8c !important;
+  color: var(--white) !important;
+  font-size: clamp(1.5rem, 5vw, 2rem) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 0 #2c5d8c;
+}
+.o1-plus-bottom:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 #2c5d8c;
+}
+.o1-plus-bottom:disabled {
+  background: var(--panel2) !important;
+  border-color: var(--border) !important;
+  color: var(--text-dim) !important;
+  box-shadow: none;
+}
+.o1-shortcut-blank {
+  visibility: hidden;
+}
+.np-enter {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 3.5vw, 1.3rem);
+  font-weight: 700;
+  background: var(--green);
+  border: none; border-radius: 6px;
+  color: var(--white);
+  min-height: 44px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 0 #1a5028;
+}
+.np-enter:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 #1a5028; }
+.np-enter:disabled { opacity: .35; }
+
+/* CRICKET */
+#cricket-game {
+  display: none; flex: 1; flex-direction: column;
+  overflow: hidden; min-height: 0;
+}
+#cricket-game.show { display: flex; }
+.cricket-board {
+  flex: 1;
+  display: flex; flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 8px 4px;
+  gap: 4px;
+  min-height: 0;
+}
+.cricket-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: clamp(4px, 2vw, 12px);
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  max-height: 70px;
+  padding: 0 4px;
+}
+.cr-marks {
+  flex: 1;
+  display: flex; align-items: center;
+  height: clamp(50px, 13vw, 70px);
+  min-width: 0;
+}
+.cr-marks.left { justify-content: flex-end; padding-right: 4px; }
+.cr-marks.right { justify-content: flex-start; padding-left: 4px; }
+.cr-marks svg {
+  width: clamp(50px, 14vw, 80px);
+  height: 100%;
+  max-height: 60px;
+  overflow: visible;
+}
+.cricket-row.one-closed.left-closed .cr-marks.left,
+.cricket-row.one-closed.right-closed .cr-marks.right {
+  /* highlight the side that closed */
+}
+.cr-dt {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 5.5vw, 2rem);
+  width: clamp(50px, 14vw, 72px);
+  height: clamp(44px, 11vw, 60px);
+  background: var(--red);
+  border: none; border-radius: 6px;
+  color: var(--white);
+  box-shadow: 0 2px 0 var(--red-dark);
+  transition: all .05s;
+}
+.cr-dt:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 var(--red-dark); }
+.cr-dt.placeholder { visibility: hidden; }
+.cr-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 8vw, 3rem);
+  width: clamp(70px, 18vw, 95px);
+  height: clamp(50px, 13vw, 70px);
+  background: var(--red);
+  border: none; border-radius: 6px;
+  color: var(--white);
+  box-shadow: 0 2px 0 var(--red-dark);
+  transition: all .05s;
+  letter-spacing: -1px;
+}
+.cr-num:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 var(--red-dark); }
+.cricket-row.closed-both .cr-num,
+.cricket-row.closed-both .cr-dt {
+  background: #444; box-shadow: 0 2px 0 #222;
+  opacity: .5;
+}
+.cricket-footer {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 80px 1fr 80px;
+  gap: 6px;
+  padding: 6px 6px 8px;
+  background: var(--bg);
+  border-top: 2px solid var(--red);
+  height: 56px;
+}
+.cf-back {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  letter-spacing: 2px;
+  background: var(--yellow);
+  border: none; border-radius: 5px;
+  color: var(--numpad-text);
+}
+.cf-back:active { background: var(--yellow-dim); }
+.cf-info {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: var(--font-display); font-size: .95rem; font-weight: 500;
+  color: var(--text-mid);
+  text-align: center; padding: 0 6px;
+  gap: 12px;
+}
+.cf-info .dpips { display: flex; gap: 6px; }
+.cf-info .dpip {
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--border-light);
+}
+.cf-info .dpip.used { background: var(--white); }
+.cf-info .turn-log {
+  font-size: .9rem; color: var(--white); letter-spacing: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cf-miss {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  letter-spacing: 2px;
+  background: var(--red-dark);
+  border: 2px solid var(--red);
+  border-radius: 5px;
+  color: var(--white);
+}
+.cf-miss:active { background: var(--red); }
+
+/* MODAL */
+#leg-modal {
+  display: none; position: fixed; inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.85);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+#leg-modal.open { display: flex; }
+.lm-box {
+  background: linear-gradient(180deg, var(--yellow) 0%, var(--yellow-dim) 100%);
+  border-radius: 10px;
+  padding: 20px;
+  max-width: 480px; width: 100%;
+  color: var(--numpad-text);
+}
+.lm-names {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.lm-scores {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.lm-score {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 8vw, 3.2rem);
+  font-weight: 700; line-height: 1;
+}
+.lm-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  font-weight: 600; text-align: center;
+  letter-spacing: 1px;
+}
+.lm-sub {
+  font-family: var(--font-ui);
+  font-size: .95rem; text-align: center;
+  margin-top: 4px; margin-bottom: 16px;
+  font-weight: 500;
+}
+.lm-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.lm-btn {
+  flex: 1; min-width: 0;
+  font-family: var(--font-display); font-size: .9rem; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 12px 6px;
+  border: none; border-radius: 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lm-btn:active { transform: scale(.97); }
+.lm-btn-yellow { background: var(--bg); color: var(--yellow); }
+.lm-btn-green  { background: var(--green); color: var(--white); }
+.lm-btn-red    { background: var(--red); color: var(--white); }
+
+/* SUMMARY */
+#summary-screen {
+  display: none; position: fixed; inset: 0;
+  z-index: 300;
+  background: var(--bg);
+  flex-direction: column;
+  padding: 20px 18px;
+  overflow-y: auto;
+}
+#summary-screen.open { display: flex; }
+.sum-names {
+  display: flex; justify-content: space-around; align-items: flex-start;
+  margin-top: 8px;
+}
+.sum-name-block { text-align: center; flex: 1; }
+.sum-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  font-weight: 600;
+  color: var(--text-mid);
+  letter-spacing: 1px;
+}
+.sum-name.winner { color: var(--white); }
+.sum-legs {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  font-weight: 700;
+  color: var(--white);
+  margin-top: 4px;
+}
+.sum-divider {
+  width: 100%; height: 2px;
+  background: var(--red);
+  margin: 16px 0;
+}
+.sum-stats {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 8px 12px;
+  align-items: center;
   text-align: center;
 }
+.sum-stat-val {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 5.5vw, 2rem);
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.1;
+}
+.sum-stat-label {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 4vw, 1.4rem);
+  font-weight: 500;
+  color: var(--text-mid);
+  letter-spacing: 1px;
+}
+.sum-status {
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 8px 0;
+}
+.sum-table-title {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 1px;
+  margin: 12px 0 8px;
+}
+.sum-table {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: .85rem;
+  border-collapse: separate;
+  border-spacing: 0 4px;
+}
+.sum-table th {
+  font-weight: 600;
+  color: var(--text-mid);
+  padding: 6px 4px;
+  font-size: .72rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.sum-table td {
+  padding: 8px 4px;
+  text-align: center;
+  background: var(--panel2);
+  color: var(--white);
+  font-weight: 500;
+}
+.sum-table tr td:first-child { border-radius: 4px 0 0 4px; }
+.sum-table tr td:last-child { border-radius: 0 4px 4px 0; }
+.sum-table .game-type { color: var(--white); font-weight: 700; font-family: var(--font-display); }
+.sum-actions {
+  display: flex; gap: 8px;
+  margin-top: 16px;
+}
+.sum-btn {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 14px 8px;
+  border: none; border-radius: 5px;
+}
+.sum-btn:active { transform: scale(.97); }
+.sum-btn-back { background: var(--panel2); color: var(--text-mid); }
+.sum-btn-new  { background: var(--yellow); color: var(--numpad-text); }
+.sum-btn-exit { background: var(--red); color: var(--white); }
 
+/* BUST */
+#bust-flash {
+  display: none; position: fixed; inset: 0; z-index: 250;
+  background: rgba(196,30,30,0.25);
+  pointer-events: none;
+}
+.bust-toast {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  background: var(--red);
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  padding: 14px 28px;
+  border-radius: 8px;
+  z-index: 260;
+  display: none;
+  box-shadow: 0 0 30px rgba(196,30,30,0.5);
+}
+@keyframes bust-fade { from { opacity: 1; } to { opacity: 0; } }
+.bust-toast.show { display: block; animation: bust-fade 1.2s ease-out forwards; }
+
+/* SCHEDULER */
+#scheduler {
+  display: none;
+  width: 100%; max-width: 600px;
+  min-height: 100dvh;
+  padding: 20px;
+}
+#scheduler.show { display: flex; flex-direction: column; gap: 16px; }
 .sched-back-btn {
   align-self: flex-start;
-  font-family: var(--font-ui); font-size: .72rem; font-weight: 600;
-  letter-spacing: 3px; text-transform: uppercase;
-  background: transparent;
-  border: none;
-  color: var(--text-dim); cursor: pointer;
-  transition: color .2s;
-  padding: 0;
-}
-.sched-back-btn:hover { color: var(--cyan-dim); }
-
-/* Launch button on setup screen */
-.sched-launch-btn {
-  font-family: var(--font-ui); font-size: .82rem; font-weight: 700;
-  letter-spacing: 3px; text-transform: uppercase;
-  padding: 10px 32px;
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  color: var(--text-dim); cursor: pointer;
-  transition: all .15s;
-}
-.sched-launch-btn:hover {
-  border-color: var(--cyan-dim);
+  font-family: var(--font-ui); font-size: .85rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  background: transparent; border: none;
   color: var(--text-mid);
-  box-shadow: 0 0 12px rgba(0,229,255,0.08);
+  padding: 4px 0;
 }
-.sched-launch-btn:active { opacity: .8; transform: scale(.98); }
-
-/* Roster grid */
+.sched-back-btn:active { color: var(--yellow); }
+.sched-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  text-align: center;
+  color: var(--white); line-height: 1.1;
+}
 .sched-roster-grid {
   display: flex; flex-wrap: wrap; gap: 8px;
-  width: 100%; justify-content: center;
+  justify-content: center;
 }
 .sched-player-btn {
-  font-family: var(--font-ui); font-size: .9rem; font-weight: 600;
-  letter-spacing: 2px;
-  padding: 9px 16px;
-  border-radius: 4px;
-  border: 1px solid var(--border2);
+  font-family: var(--font-ui); font-size: .95rem; font-weight: 600;
+  letter-spacing: 1px;
+  padding: 10px 16px;
+  border-radius: 5px;
+  border: 2px solid var(--border-light);
   background: var(--panel2);
-  color: var(--text-dim);
-  cursor: pointer;
-  transition: all .15s;
-}
-.sched-player-btn:hover {
-  border-color: var(--cyan-dim);
   color: var(--text-mid);
-}
-.sched-player-btn.selected {
-  background: rgba(0,229,255,0.1);
-  border-color: var(--cyan);
-  color: var(--cyan);
-  box-shadow: 0 0 10px rgba(0,229,255,0.15);
-}
-
-.sched-meta {
-  font-size: .75rem; color: var(--text-dim);
-  min-height: 1.2em; width: 100%;
-  font-family: var(--font-ui); letter-spacing: 1px;
-}
-.sched-meta span { color: var(--cyan); font-weight: 700; }
-
-/* Change / reshuffle buttons */
-.sched-change-btn {
-  font-family: var(--font-ui); font-size: .72rem; font-weight: 600;
-  letter-spacing: 3px; text-transform: uppercase;
-  background: transparent; border: none;
-  color: var(--text-dim); cursor: pointer;
-  transition: color .2s; padding: 0;
-}
-.sched-change-btn:hover { color: var(--cyan-dim); }
-
-.sched-reshuffle-btn {
-  font-family: var(--font-ui); font-size: .78rem; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  padding: 7px 14px;
-  background: rgba(0,229,255,0.04);
-  border: 1px solid var(--border2);
-  border-radius: 4px;
-  color: var(--text-dim); cursor: pointer;
   transition: all .15s;
 }
-.sched-reshuffle-btn:hover {
-  border-color: var(--cyan-dim);
-  color: var(--cyan-dim);
+.sched-player-btn:active { transform: scale(.96); }
+.sched-player-btn.selected {
+  background: var(--red-dark);
+  border-color: var(--red-bright);
+  color: var(--white);
 }
-
-/* Legend */
+.sched-meta {
+  font-size: .85rem; color: var(--text-mid);
+  text-align: center;
+  font-family: var(--font-ui);
+  min-height: 1.2em;
+}
+.sched-meta span { color: var(--yellow); font-weight: 700; }
+.sched-output { display: none; flex-direction: column; gap: 12px; }
+.sched-output.show { display: flex; }
+.sched-controls {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.sched-change-btn, .sched-reshuffle-btn {
+  font-family: var(--font-ui); font-size: .85rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 8px 14px;
+  border-radius: 5px;
+}
+.sched-change-btn { background: transparent; border: none; color: var(--text-mid); }
+.sched-reshuffle-btn { background: var(--panel2); border: 1px solid var(--border-light); color: var(--yellow); }
 .sched-legend {
   display: flex; align-items: center; gap: 8px;
-  width: 100%; flex-wrap: wrap; margin-bottom: 4px;
+  flex-wrap: wrap;
+  font-family: var(--font-ui); font-size: .8rem;
+  color: var(--text-mid);
 }
-.sched-legend-lbl { color: var(--text-dim); font-size: .72rem; letter-spacing: 1px; font-family: var(--font-ui); }
-
 .sched-pos-badge {
-  font-size: .68rem; font-weight: 700; padding: 2px 7px;
-  border-radius: 999px; font-family: var(--font-ui); letter-spacing: 1px;
+  font-size: .72rem; font-weight: 700; padding: 2px 8px;
+  border-radius: 999px; letter-spacing: 1px;
+  border: 1px solid;
 }
-.sp0 { background: var(--cyan);     color: var(--bg); }
-.sp1 { background: var(--cyan-dim); color: var(--bg); }
-.sp2 { background: rgba(0,229,255,0.2); color: var(--cyan); border: 1px solid var(--cyan-dim); }
-.sp3 { background: rgba(0,229,255,0.08); color: var(--cyan-dim); border: 1px solid var(--border2); }
-
-/* Game cards */
-#sched-games { display: flex; flex-direction: column; gap: 6px; width: 100%; margin-bottom: 12px; }
-
+.sp0 { background: var(--red); color: var(--white); border-color: var(--red); }
+.sp1 { background: var(--red-dark); color: var(--white); border-color: var(--red-dark); }
+.sp2 { background: transparent; color: var(--yellow); border-color: var(--yellow); }
+.sp3 { background: transparent; color: var(--text-mid); border-color: var(--text-mid); }
+#sched-games { display: flex; flex-direction: column; gap: 8px; }
 .sched-game-card {
   background: var(--panel2);
-  border: 1px solid var(--border2);
+  border: 1px solid var(--border);
   border-radius: 5px;
   padding: 10px 12px;
 }
 .sched-game-top {
   display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
 }
-.sched-game-num { color: var(--text-dim); font-size: .75rem; font-family: monospace; width: 14px; flex-shrink: 0; }
-.sched-game-name { color: var(--text); font-weight: 600; font-size: .88rem; flex: 1; font-family: var(--font-ui); letter-spacing: 1px; }
-
+.sched-game-num { color: var(--text-dim); font-size: .85rem; font-family: var(--font-display); width: 18px; }
+.sched-game-name { color: var(--white); font-weight: 600; flex: 1; }
 .sched-type-badge {
-  font-size: .65rem; font-weight: 700; padding: 2px 7px;
-  border-radius: 4px; border: 1px solid; flex-shrink: 0;
-  font-family: var(--font-ui); letter-spacing: 1px;
+  font-size: .7rem; font-weight: 700; padding: 3px 8px;
+  border-radius: 4px; letter-spacing: 1px;
 }
-.st-Cricket { background: rgba(0,255,136,0.06); border-color: rgba(0,255,136,0.3); color: var(--closed); }
-.st-301     { background: rgba(0,229,255,0.06); border-color: var(--border2);        color: var(--cyan-dim); }
-.st-501     { background: rgba(21,101,255,0.1); border-color: rgba(77,138,255,0.3);  color: var(--blue-bright); }
-
+.st-Cricket { background: var(--green); color: var(--white); }
+.st-301     { background: var(--red); color: var(--white); }
+.st-501     { background: var(--yellow); color: var(--numpad-text); }
 .sched-throw-row {
-  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
-  margin-left: 22px;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-left: 26px;
 }
-.sched-throw-item { display: flex; align-items: center; gap: 4px; }
-.sched-throw-name { color: var(--text-mid); font-size: .82rem; font-family: var(--font-ui); }
-.sched-arrow { color: var(--text-dim); font-size: .7rem; margin-left: 2px; }
-
-/* Summary bars */
+.sched-throw-item { display: flex; align-items: center; gap: 5px; }
+.sched-throw-name { color: var(--text); font-size: .9rem; }
+.sched-arrow { color: var(--text-dim); font-size: .8rem; }
 #sched-summary {
-  width: 100%;
   background: var(--panel2);
-  border: 1px solid var(--border2);
+  border: 1px solid var(--border);
   border-radius: 5px;
-  padding: 12px 14px;
+  padding: 12px;
 }
 .sched-sum-title {
-  font-size: .65rem; font-weight: 700; color: var(--text-dim);
-  text-transform: uppercase; letter-spacing: 4px;
-  margin-bottom: 10px; font-family: var(--font-ui);
+  font-size: .8rem; font-weight: 700; color: var(--text-mid);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-bottom: 10px;
 }
-.sched-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
-.sched-bar-name {
-  color: var(--text); font-size: .82rem; width: 78px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0;
-  font-family: var(--font-ui);
-}
+.sched-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.sched-bar-name { color: var(--white); font-size: .9rem; width: 80px; flex-shrink: 0; }
 .sched-bar-track { flex: 1; background: var(--bg); border-radius: 999px; height: 8px; }
-.sched-bar-fill  { background: var(--cyan-dim); height: 8px; border-radius: 999px; transition: width .4s ease; }
-.sched-bar-count { color: var(--cyan); font-weight: 700; font-size: .82rem; width: 14px; text-align: right; font-family: var(--font-display); }
+.sched-bar-fill  { background: var(--red); height: 8px; border-radius: 999px; }
+.sched-bar-count { color: var(--yellow); font-weight: 700; font-size: .9rem; width: 18px; text-align: right; font-family: var(--font-display); }
 
-/* Bust flash overlay */
-#bust-flash {
-  display: none; position: fixed; inset: 0; z-index: 200;
-  background: rgba(255,56,96,0.12);
-  pointer-events: none;
-  animation: bust-fade .5s ease-out forwards;
+/* Per-dart hint */
+.o1-hint {
+  font-family: var(--font-ui);
+  font-size: .7rem;
+  color: var(--text-dim);
+  text-align: center;
+  letter-spacing: 1px;
+  padding: 2px 0 0;
+  font-style: italic;
 }
-@keyframes bust-fade { from { opacity:1; } to { opacity:0; } }
+.o1-hint.show-tip { color: var(--yellow-dim); font-style: normal; }
+
+/* Finish (winning dart) modal */
+#finish-modal {
+  display: none; position: fixed; inset: 0;
+  z-index: 220;
+  background: rgba(0,0,0,0.92);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+#finish-modal.open { display: flex; }
+.fm-box {
+  background: linear-gradient(180deg, var(--green-bright) 0%, var(--green) 100%);
+  border-radius: 10px;
+  padding: 24px 20px;
+  max-width: 420px; width: 100%;
+  text-align: center;
+  color: var(--white);
+}
+.fm-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.fm-name {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 4.5vw, 1.7rem);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.fm-prompt {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 18px;
+  opacity: .95;
+}
+.fm-darts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.fm-dart {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 9vw, 3.2rem);
+  font-weight: 700;
+  padding: 18px 0;
+  border: 3px solid var(--white);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.2);
+  color: var(--white);
+}
+.fm-dart:active { transform: scale(.96); background: var(--white); color: var(--green); }
+.fm-dart-lbl {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-top: 4px;
+  opacity: .85;
+}
+
+/* Resume banner */
+#resume-banner {
+  display: none;
+  background: var(--yellow);
+  color: var(--numpad-text);
+  padding: 14px 16px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+#resume-banner.show { display: block; }
+.rb-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.rb-detail {
+  font-family: var(--font-ui);
+  font-size: .9rem;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.rb-actions { display: flex; gap: 8px; }
+.rb-btn {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+.rb-btn:active { transform: scale(.97); }
+.rb-resume { background: var(--green); color: var(--white); }
+.rb-discard { background: var(--bg); color: var(--yellow); }
+
+/* Copy-summary button */
+.sum-btn-copy {
+  background: var(--green);
+  color: var(--white);
+}
+.sum-copy-toast {
+  position: fixed;
+  bottom: 80px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--green);
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  z-index: 350;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.sum-copy-toast.show {
+  display: block;
+  animation: bust-fade 1.6s ease-out forwards;
+}
+
+@media (max-height: 700px) {
+  .leg-badge { width: 44px; }
+  .o1-pad-grid { grid-template-columns: 42px 1fr 42px; }
+  .o1-shortcut { font-size: 1rem; }
+}
 </style>
 </head>
 <body>
 
-<!-- ══ SETUP ══ -->
+<!-- SETUP -->
 <div id="setup">
-  <div class="setup-title">Darts<br>Scorecard</div>
-  <div class="setup-sub">AI Scoring System</div>
-  <div class="divider"></div>
-
-  <div class="slabel">Game Mode</div>
-  <div class="mode-row">
-    <button class="mode-btn active" data-mode="cricket">Cricket</button>
-    <button class="mode-btn" data-mode="301">301</button>
-    <button class="mode-btn" data-mode="501">501</button>
-  </div>
-
-  <div class="divider"></div>
-  <div class="slabel">Select Teams</div>
-
-  <div class="team-row">
-    <div class="team-select-wrap">
-      <span class="team-label-inline">Team 1 — Diddle Winner (Left)</span>
-      <select class="team-select" id="team1-select"></select>
-    </div>
-    <div class="team-select-wrap">
-      <span class="team-label-inline">Team 2 — Diddle Loser (Right)</span>
-      <select class="team-select" id="team2-select"></select>
+  <div class="setup-title">DARTS<br><span>SCORECARD</span></div>
+  <div class="setup-sub">Tellico Village Yacht Club</div>
+  <div id="resume-banner">
+    <div class="rb-title">⏸ Match In Progress</div>
+    <div class="rb-detail" id="rb-detail"></div>
+    <div class="rb-actions">
+      <button class="rb-btn rb-resume" id="rb-resume">Resume</button>
+      <button class="rb-btn rb-discard" id="rb-discard">Discard</button>
     </div>
   </div>
-
-  <button class="start-btn" id="start-btn">Initialize Game</button>
-  <button class="sched-launch-btn" id="sched-launch-btn">📋 Schedule Night</button>
+  <div class="section">
+    <div class="slabel">Game Mode</div>
+    <div class="mode-row">
+      <button class="mode-btn active" data-mode="cricket">Cricket</button>
+      <button class="mode-btn" data-mode="301">301</button>
+      <button class="mode-btn" data-mode="501">501</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="slabel">Select Teams</div>
+    <div class="team-row">
+      <div>
+        <div class="team-label">Team 1 — Diddle Winner (Left)</div>
+        <select class="team-select" id="team1-select"></select>
+      </div>
+      <div>
+        <div class="team-label">Team 2 — Diddle Loser (Right)</div>
+        <select class="team-select" id="team2-select"></select>
+      </div>
+    </div>
+  </div>
+  <button class="start-btn" id="start-btn">Start Game</button>
+  <button class="sched-launch-btn" id="sched-launch-btn">📋 Schedule Tonight's Players</button>
 </div>
 
-<!-- ══ SCHEDULER ══ -->
-<div id="scheduler" style="display:none;">
-  <div class="sched-panel">
-    <button class="sched-back-btn" id="sched-back-btn">← BACK</button>
-    <div class="sched-title">Tonight's<br>Players</div>
-    <div class="setup-sub">Tellico Village Yacht Club · Tuesday League</div>
-    <div class="divider"></div>
-
-    <!-- Player selector -->
-    <div id="sched-selector" style="display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;">
-      <div class="sched-roster-grid" id="sched-roster-grid"></div>
-      <div class="sched-meta" id="sched-meta" style="text-align:center;">&nbsp;</div>
-      <button class="start-btn" id="sched-gen-btn" disabled>Generate Schedule</button>
+<!-- SCHEDULER -->
+<div id="scheduler">
+  <button class="sched-back-btn" id="sched-back-btn">← BACK</button>
+  <div class="sched-title">Tonight's Players</div>
+  <div id="sched-selector" style="display:flex;flex-direction:column;gap:14px;">
+    <div class="sched-roster-grid" id="sched-roster-grid"></div>
+    <div class="sched-meta" id="sched-meta">&nbsp;</div>
+    <button class="start-btn" id="sched-gen-btn" disabled>Generate Schedule</button>
+  </div>
+  <div class="sched-output" id="sched-output">
+    <div class="sched-controls">
+      <button class="sched-change-btn" id="sched-change-btn">← Change Players</button>
+      <button class="sched-reshuffle-btn" id="sched-reshuffle-btn">🔀 Reshuffle</button>
     </div>
-
-    <!-- Schedule output -->
-    <div id="sched-output" style="display:none;width:100%;">
-      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:8px;">
-        <button class="sched-change-btn" id="sched-change-btn">← Change Players</button>
-        <button class="sched-reshuffle-btn" id="sched-reshuffle-btn">🔀 Reshuffle</button>
-      </div>
-      <div class="sched-legend">
-        <span class="sched-legend-lbl">Throw order →</span>
-        <span class="sched-pos-badge sp0">P1</span>
-        <span class="sched-pos-badge sp1">P2</span>
-        <span class="sched-pos-badge sp2">P3</span>
-        <span class="sched-pos-badge sp3">P4</span>
-      </div>
-      <div id="sched-games"></div>
-      <div id="sched-summary"></div>
+    <div class="sched-legend">
+      <span>Order:</span>
+      <span class="sched-pos-badge sp0">P1</span>
+      <span class="sched-pos-badge sp1">P2</span>
+      <span class="sched-pos-badge sp2">P3</span>
+      <span class="sched-pos-badge sp3">P4</span>
     </div>
+    <div id="sched-games"></div>
+    <div id="sched-summary"></div>
   </div>
 </div>
 
-<!-- ══ GAME ══ -->
+<!-- GAME -->
 <div id="game">
-  <button class="exit-btn" id="btn-exit">EXIT</button>
-  <div class="main-panel">
-    <div class="score-header" id="score-header"></div>
-
-    <!-- Cricket UI -->
-    <div id="cricket-game" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
-      <div class="turn-bar" id="turn-bar"></div>
-      <div class="board" id="board"></div>
-      <div class="g-footer">
-        <button class="foot-btn btn-undo" id="c-btn-undo">↩ UNDO</button>
-        <div class="throw-log" id="throw-log"><span class="throw-log-empty">—</span></div>
-        <button class="foot-btn btn-miss" id="c-btn-action">MISS</button>
+  <button class="exit-btn" id="btn-exit">✕</button>
+  <div class="score-header" id="score-header"></div>
+  <div class="legs-banner">
+    <span class="legs-count" id="legs-l">0</span>
+    <span class="legs-label" id="legs-label">First to 1 Leg</span>
+    <span class="legs-count" id="legs-r">0</span>
+  </div>
+  <!-- 01 -->
+  <div id="o1-game">
+    <div class="o1-play-area">
+      <div class="o1-darts-side" id="o1-darts-l"></div>
+      <div class="o1-dart-track">
+        <div class="o1-dart-num" data-d="1">1</div>
+        <div class="o1-dart-num" data-d="2">2</div>
+        <div class="o1-dart-num" data-d="3">3</div>
+      </div>
+      <div class="o1-darts-side" id="o1-darts-r"></div>
+    </div>
+    <div class="o1-numpad-area">
+      <div class="o1-rule-row">
+        <button class="o1-back-btn" id="o1-back">BACK</button>
+        <button class="o1-bust-btn" id="o1-bust">BUST</button>
+        <div class="o1-rule-display" id="o1-display">Straight-In</div>
+        <button class="o1-miss-btn" id="o1-miss">MISS</button>
+        <button class="o1-enter-btn" id="o1-enter" disabled>ENTER</button>
+      </div>
+      <div class="o1-hint" id="o1-hint">Tap + between darts for per-dart accuracy</div>
+      <div class="o1-pad-grid">
+        <div class="o1-shortcuts" id="o1-shortcuts-l"></div>
+        <div class="o1-keys" id="o1-keys"></div>
+        <div class="o1-shortcuts" id="o1-shortcuts-r"></div>
       </div>
     </div>
-
-    <!-- 01 UI -->
-    <div id="o1-game">
-      <div class="o1-turn-bar" id="o1-turn-bar"></div>
-      <!-- Turn history: side-by-side columns -->
-      <div class="o1-history">
-        <div class="o1-hist-col" id="o1-hist-0"></div>
-        <div class="o1-hist-col" id="o1-hist-1"></div>
+  </div>
+  <!-- Cricket -->
+  <div id="cricket-game">
+    <div class="cricket-board" id="cricket-board"></div>
+    <div class="cricket-footer">
+      <button class="cf-back" id="c-back">BACK</button>
+      <div class="cf-info" id="c-info">
+        <div class="dpips" id="c-dpips">
+          <span class="dpip"></span><span class="dpip"></span><span class="dpip"></span>
+        </div>
+        <div class="turn-log" id="c-turn-log"></div>
       </div>
-      <!-- Numpad / input area -->
-      <div class="o1-body">
-        <div class="o1-status" id="o1-status"></div>
-        <div class="o1-display-row">
-          <button class="o1-undo-btn" id="o1-btn-undo">↩ UNDO</button>
-          <div class="o1-display empty" id="o1-display">ENTER SCORE</div>
-          <button class="o1-enter-btn" id="o1-btn-enter" disabled>ENTER</button>
-        </div>
-        <div style="display:flex;gap:7px;">
-          <button class="o1-miss-btn" id="o1-btn-miss" style="flex:1;">MISS</button>
-          <button class="o1-bust-btn" id="o1-btn-bust" style="flex:1;">BUST</button>
-        </div>
-        <div class="numpad">
-          <button class="np-btn" data-d="1">1</button>
-          <button class="np-btn" data-d="2">2</button>
-          <button class="np-btn" data-d="3">3</button>
-          <button class="np-btn" data-d="4">4</button>
-          <button class="np-btn" data-d="5">5</button>
-          <button class="np-btn" data-d="6">6</button>
-          <button class="np-btn" data-d="7">7</button>
-          <button class="np-btn" data-d="8">8</button>
-          <button class="np-btn" data-d="9">9</button>
-        </div>
-        <div class="np-quick-row" id="np-bottom-row">
-          <!-- dynamic: 100/180/140 or UNDO/0/+ -->
-        </div>
-      </div>
+      <button class="cf-miss" id="c-miss">MISS</button>
     </div>
-
   </div>
 </div>
 
-<!-- ══ WIN ══ -->
-<div id="win-screen">
-  <button class="win-close-btn" id="btn-win-close">✕</button>
-  <div class="win-ring"><div class="win-ring-inner">🎯</div></div>
-  <div class="win-label">Game Over — Winner</div>
-  <div class="win-name" id="win-name"></div>
-  <div class="win-sub" id="win-sub">All numbers closed</div>
-  <div class="win-btns" id="win-btns-area">
-    <button class="win-btn win-rematch" id="btn-rematch">REMATCH</button>
-    <button class="win-btn win-new"     id="btn-win-exit">NEW GAME</button>
+<!-- LEG MODAL -->
+<div id="leg-modal">
+  <div class="lm-box">
+    <div class="lm-names">
+      <span id="lm-n1"></span>
+      <span id="lm-n2"></span>
+    </div>
+    <div class="lm-scores">
+      <span class="lm-score" id="lm-s1"></span>
+      <span class="lm-score" id="lm-s2"></span>
+    </div>
+    <div class="lm-title" id="lm-title">Leg Complete</div>
+    <div class="lm-sub" id="lm-sub"></div>
+    <div class="lm-actions">
+      <button class="lm-btn lm-btn-yellow" id="lm-change-players">Change Players</button>
+      <button class="lm-btn lm-btn-green"  id="lm-next">Next Leg</button>
+      <button class="lm-btn lm-btn-red"    id="lm-end">End Match</button>
+    </div>
   </div>
 </div>
 
-<!-- Bust flash -->
+<!-- SUMMARY -->
+<div id="summary-screen">
+  <div class="sum-names">
+    <div class="sum-name-block">
+      <div class="sum-name" id="sum-n1"></div>
+      <div class="sum-legs" id="sum-l1"></div>
+    </div>
+    <div class="sum-name-block">
+      <div class="sum-name" id="sum-n2"></div>
+      <div class="sum-legs" id="sum-l2"></div>
+    </div>
+  </div>
+  <div class="sum-divider"></div>
+  <div class="sum-stats" id="sum-stats"></div>
+  <div class="sum-divider"></div>
+  <div class="sum-status">All games saved.</div>
+  <div class="sum-table-title">Match Summary</div>
+  <table class="sum-table" id="sum-table"></table>
+  <div class="sum-actions">
+    <button class="sum-btn sum-btn-back" id="sum-back">Back</button>
+    <button class="sum-btn sum-btn-copy" id="sum-copy">Copy</button>
+    <button class="sum-btn sum-btn-new"  id="sum-new">New Match</button>
+    <button class="sum-btn sum-btn-exit" id="sum-exit">Exit</button>
+  </div>
+</div>
+
 <div id="bust-flash"></div>
+<div class="bust-toast" id="bust-toast">BUST</div>
+
+<!-- FINISH (winning dart) MODAL -->
+<div id="finish-modal">
+  <div class="fm-box">
+    <div class="fm-title">Checkout!</div>
+    <div class="fm-name" id="fm-name"></div>
+    <div class="fm-prompt">How many darts to finish?</div>
+    <div class="fm-darts">
+      <button class="fm-dart" data-darts="1">1<span class="fm-dart-lbl">DART</span></button>
+      <button class="fm-dart" data-darts="2">2<span class="fm-dart-lbl">DARTS</span></button>
+      <button class="fm-dart" data-darts="3">3<span class="fm-dart-lbl">DARTS</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- COPY TOAST -->
+<div class="sum-copy-toast" id="sum-copy-toast">Copied to clipboard ✓</div>
 
 <script>
-
-/* ══════════════════════════════════════════
-   TEAMS
-══════════════════════════════════════════ */
 const TEAMS = [
   "Armed and Hazardous","Cold Darted","Dartaholics","Darty Deeds",
   "Darty Dogs","Down and Darty","Flighty","Game of Throws",
   "Guns & Hoses","Hit or Miss","Pointless","Rat Pack",
   "Shooting Stars","Snipers","Snail Darters","We're Sexy and we Throw It"
 ];
-
-/* ══════════════════════════════════════════
-   GLOBALS
-══════════════════════════════════════════ */
-const NUMBERS = [20,19,18,17,16,15,'B'];
-const NUM_VAL  = n => n === 'B' ? 25 : n;
-
-let gameMode     = 'cricket'; // 'cricket' | '301' | '501'
-let cricketState = {};
-let cricketHistory = [];
-let o1State      = {};
-let o1History    = [];
-
-/* ══════════════════════════════════════════
-   SETUP
-══════════════════════════════════════════ */
-function populateDropdowns() {
-  ['team1-select','team2-select'].forEach((id, idx) => {
-    const sel = document.getElementById(id);
-    TEAMS.forEach((t, i) => {
-      const opt = document.createElement('option');
-      opt.value = t; opt.textContent = t;
-      if (i === idx) opt.selected = true;
-      sel.appendChild(opt);
-    });
-  });
-}
-populateDropdowns();
-
-document.querySelectorAll('.mode-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    gameMode = btn.dataset.mode;
-  });
-});
-
-document.getElementById('start-btn').addEventListener('click', () => {
-  const t1 = document.getElementById('team1-select').value;
-  const t2 = document.getElementById('team2-select').value;
-  if (t1 === t2) { alert('Please select two different teams.'); return; }
-  const names = [t1, t2];
-  if (gameMode === 'cricket') startCricket(names);
-  else startO1(names, gameMode === '301' ? 301 : 501);
-});
-
-/* ══════════════════════════════════════════
-   CRICKET — GAME LOGIC
-══════════════════════════════════════════ */
-function startCricket(names) {
-  cricketHistory = [];
-  cricketState = {
-    players: names.map(n => ({ name: n.toUpperCase(), score: 0 })),
-    marks:   NUMBERS.map(() => new Array(names.length).fill(0)),
-    current: 0,
-    dart:    0,
-    throwLog: []   // [{label, value}] for current turn display
-  };
-  showGame('cricket');
-  renderCricket();
-}
-
-function cricketHit(ni, hits, label) {
-  // hits = marks awarded (1, 2, or 3)
-  // label = display string for throw log (e.g. "60", "32", "25", "50", "20")
-  if (cricketState.dart >= 3) return; // safety guard
-  cricketHistory.push(JSON.stringify(cricketState));
-  const cur  = cricketState.current;
-  const val  = NUM_VAL(NUMBERS[ni]);
-  const prev = cricketState.marks[ni][cur];
-  cricketState.marks[ni][cur] = Math.min(3, prev + hits);
-  const overflow = (prev + hits) - 3;
-  if (overflow > 0) {
-    const anyOpen = cricketState.players.some((_,pi) => pi !== cur && cricketState.marks[ni][pi] < 3);
-    if (anyOpen) cricketState.players[cur].score += val * overflow;
-  }
-  cricketState.throwLog.push(label);
-  cricketState.dart++;
-  if (cricketState.dart >= 3) {
-    // Auto-advance after 3rd dart
-    if (cricketCheckWin()) return;
-    cricketEndTurn();
-    return;
-  }
-  if (cricketCheckWin()) return;
-  renderCricket();
-}
-
-function cricketEndTurn() {
-  cricketState.dart     = 0;
-  cricketState.throwLog = [];
-  cricketState.current  = (cricketState.current + 1) % cricketState.players.length;
-  if (cricketCheckWin()) return;
-  renderCricket();
-}
-
-function cricketAction() {
-  // MISS: dart===0, end turn with no scores
-  // ENTER: dart>0, end turn early locking in what was scored
-  cricketHistory.push(JSON.stringify(cricketState));
-  cricketEndTurn();
-}
-
-function cricketCheckWin() {
-  const st = cricketState;
-  for (let pi = 0; pi < st.players.length; pi++) {
-    if (!NUMBERS.every((_,ni) => st.marks[ni][pi] >= 3)) continue;
-    const myScore = st.players[pi].score;
-    if (st.players.every(p => p.score <= myScore)) {
-      renderCricket();
-      showWin(st.players[pi].name, 'All numbers closed');
-      return true;
-    }
-  }
-  return false;
-}
-
-/* ── Cricket render ── */
-function renderCricket() { renderHeader(); renderTurnBar(); renderBoard(); renderThrowLog(); renderActionBtn(); }
-
-function renderHeader() {
-  const h = document.getElementById('score-header');
-  const n = cricketState.players.length;
-  const half = Math.ceil(n / 2);
-  let left = '', right = '';
-  for (let i = 0; i < half; i++) {
-    const p = cricketState.players[i];
-    const a = i === cricketState.current ? ' active-player' : '';
-    left += `<div class="player-col${a}"><div class="sc-name">${p.name}</div><div class="sc-pts">${p.score}</div></div>`;
-  }
-  for (let i = half; i < n; i++) {
-    const p = cricketState.players[i];
-    const a = i === cricketState.current ? ' active-player' : '';
-    right += `<div class="player-col${a}"><div class="sc-name">${p.name}</div><div class="sc-pts">${p.score}</div></div>`;
-  }
-  h.innerHTML = `<div class="score-half left">${left}</div><div class="score-half right">${right}</div>`;
-}
-
-function renderTurnBar() {
-  const p    = cricketState.players[cricketState.current];
-  const pips = [0,1,2].map(i => `<span class="dpip${i < cricketState.dart ? ' used' : ''}"></span>`).join('');
-  document.getElementById('turn-bar').innerHTML =
-    `<div class="dart-pips">${pips}</div><span>${p.name} &mdash; DART ${cricketState.dart+1} / 3</span><div class="dart-pips">${pips}</div>`;
-}
-
-function renderThrowLog() {
-  const log = document.getElementById('throw-log');
-  const throws = cricketState.throwLog;
-  if (!throws || throws.length === 0) {
-    log.innerHTML = '<span class="throw-log-empty">—</span>';
-  } else {
-    log.innerHTML = throws.map(t => `<span class="throw-chip">${t}</span>`).join('');
-  }
-}
-
-function renderActionBtn() {
-  const btn = document.getElementById('c-btn-action');
-  if (cricketState.dart === 0) {
-    btn.textContent = 'MISS';
-    btn.className   = 'foot-btn btn-miss';
-  } else {
-    btn.textContent = 'ENTER';
-    btn.className   = 'foot-btn btn-enter';
-  }
-}
-
-function renderBoard() {
-  const board = document.getElementById('board');
-  board.innerHTML = '';
-  const n    = cricketState.players.length;
-  const half = Math.ceil(n / 2);
-
-  NUMBERS.forEach((num, ni) => {
-    const isBull    = num === 'B';
-    const marks     = cricketState.marks[ni];
-    const allClosed = marks.every(m => m >= 3);
-    const anyClosed = marks.some(m => m >= 3);
-
-    const row = document.createElement('div');
-    row.className = 'num-row';
-    if (allClosed)       row.classList.add('both-closed');
-    else if (anyClosed)  row.classList.add('one-closed');
-
-    // Left marks
-    for (let pi = 0; pi < half; pi++) row.appendChild(cricketMarksArea(ni, pi));
-
-    if (isBull) {
-      // Bull row: D(2marks/50) | B(1mark/25) | D(2marks/50)
-      row.appendChild(cricketWrap(cricketDtBtn('D', () => cricketHit(ni, 2, '50'))));
-      const nw = document.createElement('div'); nw.className = 'btn-wrap';
-      const nb = document.createElement('button');
-      nb.className  = 'num-btn' + (allClosed ? ' all-closed' : '');
-      nb.textContent = 'B';
-      if (!allClosed) nb.addEventListener('click', () => cricketHit(ni, 1, '25'));
-      nw.appendChild(nb); row.appendChild(nw);
-      row.appendChild(cricketWrap(cricketDtBtn('D', () => cricketHit(ni, 2, '50'))));
-    } else {
-      // Normal row: D | number | T
-      const singleLabel = String(num);
-      const doubleLabel = String(num * 2);
-      const tripleLabel = String(num * 3);
-      row.appendChild(cricketWrap(cricketDtBtn('D', () => cricketHit(ni, 2, doubleLabel))));
-      const nw = document.createElement('div'); nw.className = 'btn-wrap';
-      const nb = document.createElement('button');
-      nb.className  = 'num-btn' + (allClosed ? ' all-closed' : '');
-      nb.textContent = singleLabel;
-      if (!allClosed) nb.addEventListener('click', () => cricketHit(ni, 1, singleLabel));
-      nw.appendChild(nb); row.appendChild(nw);
-      row.appendChild(cricketWrap(cricketDtBtn('T', () => cricketHit(ni, 3, tripleLabel))));
-    }
-
-    // Right marks
-    for (let pi = half; pi < n; pi++) row.appendChild(cricketMarksArea(ni, pi));
-    board.appendChild(row);
-  });
-}
-
-function cricketMarksArea(ni, pi) {
-  const d = document.createElement('div'); d.className = 'marks-area';
-  d.innerHTML = drawMarks(cricketState.marks[ni][pi], pi === cricketState.current);
-  return d;
-}
-function cricketWrap(btn) {
-  const w = document.createElement('div'); w.className = 'btn-wrap'; w.appendChild(btn); return w;
-}
-function cricketDtBtn(label, handler) {
-  const b = document.createElement('button');
-  b.className = 'dt-btn'; b.textContent = label;
-  b.addEventListener('click', handler); return b;
-}
-let _markSvgCounter = 0;
-function drawMarks(m, isActive) {
-  if (m === 0) return `<svg viewBox="0 0 80 54"></svg>`;
-  const closed = m >= 3;
-  const col  = closed ? '#00ff88' : (isActive ? '#00e5ff' : '#2a7aaa');
-  const glow = closed ? 'rgba(0,255,136,0.4)' : (isActive ? 'rgba(0,229,255,0.4)' : 'none');
-  const sw   = 2.5;
-  const fid  = `gf${++_markSvgCounter}`;
-  let defs = glow !== 'none'
-    ? `<defs><filter id="${fid}"><feGaussianBlur stdDeviation="2" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs>`
-    : '';
-  let p = '';
-  const filt = glow !== 'none' ? ` filter="url(#${fid})"` : '';
-  if (m >= 1) p += `<line x1="18" y1="44" x2="58" y2="10" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"${filt}/>`;
-  if (m >= 2) p += `<line x1="58" y1="44" x2="18" y2="10" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"${filt}/>`;
-  if (m >= 3) p += `<ellipse cx="38" cy="27" rx="24" ry="20" fill="none" stroke="${col}" stroke-width="${sw-0.5}"${filt}/>`;
-  return `<svg viewBox="0 0 80 54" overflow="visible">${defs}${p}</svg>`;
-}
-
-document.getElementById('c-btn-action').addEventListener('click', cricketAction);
-document.getElementById('c-btn-undo').addEventListener('click', () => {
-  if (!cricketHistory.length) return;
-  cricketState = JSON.parse(cricketHistory.pop());
-  document.getElementById('win-screen').classList.remove('open');
-  renderCricket();
-});
-
-/* ══════════════════════════════════════════
-   01 GAME — LOGIC
-══════════════════════════════════════════ */
-function startO1(names, startingTotal) {
-  o1History = [];
-  o1State = {
-    players: names.map(n => ({
-      name:    n.toUpperCase(),
-      total:   startingTotal,
-      history: []          // [{display, scored, bust, miss}]
-    })),
-    startingTotal,
-    current: 0,
-    input:   '',           // raw string being typed e.g. "20 + 5 + 2"
-    segments: []           // numeric segments e.g. [20, 5] (confirmed parts)
-  };
-  showGame('o1');
-  renderO1();
-}
-
-/* ── Input helpers ── */
-function o1InputTotal() {
-  // Sum confirmed segments + current in-progress value
-  const st = o1State;
-  let total = st.segments.reduce((a,b) => a+b, 0);
-  const cur = currentSegmentValue();
-  if (cur !== null) total += cur;
-  return total;
-}
-
-function currentSegmentValue() {
-  // Returns numeric value of the text after the last +, or null if empty
-  const parts = o1State.input.split('+');
-  const last  = parts[parts.length-1].trim();
-  if (last === '') return null;
-  return parseInt(last, 10);
-}
-
-/* ── Digit press ── */
-function o1Digit(d) {
-  const st = o1State;
-  const p  = st.players[st.current];
-  const parts    = st.input.split('+');
-  const trailTxt = parts[parts.length-1].trim();
-  const newTrail = trailTxt + d;
-  if (newTrail.length > 3) return;
-  const segVal = parseInt(newTrail, 10);
-  if (segVal > 180) return;
-  const confirmedSum = st.segments.reduce((a,b)=>a+b, 0);
-  if (confirmedSum + segVal > p.total) return;
-  if (st.input === '' || st.input.endsWith(' + ')) {
-    st.input = st.input + d;
-  } else {
-    const allButLast = parts.slice(0, -1).map(s => s.trim());
-    st.input = allButLast.length > 0 ? allButLast.join(' + ') + ' + ' + newTrail : newTrail;
-  }
-  renderO1Display();
-  renderO1Numpad();
-  updateEnterBtn();
-}
-
-/* ── Plus: add separator (lock current segment, start next) ── */
-function o1PlusSeparator() {
-  const st = o1State;
-  if (st.input === '') return;
-  const cur = currentSegmentValue();
-  if (cur === null || isNaN(cur)) return;
-  // Lock segment
-  st.segments.push(cur);
-  // Max 3 darts
-  if (st.segments.length >= 3) {
-    // Auto-confirm after 3rd dart is added
-    o1Confirm();
-    return;
-  }
-  st.input = st.input + ' + ';
-  renderO1Display();
-  renderO1Numpad();
-  updateEnterBtn();
-}
-
-/* ── Backspace ── */
-function o1Backspace() {
-  const st = o1State;
-  if (st.input === '') {
-    // No input — undo last confirmed turn
-    o1UndoTurn();
-    return;
-  }
-  // If trailing char is space (we're at " + " boundary), remove the last " + " and pop segment
-  if (st.input.endsWith(' + ')) {
-    st.input = st.input.slice(0, -3);
-    st.segments.pop();
-  } else {
-    // Remove last char
-    st.input = st.input.slice(0, -1);
-    // If now ends with space (from " + X" -> " + "), trim back further
-    if (st.input.endsWith(' + ')) {
-      // stay — partial next segment deleted, separator remains ok
-    }
-  }
-  renderO1Display();
-  renderO1Numpad();
-  updateEnterBtn();
-}
-
-/* ── Undo confirmed turn (full game history) ── */
-function o1UndoTurn() {
-  if (!o1History.length) return;
-  o1State = JSON.parse(o1History.pop());
-  document.getElementById('win-screen').classList.remove('open');
-  clearStatus();
-  renderO1();
-}
-
-/* ── Confirm (ENTER) ── */
-function o1Confirm() {
-  const st = o1State;
-  if (st.input === '' && st.segments.length === 0) return;
-  const cur = currentSegmentValue();
-  if (cur !== null && !isNaN(cur)) st.segments.push(cur);
-  const score    = st.segments.reduce((a,b)=>a+b, 0);
-  const p        = st.players[st.current];
-  const newTotal = p.total - score;
-  // Snapshot BEFORE mutating player state
-  o1History.push(JSON.stringify({
-    players:       st.players.map(pl=>({...pl, history:[...pl.history]})),
-    startingTotal: st.startingTotal,
-    current:       st.current,
-    input:         '',
-    segments:      []
-  }));
-  st.input    = '';
-  st.segments = [];
-  // Bust
-  if (newTotal < 0 || newTotal === 1) {
-    p.history.push({ display: 'BUST', scored: 0, bust: true });
-    st.current = (st.current + 1) % st.players.length;
-    renderO1();
-    showBust();
-    return;
-  }
-  // Win
-  p.history.push({ display: String(score), scored: score });
-  p.total = newTotal;
-  if (newTotal === 0) {
-    renderO1();
-    showWin(p.name, 'Checked out!');
-    return;
-  }
-  st.current = (st.current + 1) % st.players.length;
-  renderO1();
-}
-
-/* ── Miss ── */
-function o1Miss() {
-  const st = o1State;
-  const p  = st.players[st.current];
-  o1History.push(JSON.stringify({
-    players:       st.players.map(pl=>({...pl, history:[...pl.history]})),
-    startingTotal: st.startingTotal,
-    current:       st.current,
-    input:         '',
-    segments:      []
-  }));
-  p.history.push({ display: 'MISS', scored: 0, miss: true });
-  st.input    = '';
-  st.segments = [];
-  st.current  = (st.current + 1) % st.players.length;
-  renderO1();
-}
-
-/* ── Bust button (player declares bust manually) ── */
-function o1BustBtn() {
-  const st = o1State;
-  const p  = st.players[st.current];
-  o1History.push(JSON.stringify({
-    players:       st.players.map(pl=>({...pl, history:[...pl.history]})),
-    startingTotal: st.startingTotal,
-    current:       st.current,
-    input:         '',
-    segments:      []
-  }));
-  p.history.push({ display: 'BUST', scored: 0, bust: true });
-  st.input    = '';
-  st.segments = [];
-  st.current  = (st.current + 1) % st.players.length;
-  renderO1();
-  showBust();
-}
-
-/* ── Quick-entry ── */
-function o1QuickEnter(val) {
-  const st = o1State;
-  const p  = st.players[st.current];
-  if (st.input !== '' || st.segments.length > 0) return; // only when clear
-  const newTotal = p.total - val;
-  // Block invalid scores without recording history
-  if (val > p.total || newTotal === 1) {
-    showBustBlocked();
-    return;
-  }
-
-  o1History.push(JSON.stringify({
-    players:       st.players.map(pl=>({...pl, history:[...pl.history]})),
-    startingTotal: st.startingTotal,
-    current:       st.current,
-    input:         '',
-    segments:      []
-  }));
-
-  p.history.push({ display: String(val), scored: val });
-  p.total = newTotal;
-
-  if (newTotal === 0) { renderO1(); showWin(p.name, 'Checked out!'); return; }
-  st.current = (st.current + 1) % st.players.length;
-  renderO1();
-}
-
-function updateEnterBtn() {
-  const btn   = document.getElementById('o1-btn-enter');
-  const total = o1InputTotal();
-  btn.disabled = (total <= 0);
-}
-
-/* ── 01 render ── */
-function renderO1() {
-  renderO1Header();
-  renderO1TurnBar();
-  renderO1Display();
-  renderO1Numpad();
-  renderO1History();
-  clearStatus();
-  updateEnterBtn();
-}
-
-function renderO1Header() {
-  const h  = document.getElementById('score-header');
-  const st = o1State;
-  const p0 = st.players[0], p1 = st.players[1];
-  const a0 = st.current === 0 ? ' active-player' : '';
-  const a1 = st.current === 1 ? ' active-player' : '';
-  h.innerHTML = `
-    <div class="score-half left">
-      <div class="player-col${a0}">
-        <div class="sc-name">${p0.name}</div>
-        <div class="sc-pts">${p0.total}</div>
-      </div>
-    </div>
-    <div class="score-half right">
-      <div class="player-col${a1}">
-        <div class="sc-name">${p1.name}</div>
-        <div class="sc-pts">${p1.total}</div>
-      </div>
-    </div>`;
-}
-
-function renderO1TurnBar() {
-  const p = o1State.players[o1State.current];
-  document.getElementById('o1-turn-bar').innerHTML =
-    `<span class="o1-turn-indicator">▶</span><span>${p.name} &mdash; YOUR TURN</span><span class="o1-turn-indicator">◀</span>`;
-}
-
-function renderO1Display() {
-  const disp = document.getElementById('o1-display');
-  const inp  = o1State.input;
-  if (inp === '') {
-    disp.textContent = 'ENTER SCORE';
-    disp.className   = 'o1-display empty';
-  } else {
-    disp.textContent = inp;
-    disp.className   = 'o1-display';
-  }
-}
-
-function renderO1History() {
-  o1State.players.forEach((p, pi) => {
-    const col = document.getElementById(`o1-hist-${pi}`);
-    col.innerHTML = '';
-    p.history.forEach((entry, i) => {
-      const div = document.createElement('div');
-      const isLatest = i === p.history.length - 1;
-      if (entry.bust) {
-        div.className = 'o1-hist-entry bust-entry';
-        div.textContent = 'BUST';
-      } else if (entry.miss) {
-        div.className = 'o1-hist-entry miss-entry';
-        div.textContent = 'MISS';
-      } else {
-        div.className = 'o1-hist-entry' + (isLatest ? ' latest' : '');
-        div.textContent = entry.display;
-      }
-      col.appendChild(div);
-    });
-    // Scroll to bottom
-    col.scrollTop = col.scrollHeight;
-  });
-}
-
-function renderO1Numpad() {
-  const hasInput = o1State.input !== '' || o1State.segments.length > 0;
-  const row = document.getElementById('np-bottom-row');
-  row.innerHTML = '';
-  if (hasInput) {
-    const undoB = document.createElement('button');
-    undoB.className = 'np-quick np-undo-sm'; undoB.textContent = '↩ UNDO';
-    undoB.addEventListener('click', o1Backspace);
-
-    const zeroB = document.createElement('button');
-    zeroB.className = 'np-quick np-zero'; zeroB.textContent = '0';
-    zeroB.addEventListener('click', () => o1Digit('0'));
-
-    const plusB = document.createElement('button');
-    plusB.className = 'np-quick np-plus'; plusB.textContent = '+';
-    plusB.addEventListener('click', o1PlusSeparator);
-
-    row.appendChild(undoB); row.appendChild(zeroB); row.appendChild(plusB);
-  } else {
-    const currentTotal = o1State.players[o1State.current].total;
-    [[100,'np-q100'],[180,'np-q180'],[140,'np-q140']].forEach(([val, cls]) => {
-      const b = document.createElement('button');
-      const newTotal = currentTotal - val;
-      const invalid  = val > currentTotal || newTotal === 1;
-      b.className = `np-quick ${cls}`;
-      b.textContent = String(val);
-      if (invalid) {
-        b.style.opacity = '0.25';
-        b.style.cursor  = 'default';
-        b.style.pointerEvents = 'none';
-      } else {
-        b.addEventListener('click', () => o1QuickEnter(val));
-      }
-      row.appendChild(b);
-    });
-  }
-}
-
-function clearStatus() {
-  const s = document.getElementById('o1-status');
-  s.textContent = ''; s.className = 'o1-status';
-}
-
-document.querySelectorAll('.np-btn').forEach(btn => {
-  btn.addEventListener('click', () => o1Digit(btn.dataset.d));
-});
-document.getElementById('o1-btn-undo').addEventListener('click', o1Backspace);
-document.getElementById('o1-btn-enter').addEventListener('click', o1Confirm);
-document.getElementById('o1-btn-miss').addEventListener('click', o1Miss);
-document.getElementById('o1-btn-bust').addEventListener('click', o1BustBtn);
-
-/* ══════════════════════════════════════════
-   SHARED / UTILITY
-══════════════════════════════════════════ */
-function showGame(mode) {
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('game').style.display  = 'flex';
-  document.getElementById('win-screen').classList.remove('open');
-
-  const cricketEl = document.getElementById('cricket-game');
-  const o1El      = document.getElementById('o1-game');
-
-  if (mode === 'cricket') {
-    cricketEl.style.display = 'flex';
-    o1El.style.display      = 'none';
-  } else {
-    cricketEl.style.display = 'none';
-    o1El.style.display      = 'flex';
-  }
-}
-
-function showWin(name, sub) {
-  document.getElementById('win-name').textContent = name;
-  document.getElementById('win-sub').textContent  = sub;
-  document.getElementById('win-screen').classList.add('open');
-}
-
-function showBust() {
-  const status = document.getElementById('o1-status');
-  status.textContent = '✕  BUST — SCORE REVERTED';
-  status.className   = 'o1-status bust';
-  _triggerBustFlash();
-}
-
-function showBustBlocked() {
-  const status = document.getElementById('o1-status');
-  status.textContent = '✕  INVALID — CANNOT SCORE THAT';
-  status.className   = 'o1-status bust';
-  _triggerBustFlash();
-}
-
-function _triggerBustFlash() {
-  const flash = document.getElementById('bust-flash');
-  flash.style.display = 'block';
-  void flash.offsetWidth;
-  flash.style.animation = 'none';
-  void flash.offsetWidth;
-  flash.style.animation = 'bust-fade .5s ease-out forwards';
-  setTimeout(() => { flash.style.display = 'none'; }, 550);
-}
-
-
-/* ══════════════════════════════════════════
-   EXIT / REMATCH / NEW GAME
-══════════════════════════════════════════ */
-function goSetup() {
-  document.getElementById('win-screen').classList.remove('open');
-  document.getElementById('game').style.display  = 'none';
-  document.getElementById('setup').style.display = 'flex';
-}
-
-document.getElementById('btn-exit').addEventListener('click', goSetup);
-document.getElementById('btn-win-exit').addEventListener('click', goSetup);
-document.getElementById('btn-win-close').addEventListener('click', () => {
-  document.getElementById('win-screen').classList.remove('open');
-});
-document.getElementById('btn-rematch').addEventListener('click', () => {
-  document.getElementById('win-screen').classList.remove('open');
-  if (gameMode === 'cricket') {
-    startCricket(cricketState.players.map(p => p.name));
-  } else {
-    startO1(o1State.players.map(p => p.name), o1State.startingTotal);
-  }
-});
-
-/* ══════════════════════════════════════════
-   SCHEDULER
-══════════════════════════════════════════ */
 const ROSTER = [
   "Chelsea","Chris","Christian","Diana",
   "Jack","Jamie","Jared","Jeff","Justin",
   "Louis","Matt","Rick","Tom"
 ];
-
 const SCHED_GAMES = [
   { id:1, label:"Doubles Cricket", type:"Cricket", slots:2 },
   { id:2, label:"Doubles Cricket", type:"Cricket", slots:2 },
@@ -1740,146 +1401,1383 @@ const SCHED_GAMES = [
   { id:8, label:"Team 501",        type:"501",     slots:4 },
 ];
 const SCHED_TOTAL_SLOTS = 21;
+const NUMBERS = [20,19,18,17,16,15,'B'];
+const NUM_VAL = n => n === 'B' ? 25 : n;
+const DEFAULT_SHORTCUTS = [60, 45, 41, 26];
 
-let schedSelected = new Set();
-
-function schedShuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+/* Checkout chart from Dartshop Double-Out chart.
+   Each entry is a 1, 2, or 3-dart out. D-Bull = 50 (Double Bull). */
+const CHECKOUTS = {
+  170: 'T20 T20 D-Bull', 167: 'T20 T19 D-Bull', 164: 'T20 T18 D-Bull', 161: 'T20 T17 D-Bull',
+  160: 'T20 T20 D20', 158: 'T20 T20 D19', 157: 'T20 T19 D20', 156: 'T20 T20 D18',
+  155: 'T20 T15 D-Bull', 154: 'T20 T18 D20', 153: 'T20 T19 D18', 152: 'T20 T20 D16',
+  151: 'T20 T17 D20', 150: 'T20 T18 D18', 149: 'T20 T19 D16', 148: 'T20 T16 D20',
+  147: 'T20 T17 D18', 146: 'T20 T18 D16', 145: 'T20 T15 D20', 144: 'T20 T20 D12',
+  143: 'T20 T17 D16', 142: 'T20 T14 D20', 141: 'T20 T15 D18', 140: 'T20 T16 D16',
+  139: 'T20 T13 D20', 138: 'T20 T14 D18', 137: 'T17 T18 D16', 136: 'T20 T20 D8',
+  135: 'T20 T15 D15', 134: 'T20 T14 D16', 133: 'T20 T19 D8', 132: 'T20 T20 D6',
+  131: 'T20 T13 D16', 130: 'T20 T18 D8', 129: 'T19 T20 D6', 128: 'T18 T14 D16',
+  127: 'T20 T17 D8', 126: 'T19 T19 D6', 125: '25 T20 D20', 124: 'T20 D16 D16',
+  123: 'T19 T16 D9', 122: 'T18 T20 D4', 121: 'T20 T15 D8', 120: 'T20 S20 D20',
+  119: 'T19 T10 D16', 118: 'T20 S18 D20', 117: 'T20 S17 D20', 116: 'T20 S16 D20',
+  115: 'T20 S15 D20', 114: 'T20 S14 D20', 113: 'T20 S13 D20', 112: 'T20 S20 D16',
+  111: 'T20 S19 D16', 110: 'T20 S18 D16', 109: 'T20 S17 D16', 108: 'T20 S16 D16',
+  107: 'T19 S18 D16', 106: 'T20 S14 D16', 105: 'T20 S13 D16', 104: 'T18 S18 D16',
+  103: 'T20 S11 D16', 102: 'T20 S10 D16', 101: 'T17 S18 D16', 100: 'T20 D20',
+  99: 'T19 S10 D16', 98: 'T20 D19', 97: 'T19 D20', 96: 'T20 D18', 95: 'T15 S18 D16',
+  94: 'T18 D20', 93: 'T19 D18', 92: 'T20 D16', 91: 'T17 D20', 90: 'T18 D18',
+  89: 'T19 D16', 88: 'T16 D20', 87: 'T17 D18', 86: 'T18 D16', 85: 'T15 D20',
+  84: 'T20 D12', 83: 'T17 D16', 82: 'T14 D20', 81: 'T15 D18', 80: 'T16 D16',
+  79: 'T13 D20', 78: 'T14 D18', 77: 'T15 D16', 76: 'T20 D8', 75: 'T15 D15',
+  74: 'T14 D16', 73: 'T19 D8', 72: 'T20 D6', 71: 'T13 D16', 70: 'T18 D8',
+  69: 'T19 D6', 68: 'T16 D10', 67: 'T17 D8', 66: 'T10 D18', 65: 'T15 D10',
+  64: 'T16 D8', 63: 'T13 D12', 62: 'T10 D16', 61: 'T15 D8', 60: 'S20 D20',
+  59: 'S17 D21', // 21 invalid; correct entry below
+  58: 'S18 D20', 57: 'S17 D20', 56: 'S16 D20', 55: 'S15 D20', 54: 'S14 D20',
+  53: 'S13 D20', 52: 'S20 D16', 51: 'S19 D16', 50: 'S18 D16', 49: 'S17 D16',
+  48: 'S16 D16', 47: 'S15 D16', 46: 'S14 D16', 45: 'S13 D16', 44: 'S12 D16',
+  43: 'S11 D16', 42: 'S10 D16', 41: 'S9 D16', 40: 'D20', 38: 'D19', 36: 'D18',
+  34: 'D17', 32: 'D16', 30: 'D15', 28: 'D14', 26: 'D13', 24: 'D12', 22: 'D11',
+  20: 'D10', 18: 'D9', 16: 'D8', 14: 'D7', 12: 'D6', 10: 'D5', 8: 'D4',
+  6: 'D3', 4: 'D2', 2: 'D1',
+  // Odd 2-dart outs from chart
+  39: 'S7 D16', 37: 'S5 D16', 35: 'S3 D16', 33: 'S1 D16',
+  31: 'S15 D8', 29: 'S13 D8', 27: 'S11 D8', 25: 'S9 D8',
+  23: 'S7 D8', 21: 'S5 D8', 19: 'S3 D8', 17: 'S1 D8',
+  15: 'S7 D4', 13: 'S5 D4', 11: 'S3 D4', 9: 'S1 D4',
+  7: 'S3 D2', 5: 'S1 D2', 3: 'S1 D1',
+};
+// Fix the 59 entry (chart shows S17 D21 which doesn't exist; canonical is S19 D20)
+CHECKOUTS[59] = 'S19 D20';
+// Bogey scores (no possible 3-dart finish)
+const BOGEY_SCORES = new Set([169, 168, 166, 165, 163, 162, 159]);
+function getCheckout(remaining) {
+  if (remaining > 170) return null;
+  if (BOGEY_SCORES.has(remaining)) return 'NO OUT';
+  return CHECKOUTS[remaining] || null;
 }
+
+let gameMode = 'cricket';
+let match = null;
+let history = [];
+let sessionStats = {};
+let pendingFinish = null; // { winnerIdx, score } awaiting dart-count
+
+/* PERSISTENCE */
+const STORAGE_KEY = 'dartaholics-v2';
+let _saveTimer = null;
+function saveState() {
+  if (_saveTimer) return;
+  _saveTimer = requestAnimationFrame(() => {
+    _saveTimer = null;
+    try {
+      const payload = {
+        match, history, sessionStats,
+        gameMode,
+        ts: Date.now()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {}
+  });
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+function clearMatchState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    p.match = null;
+    p.history = [];
+    p.pendingFinish = null;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  } catch (e) {}
+}
+function saveSessionStatsOnly() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const existing = raw ? JSON.parse(raw) : {};
+    existing.sessionStats = sessionStats;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
+  } catch (e) {}
+}
+
+/* SETUP */
+function populateDropdowns() {
+  ['team1-select','team2-select'].forEach((id, idx) => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';
+    TEAMS.forEach((t, i) => {
+      const opt = document.createElement('option');
+      opt.value = t; opt.textContent = t;
+      if (i === idx) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+populateDropdowns();
+
+/* Restore on load */
+(function bootstrap() {
+  const saved = loadState();
+  if (!saved) return;
+  // Always restore session stats (player shortcuts) even if no active match
+  if (saved.sessionStats) sessionStats = saved.sessionStats;
+  // Show resume banner only if there's an unfinished match
+  if (saved.match && saved.match.players && !saved.match.players.some(p => p.legsWon >= saved.match.legsToWin)) {
+    const m = saved.match;
+    const detail = `${m.players[0].name} vs ${m.players[1].name} · ${m.mode === 'cricket' ? 'Cricket' : m.mode}`;
+    document.getElementById('rb-detail').textContent = detail;
+    document.getElementById('resume-banner').classList.add('show');
+  }
+})();
+
+document.getElementById('rb-resume').addEventListener('click', () => {
+  const saved = loadState();
+  if (!saved || !saved.match) return;
+  match = saved.match;
+  history = saved.history || [];
+  gameMode = saved.gameMode || match.mode;
+  document.getElementById('resume-banner').classList.remove('show');
+  showGame();
+});
+document.getElementById('rb-discard').addEventListener('click', () => {
+  if (!confirm('Discard the in-progress match?')) return;
+  clearMatchState();
+  document.getElementById('resume-banner').classList.remove('show');
+});
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    gameMode = btn.dataset.mode;
+  });
+});
+document.getElementById('start-btn').addEventListener('click', () => {
+  const t1 = document.getElementById('team1-select').value;
+  const t2 = document.getElementById('team2-select').value;
+  if (t1 === t2) { alert('Pick two different teams.'); return; }
+  startMatch([t1, t2]);
+});
+
+/* MATCH */
+function startMatch(names) {
+  const upper = names.map(n => n.toUpperCase());
+  match = {
+    mode: gameMode,
+    startingTotal: gameMode === 'cricket' ? 0 : (gameMode === '301' ? 301 : 501),
+    legsToWin: 1,
+    players: upper.map(n => ({
+      name: n,
+      legsWon: 0,
+      matchPointsScored: 0,
+      matchDartsThrown: 0,
+      matchTurns: 0,
+      matchMarks: 0,
+      first9Scores: [],
+      finishes: [],
+      games: [],
+    })),
+    currentLeg: 1,
+  };
+  history = [];
+  startLeg();
+  showGame();
+}
+
+function startLeg() {
+  const m = match;
+  if (m.mode === 'cricket') {
+    m.leg = {
+      type: 'cricket',
+      current: 0,
+      dart: 0,
+      marks: NUMBERS.map(() => new Array(m.players.length).fill(0)),
+      points: m.players.map(()=>0),
+      totalMarks: m.players.map(()=>0),
+      turns: m.players.map(()=>0),
+      darts: m.players.map(()=>0),
+      currentTurnLog: [],
+    };
+  } else {
+    m.leg = {
+      type: 'o1',
+      current: 0,
+      // New input model:
+      pendingDart: null,           // { value, multiplier } — multiplier null|2|3
+      awaitingNextDart: false,     // true after user taps + and is waiting for next dart
+      segments: [],                // array of { score, label } — confirmed darts this turn
+      totals: m.players.map(()=>m.startingTotal),
+      turnHistory: m.players.map(()=>[]),  // array of {score, remaining, bust, miss, formula}
+      turns: m.players.map(()=>0),
+      darts: m.players.map(()=>0),
+      legScored: m.players.map(()=>0),
+      first9: m.players.map(()=>0),
+      first9Turns: m.players.map(()=>0),
+    };
+  }
+  history = [];
+  render();
+}
+
+function showGame() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('scheduler').classList.remove('show');
+  document.getElementById('game').classList.add('active');
+  document.getElementById('leg-modal').classList.remove('open');
+  document.getElementById('summary-screen').classList.remove('open');
+  const o1El = document.getElementById('o1-game');
+  const crEl = document.getElementById('cricket-game');
+  if (match.mode === 'cricket') {
+    o1El.classList.remove('show'); crEl.classList.add('show');
+  } else {
+    crEl.classList.remove('show'); o1El.classList.add('show');
+  }
+  render();
+}
+
+function render() {
+  renderHeader();
+  renderLegsBanner();
+  if (match.mode === 'cricket') renderCricket();
+  else renderO1();
+  saveState();
+}
+
+function renderHeader() {
+  const h = document.getElementById('score-header');
+  const m = match;
+  const cur = m.leg.current;
+  const p0 = m.players[0], p1 = m.players[1];
+  let s0, s1, st0, st1;
+  if (m.mode === 'cricket') {
+    s0 = m.leg.points[0]; s1 = m.leg.points[1];
+    st0 = computeMPR(0); st1 = computeMPR(1);
+  } else {
+    s0 = m.leg.totals[0]; s1 = m.leg.totals[1];
+    st0 = computePPR(0); st1 = computePPR(1);
+  }
+  h.innerHTML = `
+    <div class="player-block ${cur===0?'active':''}">
+      <div class="pname">${p0.name}</div>
+      <div class="pscore-row">
+        <div class="pscore-stats left">
+          <div class="pstat-match">${st0.match}</div>
+          <div class="pstat-leg">${st0.leg}</div>
+        </div>
+        <div class="pscore">${s0}</div>
+      </div>
+    </div>
+    <div class="leg-badge">
+      <div class="leg-badge-num">${m.currentLeg}</div>
+      <div class="leg-badge-lbl">Leg</div>
+    </div>
+    <div class="player-block ${cur===1?'active':''}">
+      <div class="pname">${p1.name}</div>
+      <div class="pscore-row">
+        <div class="pscore">${s1}</div>
+        <div class="pscore-stats right">
+          <div class="pstat-match">${st1.match}</div>
+          <div class="pstat-leg">${st1.leg}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderLegsBanner() {
+  document.getElementById('legs-l').textContent = match.players[0].legsWon;
+  document.getElementById('legs-r').textContent = match.players[1].legsWon;
+  document.getElementById('legs-label').textContent =
+    `First to ${match.legsToWin} Leg${match.legsToWin>1?'s':''}`;
+}
+
+function computePPR(pi) {
+  const m = match, p = m.players[pi];
+  const legDarts = m.leg.darts[pi];
+  const legScore = m.leg.legScored[pi];
+  const legPPR = legDarts > 0 ? (legScore / legDarts * 3).toFixed(1) : '0.0';
+  const totDarts = p.matchDartsThrown + legDarts;
+  const totScore = p.matchPointsScored + legScore;
+  const matchPPR = totDarts > 0 ? (totScore / totDarts * 3).toFixed(1) : '0.0';
+  return { match: matchPPR, leg: legPPR };
+}
+function computeMPR(pi) {
+  const m = match, p = m.players[pi];
+  const legDarts = m.leg.darts[pi];
+  const legMarks = m.leg.totalMarks[pi];
+  const legMPR = legDarts > 0 ? (legMarks / legDarts * 3).toFixed(2) : '0.00';
+  const totDarts = p.matchDartsThrown + legDarts;
+  const totMarks = p.matchMarks + legMarks;
+  const matchMPR = totDarts > 0 ? (totMarks / totDarts * 3).toFixed(2) : '0.00';
+  return { match: matchMPR, leg: legMPR };
+}
+
+/* 01 */
+function renderO1() {
+  const leg = match.leg;
+  const activePi = leg.current;
+  const pdLabel = pendingDartLabel();
+  const hasPending = leg.segments.length > 0 || pdLabel !== '' || leg.awaitingNextDart;
+  const formula = buildFormulaString();
+
+  ['l','r'].forEach((side, pi) => {
+    const el = document.getElementById(`o1-darts-${side}`);
+    const turns = match.leg.turnHistory[pi] || [];
+    let html = '';
+    turns.forEach((t, idx) => {
+      const latest = (idx === turns.length - 1 && !(pi === activePi && hasPending)) ? ' latest' : '';
+      const cls = t.bust ? ' bust' : (t.miss ? ' miss' : '');
+      let scoreText;
+      if (t.bust) scoreText = 'BUST';
+      else if (t.miss) scoreText = 'MISS';
+      else scoreText = String(t.score);
+      html += `<div class="o1-turn-row${latest}${cls}">
+        <span class="o1-turn-score">${scoreText}</span>
+        <span class="o1-turn-remaining">→ ${t.remaining}</span>
+      </div>`;
+    });
+    // Pending row for active player only
+    if (pi === activePi && hasPending) {
+      const confirmedSum = leg.segments.reduce((a,s)=>a+s.score, 0);
+      const projected = leg.totals[pi] - confirmedSum;
+      html += `<div class="o1-turn-row pending latest">
+        <span class="o1-turn-score">${formula || '...'}</span>
+        <span class="o1-turn-remaining">→ ${projected}</span>
+      </div>`;
+    }
+    el.innerHTML = html;
+    el.scrollTop = el.scrollHeight;
+  });
+  const pi = leg.current;
+  const confirmedSum = leg.segments.reduce((a,s)=>a+s.score, 0);
+  const dartCount = leg.segments.length + (leg.pendingDart && leg.pendingDart.value !== null ? 1 : 0);
+  document.querySelectorAll('#o1-game .o1-dart-num').forEach((n, i) => {
+    n.classList.toggle('current', i === dartCount && dartCount < 3);
+  });
+  const disp = document.getElementById('o1-display');
+  // Projected remaining is based on CONFIRMED darts only (after +). Pending dart doesn't reduce checkout target.
+  const projected = leg.totals[pi] - confirmedSum;
+  const checkout = getCheckout(projected);
+  const hasInput = pdLabel !== '' || leg.segments.length > 0 || leg.awaitingNextDart;
+
+  disp.classList.remove('has-input', 'checkout');
+
+  if (checkout && checkout !== 'NO OUT') {
+    disp.classList.add('checkout');
+    const dartsLeft = 3 - leg.segments.length;
+    const route = formatCheckoutRoute(checkout);
+    const targetLabel = `${projected} • ${dartsLeft}-dart out`;
+    disp.innerHTML = `
+      <div class="o1-checkout-target">${targetLabel}</div>
+      <div class="o1-checkout-route">${route}</div>
+    `;
+  } else if (checkout === 'NO OUT') {
+    disp.classList.add('has-input');
+    disp.innerHTML = `
+      <div class="o1-checkout-target" style="color:var(--text-dim)">${projected} • NO OUT</div>
+      <div class="o1-checkout-route" style="color:var(--text-mid);font-size:1rem">Reduce score</div>
+    `;
+  } else if (hasInput) {
+    disp.classList.add('has-input');
+    disp.textContent = buildFormulaString() || '...';
+  } else {
+    disp.textContent = 'Straight-In';
+  }
+
+  // Hint line
+  const hint = document.getElementById('o1-hint');
+  if (!hasInput) {
+    hint.textContent = 'Tap D or T first for double/triple, + between darts';
+    hint.className = 'o1-hint show-tip';
+  } else if (leg.pendingDart && leg.pendingDart.multiplier && leg.pendingDart.value === null) {
+    const m = leg.pendingDart.multiplier === 3 ? 'TRIPLE' : 'DOUBLE';
+    hint.textContent = `${m} armed — tap a number 1-20`;
+    hint.className = 'o1-hint show-tip';
+  } else {
+    const which = leg.segments.length + 1;
+    hint.textContent = `Dart ${which} of 3 — ${buildFormulaString() || '...'}`;
+    hint.className = 'o1-hint';
+  }
+  // BACK ↔ UNDO label
+  const backBtn = document.getElementById('o1-back');
+  backBtn.textContent = hasInput ? 'UNDO' : 'BACK';
+  // ENTER button enabled state (in rule row)
+  const enterBtn = document.getElementById('o1-enter');
+  const pd = leg.pendingDart;
+  const hasCompleteDart = pd && pd.value !== null;
+  enterBtn.disabled = !hasCompleteDart && leg.segments.length === 0;
+  renderO1Numpad();
+  renderO1Shortcuts();
+}
+
+function formatCheckoutRoute(routeStr) {
+  // Style each dart with a chip; separator dot between
+  const darts = routeStr.split(/\s+/);
+  return darts.map(d => `<span class="ck-darts">${d}</span>`).join('<span class="ck-sep">·</span>');
+}
+
+function renderO1Numpad() {
+  const keys = document.getElementById('o1-keys');
+  const leg = match.leg;
+  keys.innerHTML = '';
+  // Rows 1-3: digits 1-9
+  for (let i = 1; i <= 9; i++) {
+    const b = document.createElement('button');
+    b.className = 'np-btn';
+    b.textContent = i;
+    b.addEventListener('click', () => o1Digit(String(i)));
+    keys.appendChild(b);
+  }
+  // Row 4: D | 0 | T (always visible)
+  const pd = leg.pendingDart || { multiplier: null, value: null };
+  // Armed = multiplier is set but value not yet typed (waiting for digit)
+  const dArmed = pd.multiplier === 2 && pd.value === null;
+  const tArmed = pd.multiplier === 3 && pd.value === null;
+  const dBtn = document.createElement('button');
+  dBtn.className = 'np-dt' + (dArmed ? ' armed' : '');
+  dBtn.textContent = 'D';
+  dBtn.addEventListener('click', () => o1ToggleDT(2));
+  if (pd.value !== null && pd.value > 20) dBtn.disabled = true;
+  keys.appendChild(dBtn);
+
+  const zero = document.createElement('button');
+  zero.className = 'np-zero'; zero.textContent = '0';
+  zero.addEventListener('click', () => o1Digit('0'));
+  keys.appendChild(zero);
+
+  const tBtn = document.createElement('button');
+  tBtn.className = 'np-dt' + (tArmed ? ' armed' : '');
+  tBtn.textContent = 'T';
+  tBtn.addEventListener('click', () => o1ToggleDT(3));
+  if (pd.value !== null && pd.value > 20) tBtn.disabled = true;
+  keys.appendChild(tBtn);
+}
+
+function renderO1Shortcuts() {
+  const leg = match.leg;
+  const hasInput = (leg.pendingDart && (leg.pendingDart.value !== null || leg.pendingDart.multiplier !== null)) || leg.segments.length > 0 || leg.awaitingNextDart;
+  const activePi = leg.current;
+  const activeTotal = leg.totals[activePi];
+
+  ['l','r'].forEach((side, pi) => {
+    const el = document.getElementById(`o1-shortcuts-${side}`);
+    el.innerHTML = '';
+    // Each side displays its own player's most-frequent scores (visual reminder of their tendencies)
+    const shortcuts = getShortcutsFor(match.players[pi].name);
+    // But ALL shortcuts route to the ACTIVE player when tapped
+    shortcuts.slice(0, 3).forEach(v => {
+      const b = document.createElement('button');
+      b.className = 'o1-shortcut';
+      b.textContent = v;
+      const newT = activeTotal - v;
+      const invalid = v > activeTotal || newT === 1 || hasInput;
+      if (invalid) b.disabled = true;
+      else b.addEventListener('click', () => o1QuickEnterFor(activePi, v));
+      el.appendChild(b);
+    });
+    // Bottom (4th) cell: depends on side and input state
+    const bottomBtn = document.createElement('button');
+    if (hasInput && side === 'r') {
+      // Right column bottom = + during input
+      bottomBtn.className = 'o1-shortcut o1-plus-bottom';
+      bottomBtn.textContent = '+';
+      const pd = leg.pendingDart;
+      const canPlus = pd && pd.value !== null;
+      if (!canPlus) bottomBtn.disabled = true;
+      else bottomBtn.addEventListener('click', o1PlusSeparator);
+    } else if (hasInput && side === 'l') {
+      // Left column bottom = blank during input
+      bottomBtn.className = 'o1-shortcut o1-shortcut-blank';
+      bottomBtn.textContent = '';
+      bottomBtn.disabled = true;
+    } else {
+      const v = shortcuts[3];
+      bottomBtn.className = 'o1-shortcut';
+      bottomBtn.textContent = v;
+      const newT = activeTotal - v;
+      const invalid = v > activeTotal || newT === 1;
+      if (invalid) bottomBtn.disabled = true;
+      else bottomBtn.addEventListener('click', () => o1QuickEnterFor(activePi, v));
+    }
+    el.appendChild(bottomBtn);
+  });
+}
+function getShortcutsFor(name) {
+  const stats = sessionStats[name];
+  if (!stats || !stats.scoreCounts || Object.keys(stats.scoreCounts).length < 4) {
+    return DEFAULT_SHORTCUTS;
+  }
+  return Object.entries(stats.scoreCounts)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0, 4)
+    .map(e => parseInt(e[0],10));
+}
+function recordScore(name, score) {
+  if (!sessionStats[name]) sessionStats[name] = { scoreCounts: {} };
+  if (score <= 0) return;
+  sessionStats[name].scoreCounts[score] = (sessionStats[name].scoreCounts[score] || 0) + 1;
+}
+
+function o1InputTotal() {
+  const seg = match.leg.segments.reduce((a,s)=>a+s.score, 0);
+  const cur = pendingDartValue();
+  return seg + (cur || 0);
+}
+function pendingDartValue() {
+  // Returns the value of the dart currently being typed (factoring in × multiplier), or null
+  const pd = match.leg.pendingDart;
+  if (!pd || pd.value === null || pd.value === undefined) return null;
+  const mult = pd.multiplier || 1;
+  return pd.value * mult;
+}
+function pendingDartLabel() {
+  const pd = match.leg.pendingDart;
+  if (!pd) return '';
+  if (pd.value === null || pd.value === undefined) {
+    // Multiplier armed, no value yet
+    if (pd.multiplier === 2) return 'D_';
+    if (pd.multiplier === 3) return 'T_';
+    return '';
+  }
+  // Value set
+  if (pd.multiplier === 3) return `T${pd.value}`;
+  if (pd.multiplier === 2 && pd.value === 25) return 'D-Bull';
+  if (pd.multiplier === 2) return `D${pd.value}`;
+  return String(pd.value);
+}
+function buildFormulaString() {
+  // Build the live in-progress formula like "20 + (17×3) + 18" or "(17×3) + 15 +"
+  const leg = match.leg;
+  const parts = leg.segments.map(s => s.label);
+  const pdLabel = pendingDartLabel();
+  if (pdLabel) parts.push(pdLabel);
+  let s = parts.join(' + ');
+  // If user just hit + and is awaiting next dart, show trailing +
+  if (leg.awaitingNextDart && pdLabel === '') s += s ? ' + ' : '+ ';
+  return s;
+}
+
+function o1Digit(d) {
+  const leg = match.leg;
+  if (!leg.pendingDart) leg.pendingDart = { multiplier: null, value: null };
+  const pd = leg.pendingDart;
+  // Append digit to value
+  const currentStr = pd.value === null ? '' : String(pd.value);
+  const newStr = currentStr + d;
+  if (newStr.length > 3) return;
+  const newVal = parseInt(newStr, 10);
+  // Validate base value: max single = 25 (Bull), max with multiplier respects D=20, T=20
+  const mult = pd.multiplier;
+  if (mult === 2 || mult === 3) {
+    // D or T armed: only 1-20 valid as base
+    if (newVal < 1 || newVal > 20) {
+      // Allow partial typing (e.g. typing "1" before "5" for D15) — only reject if final exceeds 20
+      // Simpler: we allow up to 20. If newVal > 20, reject.
+      if (newVal > 20) return;
+    }
+  } else {
+    // Single dart: max 25 (Bull), but typing "2" should be allowed (preceding "20" or "25")
+    if (newVal > 60) return;
+    // Single dart values: 1-20, 25 (Bull), 50 (D-Bull). Allow typing through.
+  }
+  const sum = leg.segments.reduce((a,s)=>a+s.score, 0);
+  const dartScore = newVal * (mult || 1);
+  if (sum + dartScore > leg.totals[leg.current]) return;
+  pd.value = newVal;
+  leg.awaitingNextDart = false;
+  render();
+}
+
+// Toggle D (mult=2) or T (mult=3) on the pending dart
+function o1ToggleDT(targetMult) {
+  const leg = match.leg;
+  if (!leg.pendingDart) leg.pendingDart = { multiplier: null, value: null };
+  const pd = leg.pendingDart;
+  // If already armed with this multiplier → toggle off
+  if (pd.multiplier === targetMult) {
+    pd.multiplier = null;
+    // If a value is set and now exceeds remaining, clear value
+    if (pd.value !== null) {
+      const sum = leg.segments.reduce((a,s)=>a+s.score, 0);
+      if (sum + pd.value > leg.totals[leg.current]) pd.value = null;
+    }
+  } else {
+    // If a value is already typed, validate it against the new multiplier first
+    if (pd.value !== null) {
+      // D/T require value 1-20
+      if (pd.value > 20) {
+        // Can't apply D or T to >20 (no D25, no T25). Ignore.
+        return;
+      }
+      const sum = leg.segments.reduce((a,s)=>a+s.score, 0);
+      const newScore = pd.value * targetMult;
+      if (sum + newScore > leg.totals[leg.current]) {
+        // Would bust — ignore the toggle
+        return;
+      }
+    }
+    pd.multiplier = targetMult;
+  }
+  leg.awaitingNextDart = false;
+  render();
+}
+
+function o1PlusSeparator() {
+  const leg = match.leg;
+  const pd = leg.pendingDart;
+  if (!pd || pd.value === null) return;
+  const dartScore = pd.value * (pd.multiplier || 1);
+  let label;
+  if (pd.multiplier === 3) label = `T${pd.value}`;
+  else if (pd.multiplier === 2 && pd.value === 25) label = 'D-Bull';
+  else if (pd.multiplier === 2) label = `D${pd.value}`;
+  else label = String(pd.value);
+  leg.segments.push({ score: dartScore, label });
+  leg.pendingDart = null;
+  if (leg.segments.length >= 3) { o1Confirm(); return; }
+  leg.awaitingNextDart = true;
+  render();
+}
+
+function o1Backspace() {
+  const leg = match.leg;
+  const pd = leg.pendingDart;
+  if (pd) {
+    // If value is being typed, strip a digit; if no value, clear multiplier
+    if (pd.value !== null && pd.value !== undefined) {
+      const s = String(pd.value);
+      if (s.length > 1) pd.value = parseInt(s.slice(0,-1), 10);
+      else pd.value = null;
+      render();
+      return;
+    }
+    if (pd.multiplier) {
+      pd.multiplier = null;
+      // If pendingDart now empty, drop it
+      leg.pendingDart = null;
+      render();
+      return;
+    }
+    leg.pendingDart = null;
+  }
+  if (leg.awaitingNextDart) {
+    leg.awaitingNextDart = false;
+    render();
+    return;
+  }
+  if (leg.segments.length > 0) {
+    leg.segments.pop();
+    render();
+    return;
+  }
+  // Empty turn → undo previous full turn
+  o1UndoTurn();
+}
+function o1UndoTurn() {
+  if (!history.length) return;
+  match = JSON.parse(history.pop());
+  document.getElementById('leg-modal').classList.remove('open');
+  render();
+}
+function snapshotMatch() {
+  history.push(JSON.stringify(match));
+  if (history.length > 30) history.shift();
+}
+
+function o1Confirm() {
+  const leg = match.leg;
+  // Push pending dart if it's complete
+  const pd = leg.pendingDart;
+  if (pd && pd.value !== null) {
+    const dartScore = pd.value * (pd.multiplier || 1);
+    let label;
+    if (pd.multiplier === 3) label = `T${pd.value}`;
+    else if (pd.multiplier === 2 && pd.value === 25) label = 'D-Bull';
+    else if (pd.multiplier === 2) label = `D${pd.value}`;
+    else label = String(pd.value);
+    leg.segments.push({ score: dartScore, label });
+    leg.pendingDart = null;
+  }
+  if (leg.segments.length === 0) return;
+
+  const userEnteredSegments = leg.segments.length;
+  const score = leg.segments.reduce((a,s)=>a+s.score, 0);
+  const formula = leg.segments.map(s => s.label).join(' + ');
+  const pi = leg.current;
+  const p = match.players[pi];
+  const newTotal = leg.totals[pi] - score;
+
+  snapshotMatch();
+  leg.pendingDart = null;
+  leg.segments = [];
+  leg.awaitingNextDart = false;
+
+  if (newTotal < 0 || newTotal === 1) {
+    leg.turnHistory[pi].push({ bust: true, remaining: leg.totals[pi], formula });
+    leg.darts[pi] += 3;
+    leg.turns[pi]++;
+    showBust();
+    advanceO1Turn();
+    return;
+  }
+  leg.turnHistory[pi].push({ score, remaining: newTotal, formula });
+
+  // Checkout
+  if (newTotal === 0) {
+    leg.legScored[pi] += score;
+    leg.totals[pi] = newTotal;
+    if (leg.turns[pi] < 3) leg.first9[pi] += score;
+    if (score > 0) recordScore(p.name, score);
+    p.finishes.push(score);
+    if (userEnteredSegments > 1) {
+      leg.darts[pi] += userEnteredSegments;
+      leg.turns[pi]++;
+      finishLeg(pi);
+    } else {
+      pendingFinish = { winnerIdx: pi, score };
+      showFinishPrompt(p.name);
+    }
+    return;
+  }
+
+  // Normal turn
+  leg.darts[pi] += userEnteredSegments > 1 ? userEnteredSegments : 3;
+  leg.turns[pi]++;
+  leg.legScored[pi] += score;
+  leg.totals[pi] = newTotal;
+  if (leg.turns[pi] <= 3) {
+    leg.first9[pi] += score;
+    leg.first9Turns[pi] = leg.turns[pi];
+  }
+  if (score > 0) recordScore(p.name, score);
+  advanceO1Turn();
+}
+
+function showFinishPrompt(name) {
+  document.getElementById('fm-name').textContent = name;
+  document.getElementById('finish-modal').classList.add('open');
+}
+
+document.querySelectorAll('.fm-dart').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!pendingFinish) return;
+    const darts = parseInt(btn.dataset.darts, 10);
+    const pi = pendingFinish.winnerIdx;
+    match.leg.darts[pi] += darts;
+    match.leg.turns[pi]++;
+    document.getElementById('finish-modal').classList.remove('open');
+    const winnerIdx = pendingFinish.winnerIdx;
+    pendingFinish = null;
+    finishLeg(winnerIdx);
+  });
+});
+
+// Quick-enter for the active player (from 100/180/140 buttons)
+function o1QuickEnter(val) {
+  const leg = match.leg;
+  // Only valid when no input in progress
+  if (leg.pendingDart || leg.segments.length > 0 || leg.awaitingNextDart) return;
+  o1QuickEnterFor(leg.current, val);
+}
+
+// Quick-enter for a specific player (from side shortcuts — works for either player)
+function o1QuickEnterFor(pi, val) {
+  const leg = match.leg;
+  // Guard: shortcuts only work for the active player
+  if (pi !== leg.current) return;
+  if (leg.pendingDart || leg.segments.length > 0 || leg.awaitingNextDart) return;
+  const p = match.players[pi];
+  const cur = leg.totals[pi];
+  const newT = cur - val;
+  if (val > cur || newT === 1) { showBust(); return; }
+  snapshotMatch();
+  leg.turnHistory[pi].push({ score: val, remaining: newT, formula: String(val) });
+  leg.legScored[pi] += val;
+  leg.totals[pi] = newT;
+  if (leg.turns[pi] < 3) leg.first9[pi] += val;
+  recordScore(p.name, val);
+  if (newT === 0) {
+    p.finishes.push(val);
+    pendingFinish = { winnerIdx: pi, score: val };
+    showFinishPrompt(p.name);
+    return;
+  }
+  leg.darts[pi] += 3;
+  leg.turns[pi]++;
+  if (leg.turns[pi] <= 3) leg.first9Turns[pi] = leg.turns[pi];
+  advanceO1Turn();
+}
+
+function o1Miss() {
+  const leg = match.leg;
+  const pi = leg.current;
+  snapshotMatch();
+  leg.turnHistory[pi].push({ miss: true, remaining: leg.totals[pi], formula: 'MISS' });
+  leg.darts[pi] += 3;
+  leg.turns[pi]++;
+  leg.pendingDart = null;
+  leg.segments = [];
+  leg.awaitingNextDart = false;
+  if (leg.turns[pi] <= 3) leg.first9Turns[pi] = leg.turns[pi];
+  advanceO1Turn();
+}
+
+function advanceO1Turn() {
+  match.leg.current = (match.leg.current + 1) % match.players.length;
+  render();
+}
+
+/* CRICKET */
+let _markSvgCounter = 0;
+function drawMarks(m, isActive, isClosed) {
+  if (m === 0) return `<svg viewBox="0 0 80 54"></svg>`;
+  let col;
+  if (isClosed) col = '#3aab50';        // green when closed
+  else if (isActive) col = '#ffffff';   // white for active player's in-progress marks
+  else col = '#b0b0b0';                  // grey for inactive player's in-progress marks
+  const sw = 4;
+  const fid = `gf${++_markSvgCounter}`;
+  const filt = isClosed
+    ? `<defs><filter id="${fid}"><feGaussianBlur stdDeviation="1.5" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter></defs>`
+    : '';
+  const f = isClosed ? ` filter="url(#${fid})"` : '';
+  let p = '';
+  if (m >= 1) p += `<line x1="18" y1="46" x2="62" y2="8" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"${f}/>`;
+  if (m >= 2) p += `<line x1="62" y1="46" x2="18" y2="8" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"${f}/>`;
+  if (m >= 3) p += `<ellipse cx="40" cy="27" rx="26" ry="22" fill="none" stroke="${col}" stroke-width="${sw-0.5}"${f}/>`;
+  return `<svg viewBox="0 0 80 54" preserveAspectRatio="xMidYMid meet">${filt}${p}</svg>`;
+}
+
+function renderCricket() {
+  const board = document.getElementById('cricket-board');
+  board.innerHTML = '';
+  const leg = match.leg;
+  const cur = leg.current;
+  NUMBERS.forEach((num, ni) => {
+    const isBull = num === 'B';
+    const m0 = leg.marks[ni][0];
+    const m1 = leg.marks[ni][1];
+    const closed0 = m0 >= 3;
+    const closed1 = m1 >= 3;
+    const closedAll = closed0 && closed1;
+    const row = document.createElement('div');
+    row.className = 'cricket-row';
+    if (closedAll) row.classList.add('closed-both');
+    else if (closed0 || closed1) {
+      row.classList.add('one-closed');
+      if (closed0) row.classList.add('left-closed');
+      if (closed1) row.classList.add('right-closed');
+    }
+
+    // Left marks (player 0)
+    const leftMarks = document.createElement('div');
+    leftMarks.className = 'cr-marks left';
+    leftMarks.innerHTML = drawMarks(m0, cur === 0, closed0);
+    row.appendChild(leftMarks);
+
+    if (isBull) {
+      const dBtn = makeCrBtn('D', 'cr-dt', () => cricketHit(ni, 2, '50'), closedAll);
+      const numBtn = makeCrBtn('B', 'cr-num', () => cricketHit(ni, 1, '25'), closedAll);
+      const ph = document.createElement('button');
+      ph.className = 'cr-dt placeholder'; ph.textContent = '';
+      row.appendChild(dBtn); row.appendChild(numBtn); row.appendChild(ph);
+    } else {
+      const dBtn = makeCrBtn('D', 'cr-dt', () => cricketHit(ni, 2, String(num*2)), closedAll);
+      const numBtn = makeCrBtn(String(num), 'cr-num', () => cricketHit(ni, 1, String(num)), closedAll);
+      const tBtn = makeCrBtn('T', 'cr-dt', () => cricketHit(ni, 3, String(num*3)), closedAll);
+      row.appendChild(dBtn); row.appendChild(numBtn); row.appendChild(tBtn);
+    }
+
+    // Right marks (player 1)
+    const rightMarks = document.createElement('div');
+    rightMarks.className = 'cr-marks right';
+    rightMarks.innerHTML = drawMarks(m1, cur === 1, closed1);
+    row.appendChild(rightMarks);
+
+    board.appendChild(row);
+  });
+  const pips = document.getElementById('c-dpips');
+  pips.innerHTML = [0,1,2].map(i =>
+    `<span class="dpip${i < leg.dart ? ' used':''}"></span>`
+  ).join('');
+  document.getElementById('c-turn-log').textContent =
+    leg.currentTurnLog.length ? leg.currentTurnLog.join(' · ') : '';
+}
+function makeCrBtn(label, cls, handler, disabled) {
+  const b = document.createElement('button');
+  b.className = cls;
+  b.textContent = label;
+  if (disabled) b.disabled = true;
+  else b.addEventListener('click', handler);
+  return b;
+}
+function cricketHit(ni, hits, label) {
+  const leg = match.leg;
+  if (leg.dart >= 3) return;
+  snapshotMatch();
+  const pi = leg.current;
+  const val = NUM_VAL(NUMBERS[ni]);
+  const prev = leg.marks[ni][pi];
+  leg.marks[ni][pi] = Math.min(3, prev + hits);
+  leg.totalMarks[pi] += hits;
+  const overflow = (prev + hits) - 3;
+  if (overflow > 0) {
+    const anyOpen = match.players.some((_, p2) => p2 !== pi && leg.marks[ni][p2] < 3);
+    if (anyOpen) leg.points[pi] += val * overflow;
+  }
+  leg.darts[pi]++;
+  leg.dart++;
+  leg.currentTurnLog.push(label);
+  if (cricketCheckWin()) return;
+  if (leg.dart >= 3) cricketEndTurn();
+  else render();
+}
+function cricketEndTurn() {
+  const leg = match.leg;
+  leg.turns[leg.current]++;
+  leg.currentTurnLog = [];
+  leg.dart = 0;
+  leg.current = (leg.current + 1) % match.players.length;
+  render();
+}
+function cricketMiss() {
+  const leg = match.leg;
+  snapshotMatch();
+  const pi = leg.current;
+  const dartsLeft = 3 - leg.dart;
+  leg.darts[pi] += dartsLeft;
+  leg.dart = 3;
+  cricketEndTurn();
+}
+function cricketCheckWin() {
+  const leg = match.leg;
+  for (let pi = 0; pi < match.players.length; pi++) {
+    const allClosed = NUMBERS.every((_, ni) => leg.marks[ni][pi] >= 3);
+    if (!allClosed) continue;
+    const myScore = leg.points[pi];
+    const everyoneElseLower = match.players.every((_, p2) => leg.points[p2] <= myScore);
+    if (everyoneElseLower) {
+      finishLeg(pi);
+      return true;
+    }
+  }
+  return false;
+}
+
+/* FINISH */
+function finishLeg(winnerIdx) {
+  const m = match;
+  m.players[winnerIdx].legsWon++;
+  m.players.forEach((p, pi) => {
+    const leg = m.leg;
+    p.matchDartsThrown += leg.darts[pi];
+    p.matchTurns += leg.turns[pi];
+    if (m.mode === 'cricket') {
+      p.matchPointsScored += leg.points[pi];
+      p.matchMarks += leg.totalMarks[pi];
+      p.games.push({
+        leg: m.currentLeg,
+        winner: pi === winnerIdx,
+        type: 'Cricket',
+        points: leg.points[pi],
+        marks: leg.totalMarks[pi],
+        darts: leg.darts[pi],
+        mpr: leg.darts[pi] > 0 ? (leg.totalMarks[pi] / leg.darts[pi] * 3).toFixed(2) : '0.00',
+      });
+    } else {
+      p.matchPointsScored += leg.legScored[pi];
+      p.first9Scores.push(leg.first9[pi]);
+      p.games.push({
+        leg: m.currentLeg,
+        winner: pi === winnerIdx,
+        type: m.mode,
+        scored: leg.legScored[pi],
+        remaining: leg.totals[pi],
+        darts: leg.darts[pi],
+        ppr: leg.darts[pi] > 0 ? (leg.legScored[pi] / leg.darts[pi] * 3).toFixed(1) : '0.0',
+      });
+    }
+  });
+  showLegCompleteModal(winnerIdx);
+}
+
+function showLegCompleteModal(winnerIdx) {
+  const m = match;
+  const matchOver = m.players[winnerIdx].legsWon >= m.legsToWin;
+  document.getElementById('lm-n1').textContent = m.players[0].name;
+  document.getElementById('lm-n2').textContent = m.players[1].name;
+  document.getElementById('lm-s1').textContent = m.players[0].legsWon;
+  document.getElementById('lm-s2').textContent = m.players[1].legsWon;
+  document.getElementById('lm-title').textContent =
+    matchOver ? `${m.players[winnerIdx].name} Wins!` : 'Leg Complete';
+  document.getElementById('lm-sub').textContent =
+    matchOver ? 'Match Over' : `Next: ${m.mode === 'cricket' ? 'Cricket' : (m.mode + ' SIDO')}`;
+  document.getElementById('lm-next').textContent = matchOver ? 'View Summary' : 'Next Leg';
+  document.getElementById('leg-modal').classList.add('open');
+}
+document.getElementById('lm-next').addEventListener('click', () => {
+  const m = match;
+  document.getElementById('leg-modal').classList.remove('open');
+  const matchOver = m.players.some(p => p.legsWon >= m.legsToWin);
+  if (matchOver) showSummary();
+  else { m.currentLeg++; startLeg(); }
+});
+document.getElementById('lm-end').addEventListener('click', () => {
+  document.getElementById('leg-modal').classList.remove('open');
+  showSummary();
+});
+document.getElementById('lm-change-players').addEventListener('click', () => {
+  document.getElementById('leg-modal').classList.remove('open');
+  goSetup();
+});
+
+/* SUMMARY */
+function showSummary() {
+  // Match is over — clear in-progress save but keep sessionStats
+  saveSessionStatsOnly();
+  const m = match;
+  document.getElementById('game').classList.remove('active');
+  document.getElementById('summary-screen').classList.add('open');
+  document.getElementById('sum-n1').textContent = m.players[0].name;
+  document.getElementById('sum-n2').textContent = m.players[1].name;
+  document.getElementById('sum-l1').textContent = m.players[0].legsWon;
+  document.getElementById('sum-l2').textContent = m.players[1].legsWon;
+  document.querySelectorAll('.sum-name').forEach(el => el.classList.remove('winner'));
+  const winnerIdx = m.players[0].legsWon > m.players[1].legsWon ? 0 : (m.players[1].legsWon > m.players[0].legsWon ? 1 : -1);
+  if (winnerIdx >= 0) document.querySelectorAll('.sum-name')[winnerIdx].classList.add('winner');
+
+  const statsEl = document.getElementById('sum-stats');
+  if (m.mode === 'cricket') {
+    statsEl.innerHTML = `
+      <div class="sum-stat-val">${matchMPR(0)}</div>
+      <div class="sum-stat-label">MPR</div>
+      <div class="sum-stat-val">${matchMPR(1)}</div>
+      <div class="sum-stat-val">${m.players[0].matchPointsScored}</div>
+      <div class="sum-stat-label">Points</div>
+      <div class="sum-stat-val">${m.players[1].matchPointsScored}</div>
+    `;
+  } else {
+    statsEl.innerHTML = `
+      <div class="sum-stat-val">${matchPPR(0)}</div>
+      <div class="sum-stat-label">PPR</div>
+      <div class="sum-stat-val">${matchPPR(1)}</div>
+      <div class="sum-stat-val">${first9Avg(0)}</div>
+      <div class="sum-stat-label">First Nine</div>
+      <div class="sum-stat-val">${first9Avg(1)}</div>
+      <div class="sum-stat-val">${avgFinish(0)}</div>
+      <div class="sum-stat-label">Avg Finish</div>
+      <div class="sum-stat-val">${avgFinish(1)}</div>
+    `;
+  }
+
+  const t = document.getElementById('sum-table');
+  if (m.mode === 'cricket') {
+    let rows = `<thead><tr>
+      <th></th><th>LEG</th><th>MPR</th><th>PTS</th><th>TYPE</th><th>PTS</th><th>MPR</th><th>DRT</th>
+    </tr></thead><tbody>`;
+    for (let i = 0; i < m.players[0].games.length; i++) {
+      const g0 = m.players[0].games[i], g1 = m.players[1].games[i];
+      rows += `<tr>
+        <td>${g0.winner ? '★' : (g1.winner ? ' ' : '')}</td>
+        <td>${g0.leg}</td>
+        <td>${g0.mpr}</td>
+        <td>${g0.points}</td>
+        <td class="game-type">CKT</td>
+        <td>${g1.points}</td>
+        <td>${g1.mpr}</td>
+        <td>${g0.darts + g1.darts}</td>
+      </tr>`;
+    }
+    rows += '</tbody>';
+    t.innerHTML = rows;
+  } else {
+    let rows = `<thead><tr>
+      <th></th><th>LEG</th><th>3DA</th><th>SCR</th><th>TYPE</th><th>SCR</th><th>3DA</th><th>RND</th>
+    </tr></thead><tbody>`;
+    for (let i = 0; i < m.players[0].games.length; i++) {
+      const g0 = m.players[0].games[i], g1 = m.players[1].games[i];
+      rows += `<tr>
+        <td>${g0.winner ? '★' : ''}</td>
+        <td>${g0.leg}</td>
+        <td>${g0.ppr}</td>
+        <td>${g0.scored}</td>
+        <td class="game-type">${m.startingTotal}</td>
+        <td>${g1.scored}</td>
+        <td>${g1.ppr}</td>
+        <td>${Math.max(m.players[0].matchTurns, m.players[1].matchTurns)}</td>
+      </tr>`;
+    }
+    rows += '</tbody>';
+    t.innerHTML = rows;
+  }
+}
+
+function matchPPR(pi) {
+  const p = match.players[pi];
+  return p.matchDartsThrown > 0
+    ? (p.matchPointsScored / p.matchDartsThrown * 3).toFixed(1)
+    : '0.0';
+}
+function matchMPR(pi) {
+  const p = match.players[pi];
+  return p.matchDartsThrown > 0
+    ? (p.matchMarks / p.matchDartsThrown * 3).toFixed(2)
+    : '0.00';
+}
+function first9Avg(pi) {
+  const arr = match.players[pi].first9Scores;
+  if (!arr.length) return '0.0';
+  return (arr.reduce((a,b)=>a+b,0) / arr.length).toFixed(1);
+}
+function avgFinish(pi) {
+  const arr = match.players[pi].finishes;
+  if (!arr.length) return '—';
+  return (arr.reduce((a,b)=>a+b,0) / arr.length).toFixed(1);
+}
+
+document.getElementById('sum-back').addEventListener('click', () => {
+  document.getElementById('summary-screen').classList.remove('open');
+  document.getElementById('game').classList.add('active');
+});
+document.getElementById('sum-new').addEventListener('click', goSetup);
+document.getElementById('sum-exit').addEventListener('click', goSetup);
+document.getElementById('sum-copy').addEventListener('click', copySummaryToClipboard);
+
+function copySummaryToClipboard() {
+  const m = match;
+  if (!m) return;
+  const p0 = m.players[0], p1 = m.players[1];
+  const winnerIdx = p0.legsWon > p1.legsWon ? 0 : (p1.legsWon > p0.legsWon ? 1 : -1);
+  const lines = [];
+  lines.push(`🎯 ${m.mode === 'cricket' ? 'CRICKET' : m.mode + ' SIDO'} — ${new Date().toLocaleDateString()}`);
+  lines.push(`${p0.name}  ${p0.legsWon} - ${p1.legsWon}  ${p1.name}`);
+  if (winnerIdx >= 0) lines.push(`Winner: ${m.players[winnerIdx].name}`);
+  lines.push('');
+  if (m.mode === 'cricket') {
+    lines.push(`MPR:    ${matchMPR(0)}  vs  ${matchMPR(1)}`);
+    lines.push(`Points: ${p0.matchPointsScored}  vs  ${p1.matchPointsScored}`);
+  } else {
+    lines.push(`PPR:        ${matchPPR(0)}  vs  ${matchPPR(1)}`);
+    lines.push(`First Nine: ${first9Avg(0)}  vs  ${first9Avg(1)}`);
+    lines.push(`Avg Finish: ${avgFinish(0)}  vs  ${avgFinish(1)}`);
+  }
+  lines.push('');
+  lines.push('Per-Leg:');
+  for (let i = 0; i < p0.games.length; i++) {
+    const g0 = p0.games[i], g1 = p1.games[i];
+    const star = g0.winner ? '★' : (g1.winner ? ' ' : ' ');
+    if (m.mode === 'cricket') {
+      lines.push(`  ${star} Leg ${g0.leg}: ${g0.points} pts (MPR ${g0.mpr})  vs  ${g1.points} pts (MPR ${g1.mpr})`);
+    } else {
+      lines.push(`  ${star} Leg ${g0.leg}: ${g0.scored} (3DA ${g0.ppr})  vs  ${g1.scored} (3DA ${g1.ppr})`);
+    }
+  }
+  const text = lines.join('\n');
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(fallback);
+  } else {
+    fallback();
+  }
+  const toast = document.getElementById('sum-copy-toast');
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1600);
+}
+
+/* BUST */
+function showBust() {
+  const flash = document.getElementById('bust-flash');
+  const toast = document.getElementById('bust-toast');
+  flash.style.display = 'block';
+  toast.classList.add('show');
+  setTimeout(() => {
+    flash.style.display = 'none';
+    toast.classList.remove('show');
+  }, 1200);
+}
+
+/* NAV */
+function goSetup() {
+  clearMatchState();
+  match = null;
+  history = [];
+  pendingFinish = null;
+  document.getElementById('summary-screen').classList.remove('open');
+  document.getElementById('leg-modal').classList.remove('open');
+  document.getElementById('finish-modal').classList.remove('open');
+  document.getElementById('game').classList.remove('active');
+  document.getElementById('scheduler').classList.remove('show');
+  document.getElementById('resume-banner').classList.remove('show');
+  document.getElementById('setup').style.display = 'flex';
+}
+document.getElementById('btn-exit').addEventListener('click', () => {
+  if (confirm('Exit current game? Match progress will be lost.')) goSetup();
+});
+
+/* WIRING */
+document.getElementById('o1-back').addEventListener('click', o1Backspace);
+document.getElementById('o1-miss').addEventListener('click', o1Miss);
+document.getElementById('o1-bust').addEventListener('click', o1BustBtn);
+document.getElementById('o1-enter').addEventListener('click', o1Confirm);
+
+function o1BustBtn() {
+  const leg = match.leg;
+  const pi = leg.current;
+  snapshotMatch();
+  // Capture any in-progress formula for the history entry
+  const formula = buildFormulaString() || '';
+  leg.turnHistory[pi].push({ bust: true, remaining: leg.totals[pi], formula });
+  leg.darts[pi] += 3;
+  leg.turns[pi]++;
+  leg.pendingDart = null;
+  leg.segments = [];
+  leg.awaitingNextDart = false;
+  showBust();
+  advanceO1Turn();
+}
+document.getElementById('c-back').addEventListener('click', () => {
+  if (history.length) {
+    match = JSON.parse(history.pop());
+    render();
+  }
+});
+document.getElementById('c-miss').addEventListener('click', cricketMiss);
+
+/* SCHEDULER */
+let schedSelected = new Set();
+document.getElementById('sched-launch-btn').addEventListener('click', () => {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('scheduler').classList.add('show');
+  schedSelected.clear();
+  schedBuildRoster();
+  schedUpdateUI();
+  document.getElementById('sched-output').classList.remove('show');
+  document.getElementById('sched-selector').style.display = 'flex';
+});
+document.getElementById('sched-back-btn').addEventListener('click', () => {
+  document.getElementById('scheduler').classList.remove('show');
+  document.getElementById('setup').style.display = 'flex';
+});
+document.getElementById('sched-gen-btn').addEventListener('click', schedGenerate);
+document.getElementById('sched-reshuffle-btn').addEventListener('click', () => {
+  const players = [...schedSelected];
+  if (players.length < 4) return;
+  schedRender(...schedBuildSchedule(players));
+});
+document.getElementById('sched-change-btn').addEventListener('click', () => {
+  document.getElementById('sched-output').classList.remove('show');
+  document.getElementById('sched-selector').style.display = 'flex';
+});
 
 function schedBuildRoster() {
   const grid = document.getElementById('sched-roster-grid');
-  grid.innerHTML = ROSTER.map(name =>
-    `<button class="sched-player-btn" data-name="${name}" onclick="schedTogglePlayer('${name}')">${name}</button>`
-  ).join('');
+  grid.innerHTML = '';
+  ROSTER.forEach(name => {
+    const b = document.createElement('button');
+    b.className = 'sched-player-btn';
+    b.dataset.name = name;
+    b.textContent = name;
+    b.addEventListener('click', () => {
+      if (schedSelected.has(name)) schedSelected.delete(name);
+      else schedSelected.add(name);
+      schedUpdateUI();
+    });
+    grid.appendChild(b);
+  });
 }
-
-function schedTogglePlayer(name) {
-  if (schedSelected.has(name)) schedSelected.delete(name);
-  else schedSelected.add(name);
-  schedUpdateUI();
-}
-
 function schedUpdateUI() {
   document.querySelectorAll('.sched-player-btn').forEach(btn => {
     btn.classList.toggle('selected', schedSelected.has(btn.dataset.name));
   });
   const n = schedSelected.size;
   const meta = document.getElementById('sched-meta');
-  if (n === 0) {
-    meta.innerHTML = '&nbsp;';
-  } else {
+  if (n === 0) meta.innerHTML = '&nbsp;';
+  else {
     const avg = (SCHED_TOTAL_SLOTS / n).toFixed(1);
-    meta.innerHTML = `<span>${n}</span> selected &nbsp;·&nbsp; 21 slots &nbsp;·&nbsp; ~<span>${avg}</span> games each`;
+    meta.innerHTML = `<span>${n}</span> selected · 21 slots · ~<span>${avg}</span> games each`;
   }
   document.getElementById('sched-gen-btn').disabled = n < 4;
 }
-
+function schedShuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
 function schedGenerate() {
   const players = [...schedSelected];
   if (players.length < 4) return;
-
   document.getElementById('sched-selector').style.display = 'none';
-  document.getElementById('sched-output').style.display   = 'block';
-
+  document.getElementById('sched-output').classList.add('show');
   schedRender(...schedBuildSchedule(players));
 }
-
 function schedBuildSchedule(players) {
-  const counts    = Object.fromEntries(players.map(p => [p, 0]));
-  const lastPlayed = Object.fromEntries(players.map(p => [p, -99])); // game index they last played
-
-  const schedule = SCHED_GAMES.map((game, gameIdx) => {
-    // Score each player: lower = more preferred to play this game
-    // Primary: fewest games (fairness)
-    // Secondary (soft): penalise players who played recently, boost players sitting out 3+
+  const counts = Object.fromEntries(players.map(p=>[p,0]));
+  const lastPlayed = Object.fromEntries(players.map(p=>[p,-99]));
+  const schedule = SCHED_GAMES.map((game, gi) => {
     const scored = schedShuffle([...players]).map(p => {
-      const gap      = gameIdx - lastPlayed[p]; // games since they last played
-      const gapBonus = gap >= 4 ? -0.6 : 0;    // boost if sitting out too long
-      const recency  = gap <= 1 ? 0.4 : 0;     // slight penalty if just played
+      const gap = gi - lastPlayed[p];
+      const gapBonus = gap >= 4 ? -0.6 : 0;
+      const recency = gap <= 1 ? 0.4 : 0;
       return { p, score: counts[p] + recency + gapBonus };
     });
-    scored.sort((a, b) => a.score - b.score);
-
-    const assigned = scored.slice(0, game.slots).map(s => s.p);
-    assigned.forEach(p => { counts[p]++; lastPlayed[p] = gameIdx; });
+    scored.sort((a,b)=>a.score-b.score);
+    const assigned = scored.slice(0, game.slots).map(s=>s.p);
+    assigned.forEach(p => { counts[p]++; lastPlayed[p] = gi; });
     return { ...game, assigned };
   });
-
   return [schedule, counts];
 }
-
 function schedRender(schedule, counts) {
   const gamesEl = document.getElementById('sched-games');
-  gamesEl.innerHTML = schedule.map(game => {
-    const throws = game.assigned.map((p, i) =>
+  gamesEl.innerHTML = schedule.map(g => {
+    const throws = g.assigned.map((p, i) =>
       `<div class="sched-throw-item">
         <span class="sched-pos-badge sp${i}">P${i+1}</span>
         <span class="sched-throw-name">${p}</span>
-        ${i < game.assigned.length - 1 ? '<span class="sched-arrow">→</span>' : ''}
+        ${i < g.assigned.length-1 ? '<span class="sched-arrow">→</span>' : ''}
       </div>`
     ).join('');
     return `<div class="sched-game-card">
       <div class="sched-game-top">
-        <span class="sched-game-num">${game.id}</span>
-        <span class="sched-game-name">${game.label}</span>
-        <span class="sched-type-badge st-${game.type}">${game.type}</span>
+        <span class="sched-game-num">${g.id}</span>
+        <span class="sched-game-name">${g.label}</span>
+        <span class="sched-type-badge st-${g.type}">${g.type}</span>
       </div>
       <div class="sched-throw-row">${throws}</div>
     </div>`;
   }).join('');
-
-  const maxCount = Math.max(...Object.values(counts));
-  const sorted   = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  const bars = sorted.map(([name, count]) =>
+  const maxC = Math.max(...Object.values(counts));
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const bars = sorted.map(([n,c]) =>
     `<div class="sched-bar-row">
-      <span class="sched-bar-name">${name}</span>
-      <div class="sched-bar-track"><div class="sched-bar-fill" style="width:${Math.round((count/maxCount)*100)}%"></div></div>
-      <span class="sched-bar-count">${count}</span>
+      <span class="sched-bar-name">${n}</span>
+      <div class="sched-bar-track"><div class="sched-bar-fill" style="width:${Math.round((c/maxC)*100)}%"></div></div>
+      <span class="sched-bar-count">${c}</span>
     </div>`
   ).join('');
-
-  const summary = document.getElementById('sched-summary');
-  summary.innerHTML = `<div class="sched-sum-title">Games Per Player</div>${bars}`;
+  document.getElementById('sched-summary').innerHTML =
+    `<div class="sched-sum-title">Games Per Player</div>${bars}`;
 }
-
-function schedGoBack() {
-  document.getElementById('sched-output').style.display   = 'none';
-  document.getElementById('sched-selector').style.display = 'block';
-  document.getElementById('sched-gen-btn').disabled       = schedSelected.size < 4;
-}
-
-// Wire up scheduler nav
-document.getElementById('sched-launch-btn').addEventListener('click', () => {
-  document.getElementById('setup').style.display     = 'none';
-  document.getElementById('scheduler').style.display = 'flex';
-  schedSelected.clear();
-  schedBuildRoster();
-  schedUpdateUI();
-  // Ensure selector is visible, output is hidden
-  document.getElementById('sched-selector').style.display = 'flex';
-  document.getElementById('sched-output').style.display   = 'none';
-});
-
-document.getElementById('sched-back-btn').addEventListener('click', () => {
-  document.getElementById('scheduler').style.display = 'none';
-  document.getElementById('setup').style.display     = 'flex';
-});
-
-document.getElementById('sched-gen-btn').addEventListener('click', schedGenerate);
-
-document.getElementById('sched-reshuffle-btn').addEventListener('click', () => {
-  const players = [...schedSelected];
-  if (players.length < 4) return;
-  schedRender(...schedBuildSchedule(players));
-});
-
-document.getElementById('sched-change-btn').addEventListener('click', schedGoBack);
 </script>
 </body>
 </html>
