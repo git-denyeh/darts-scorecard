@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Darts Scorecard</title>
+<title>TVYC Darts</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1192,14 +1192,275 @@ button:disabled { cursor: default; }
   .o1-pad-grid { grid-template-columns: 42px 1fr 42px; }
   .o1-shortcut { font-size: 1rem; }
 }
+
+/* DIDDLE MODAL */
+#diddle-modal {
+  display: none; position: fixed; inset: 0;
+  z-index: 400;
+  background: rgba(0,0,0,0.92);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+#diddle-modal.open { display: flex; }
+.dm-box {
+  background: var(--panel);
+  border: 2px solid var(--red);
+  border-radius: 10px;
+  padding: 24px 20px;
+  max-width: 420px; width: 100%;
+  text-align: center;
+}
+.dm-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--yellow);
+  margin-bottom: 6px;
+}
+.dm-sub {
+  font-family: var(--font-ui);
+  font-size: .9rem;
+  color: var(--text-mid);
+  margin-bottom: 20px;
+}
+.dm-teams {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.dm-team-btn {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 3.5vw, 1.3rem);
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 16px 12px;
+  border-radius: 7px;
+  border: 2px solid var(--border-light);
+  background: var(--panel2);
+  color: var(--white);
+  transition: all .12s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dm-team-btn:active { transform: scale(.97); background: var(--red-dark); border-color: var(--red-bright); }
+
+/* PIN MODAL */
+#pin-modal {
+  display: none; position: fixed; inset: 0;
+  z-index: 500;
+  background: rgba(0,0,0,0.95);
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+#pin-modal.open { display: flex; }
+.pin-box {
+  background: var(--panel);
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  padding: 24px 20px;
+  max-width: 320px; width: 100%;
+  text-align: center;
+}
+.pin-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--white); margin-bottom: 4px;
+}
+.pin-sub {
+  font-family: var(--font-ui);
+  font-size: .85rem; color: var(--text-dim);
+  margin-bottom: 16px;
+}
+.pin-display {
+  font-family: var(--font-display);
+  font-size: 2.2rem; font-weight: 700;
+  letter-spacing: 12px;
+  color: var(--yellow);
+  background: var(--panel2);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  min-height: 58px;
+  display: flex; align-items: center; justify-content: center;
+}
+.pin-error {
+  font-family: var(--font-ui);
+  font-size: .85rem; color: var(--red-bright);
+  min-height: 1.2em; margin-bottom: 10px;
+}
+.pin-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-bottom: 10px;
+}
+.pin-key {
+  font-family: var(--font-display);
+  font-size: 1.5rem; font-weight: 600;
+  background: var(--numpad-key);
+  border: none; border-radius: 6px;
+  color: var(--numpad-text);
+  padding: 14px 0;
+  box-shadow: 0 2px 0 #888;
+  transition: all .05s;
+}
+.pin-key:active { transform: translateY(2px); box-shadow: 0 0 0 #888; }
+.pin-clear {
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 700;
+  background: var(--yellow);
+  border: none; border-radius: 6px;
+  color: var(--numpad-text);
+  padding: 14px 0;
+  box-shadow: 0 2px 0 var(--yellow-dim);
+  letter-spacing: 1px;
+}
+.pin-clear:active { background: var(--yellow-dim); }
+.pin-cancel {
+  font-family: var(--font-display);
+  font-size: .9rem; font-weight: 600;
+  background: transparent; border: none;
+  color: var(--text-dim); letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 8px; padding: 8px;
+  width: 100%;
+}
+.pin-cancel:active { color: var(--text-mid); }
+
+/* ADMIN SCREEN */
+#admin-screen {
+  display: none; position: fixed; inset: 0;
+  z-index: 450;
+  background: var(--bg);
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px 18px 32px;
+  gap: 16px;
+}
+#admin-screen.open { display: flex; }
+.admin-header {
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 2px solid var(--red);
+  padding-bottom: 12px;
+}
+.admin-back {
+  font-family: var(--font-ui); font-size: .85rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  background: transparent; border: none;
+  color: var(--text-mid); padding: 4px 0;
+  flex-shrink: 0;
+}
+.admin-back:active { color: var(--yellow); }
+.admin-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--yellow); flex: 1; text-align: center;
+}
+.admin-add-btn {
+  font-family: var(--font-display); font-size: .85rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  background: var(--green); border: none;
+  border-radius: 5px; color: var(--white);
+  padding: 8px 12px; flex-shrink: 0;
+}
+.admin-add-btn:active { background: var(--green-bright); }
+.admin-player-list { display: flex; flex-direction: column; gap: 8px; }
+.admin-player-card {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.admin-player-top {
+  display: flex; align-items: center; gap: 10px;
+}
+.admin-player-name {
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 600;
+  color: var(--white); flex: 1;
+  letter-spacing: 1px;
+}
+.admin-player-name input {
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 600;
+  background: var(--panel); border: 1px solid var(--yellow);
+  border-radius: 4px; color: var(--white);
+  padding: 4px 8px; width: 100%;
+  outline: none;
+}
+.admin-del-btn {
+  font-size: 1rem; font-weight: 700;
+  background: var(--red-dark); border: 1px solid var(--red);
+  border-radius: 5px; color: var(--white);
+  width: 32px; height: 32px; flex-shrink: 0;
+}
+.admin-del-btn:active { background: var(--red); }
+.admin-player-fields {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.admin-field { display: flex; flex-direction: column; gap: 4px; }
+.admin-field-label {
+  font-family: var(--font-ui); font-size: .72rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text-dim);
+}
+.admin-field select, .admin-field input[type=number] {
+  font-family: var(--font-ui); font-size: .95rem; font-weight: 500;
+  background: var(--panel); border: 1px solid var(--border-light);
+  border-radius: 5px; color: var(--white);
+  padding: 8px 10px; outline: none;
+  appearance: none;
+}
+.admin-field select {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'><path fill='%23f5c518' d='M7 10L2 5h10z'/></svg>");
+  background-repeat: no-repeat; background-position: right 10px center;
+  padding-right: 30px; cursor: pointer;
+}
+.admin-field select option { background: #1a1a1a; color: var(--white); }
+.admin-field input[type=number]:focus,
+.admin-field select:focus { border-color: var(--yellow); }
+.admin-save-bar {
+  position: sticky; bottom: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  padding: 12px 0 0;
+}
+.admin-save-btn {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  width: 100%; padding: 14px;
+  background: var(--green); border: 2px solid var(--green-bright);
+  border-radius: 6px; color: var(--white);
+}
+.admin-save-btn:active { background: var(--green-bright); }
+.admin-change-pin-btn {
+  font-family: var(--font-ui); font-size: .82rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  background: transparent; border: 1px solid var(--border-light);
+  border-radius: 5px; color: var(--text-mid);
+  padding: 8px; width: 100%; margin-top: 8px;
+}
+.admin-change-pin-btn:active { border-color: var(--yellow); color: var(--yellow); }
+.tier-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.tier-strong { background: var(--green-bright); }
+.tier-mid    { background: var(--yellow); }
+.tier-weak   { background: var(--red-bright); }
 </style>
 </head>
 <body>
 
 <!-- SETUP -->
 <div id="setup">
-  <div class="setup-title">DARTS<br><span>SCORECARD</span></div>
-  <div class="setup-sub">Tellico Village Yacht Club</div>
+  <div class="setup-title">TVYC<br><span>DARTS</span></div>
+  <div class="setup-sub">Tellico Village Yacht Club · Dart League</div>
   <div id="resume-banner">
     <div class="rb-title">⏸ Match In Progress</div>
     <div class="rb-detail" id="rb-detail"></div>
@@ -1231,6 +1492,42 @@ button:disabled { cursor: default; }
   </div>
   <button class="start-btn" id="start-btn">Start Game</button>
   <button class="sched-launch-btn" id="sched-launch-btn">📋 Schedule Tonight's Players</button>
+  <button class="sched-launch-btn" id="admin-launch-btn" style="margin-top:-6px;">⚙️ Player Admin</button>
+</div>
+
+<!-- DIDDLE MODAL -->
+<div id="diddle-modal">
+  <div class="dm-box">
+    <div class="dm-title">🎯 Diddle</div>
+    <div class="dm-sub">Who won closest to the bull?</div>
+    <div class="dm-teams" id="dm-teams"></div>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div id="pin-modal">
+  <div class="pin-box">
+    <div class="pin-title">Admin Access</div>
+    <div class="pin-sub">Enter PIN to continue</div>
+    <div class="pin-display" id="pin-display">&#8211;&#8211;&#8211;&#8211;</div>
+    <div class="pin-error" id="pin-error"></div>
+    <div class="pin-grid" id="pin-grid"></div>
+    <button class="pin-cancel" id="pin-cancel">Cancel</button>
+  </div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div id="admin-screen">
+  <div class="admin-header">
+    <button class="admin-back" id="admin-back">&#8592; Back</button>
+    <div class="admin-title">Player Admin</div>
+    <button class="admin-add-btn" id="admin-add-btn">+ Add</button>
+  </div>
+  <div class="admin-player-list" id="admin-player-list"></div>
+  <div class="admin-save-bar">
+    <button class="admin-save-btn" id="admin-save-btn">Save Changes</button>
+    <button class="admin-change-pin-btn" id="admin-change-pin-btn">Change PIN</button>
+  </div>
 </div>
 
 <!-- SCHEDULER -->
@@ -1385,11 +1682,53 @@ const TEAMS = [
   "Guns & Hoses","Hit or Miss","Pointless","Rat Pack",
   "Shooting Stars","Snipers","Snail Darters","We're Sexy and we Throw It"
 ];
-const ROSTER = [
-  "Chelsea","Chris","Christian","Diana",
-  "Jack","Jamie","Jared","Jeff","Justin",
-  "Louis","Matt","Rick","Tom"
+
+// Default player data — loaded from localStorage if admin has edited
+const DEFAULT_PLAYER_DATA = [
+  { name:"Tom",       skill:8.5, ratingCount:4, pref:null },
+  { name:"Rick",      skill:7.8, ratingCount:4, pref:null },
+  { name:"Christian", skill:6.8, ratingCount:4, pref:null },
+  { name:"Louis",     skill:6.8, ratingCount:4, pref:null },
+  { name:"Justin",    skill:6.6, ratingCount:5, pref:null },
+  { name:"Jeff",      skill:6.0, ratingCount:2, pref:null },
+  { name:"Jack",      skill:5.6, ratingCount:5, pref:null },
+  { name:"Chelsea",   skill:5.2, ratingCount:5, pref:null },
+  { name:"Diana",     skill:4.5, ratingCount:4, pref:null },
+  { name:"Jared",     skill:4.3, ratingCount:3, pref:"Cricket" },
+  { name:"Matt",      skill:4.3, ratingCount:4, pref:null },
+  { name:"Chris",     skill:3.8, ratingCount:5, pref:"01" },
+  { name:"Jamie",     skill:3.5, ratingCount:2, pref:null },
 ];
+const PLAYER_DATA_KEY = 'dartaholics-players';
+const ADMIN_PIN_KEY   = 'dartaholics-pin';
+const DEFAULT_PIN     = '7425';
+
+function loadPlayerData() {
+  try {
+    const raw = localStorage.getItem(PLAYER_DATA_KEY);
+    return raw ? JSON.parse(raw) : DEFAULT_PLAYER_DATA.map(p=>({...p}));
+  } catch(e) { return DEFAULT_PLAYER_DATA.map(p=>({...p})); }
+}
+function savePlayerData(data) {
+  try { localStorage.setItem(PLAYER_DATA_KEY, JSON.stringify(data)); } catch(e) {}
+}
+function getAdminPin() {
+  return localStorage.getItem(ADMIN_PIN_KEY) || DEFAULT_PIN;
+}
+function setAdminPin(pin) {
+  try { localStorage.setItem(ADMIN_PIN_KEY, pin); } catch(e) {}
+}
+
+// Confidence-weighted skill: low ratingCount pulls toward midpoint (5.0)
+function weightedSkill(player) {
+  const mid = 5.0;
+  const confidence = Math.min(player.ratingCount / 5, 1.0); // full confidence at 5+ ratings
+  return player.skill * confidence + mid * (1 - confidence);
+}
+
+let playerData = loadPlayerData();
+// Keep ROSTER in sync for scheduler UI
+function getRoster() { return playerData.map(p => p.name); }
 const SCHED_GAMES = [
   { id:1, label:"Doubles Cricket", type:"Cricket", slots:2 },
   { id:2, label:"Doubles Cricket", type:"Cricket", slots:2 },
@@ -1563,8 +1902,28 @@ document.getElementById('start-btn').addEventListener('click', () => {
   const t1 = document.getElementById('team1-select').value;
   const t2 = document.getElementById('team2-select').value;
   if (t1 === t2) { alert('Pick two different teams.'); return; }
-  startMatch([t1, t2]);
+  showDiddleModal(t1, t2);
 });
+
+/* DIDDLE MODAL */
+function showDiddleModal(t1, t2) {
+  const container = document.getElementById('dm-teams');
+  container.innerHTML = '';
+  [t1, t2].forEach(team => {
+    const b = document.createElement('button');
+    b.className = 'dm-team-btn';
+    b.textContent = team;
+    b.addEventListener('click', () => {
+      // Winner = left (Player 0), Loser = right (Player 1)
+      const winner = team;
+      const loser  = team === t1 ? t2 : t1;
+      document.getElementById('diddle-modal').classList.remove('open');
+      startMatch([winner, loser]);
+    });
+    container.appendChild(b);
+  });
+  document.getElementById('diddle-modal').classList.add('open');
+}
 
 /* MATCH */
 function startMatch(names) {
@@ -2624,6 +2983,7 @@ function goSetup() {
   document.getElementById('finish-modal').classList.remove('open');
   document.getElementById('game').classList.remove('active');
   document.getElementById('scheduler').classList.remove('show');
+  document.getElementById('admin-screen').classList.remove('open');
   document.getElementById('resume-banner').classList.remove('show');
   document.getElementById('setup').style.display = 'flex';
 }
@@ -2686,17 +3046,28 @@ document.getElementById('sched-change-btn').addEventListener('click', () => {
   document.getElementById('sched-selector').style.display = 'flex';
 });
 
+function tierClass(name) {
+  const pd = playerData.find(p=>p.name===name);
+  const ws = pd ? weightedSkill(pd) : 5.0;
+  return ws >= 6.0 ? 'tier-strong' : ws >= 5.0 ? 'tier-mid' : 'tier-weak';
+}
+function tierDot(name) {
+  return `<span class="tier-dot ${tierClass(name)}"></span>`;
+}
+
 function schedBuildRoster() {
   const grid = document.getElementById('sched-roster-grid');
   grid.innerHTML = '';
-  ROSTER.forEach(name => {
+  playerData.forEach(pd => {
     const b = document.createElement('button');
     b.className = 'sched-player-btn';
-    b.dataset.name = name;
-    b.textContent = name;
+    b.dataset.name = pd.name;
+    b.style.display = 'flex';
+    b.style.alignItems = 'center';
+    b.innerHTML = `${tierDot(pd.name)}${pd.name}`;
     b.addEventListener('click', () => {
-      if (schedSelected.has(name)) schedSelected.delete(name);
-      else schedSelected.add(name);
+      if (schedSelected.has(pd.name)) schedSelected.delete(pd.name);
+      else schedSelected.add(pd.name);
       schedUpdateUI();
     });
     grid.appendChild(b);
@@ -2730,54 +3101,307 @@ function schedGenerate() {
   document.getElementById('sched-output').classList.add('show');
   schedRender(...schedBuildSchedule(players));
 }
+
+// Returns true if game type matches player preference
+function prefMatches(playerName, gameType) {
+  const pd = playerData.find(p => p.name === playerName);
+  if (!pd || !pd.pref) return false;
+  if (pd.pref === '01') return gameType === '301' || gameType === '501';
+  return pd.pref === gameType;
+}
+
 function schedBuildSchedule(players) {
-  const counts = Object.fromEntries(players.map(p=>[p,0]));
-  const lastPlayed = Object.fromEntries(players.map(p=>[p,-99]));
+  const counts       = Object.fromEntries(players.map(p=>[p,0]));
+  const lastPlayed   = Object.fromEntries(players.map(p=>[p,-99]));
+  const pairedWith   = Object.fromEntries(players.map(p=>[p, new Set()]));
+
+  // Relative skill tiers for tonight's present players only
+  const skills = Object.fromEntries(
+    players.map(name => {
+      const pd = playerData.find(p=>p.name===name);
+      return [name, pd ? weightedSkill(pd) : 5.0];
+    })
+  );
+  const skillVals = Object.values(skills);
+  skillVals.sort((a,b)=>a-b);
+  const lo = skillVals[Math.floor(skillVals.length * 0.33)];
+  const hi = skillVals[Math.floor(skillVals.length * 0.67)];
+  const tier = name => skills[name] >= hi ? 'strong' : skills[name] <= lo ? 'weak' : 'mid';
+
   const schedule = SCHED_GAMES.map((game, gi) => {
-    const scored = schedShuffle([...players]).map(p => {
+    // Score each player for candidacy in this slot
+    const candidates = schedShuffle([...players]).map(p => {
       const gap = gi - lastPlayed[p];
-      const gapBonus = gap >= 4 ? -0.6 : 0;
-      const recency = gap <= 1 ? 0.4 : 0;
-      return { p, score: counts[p] + recency + gapBonus };
+      let score = counts[p];                          // fairness base
+      if (gap <= 1) score += 0.5;                     // recency penalty
+      if (gap >= 4) score -= 0.6;                     // gap bonus
+      if (prefMatches(p, game.type)) score -= 0.4;    // preference bonus
+      // Strong players get a bias toward more games (lower score = more likely picked)
+      const ws = skills[p] || 5.0;
+      score -= (ws - 5.0) * 0.08;                     // e.g. skill 8 = -0.24 bias
+      return { p, score };
     });
-    scored.sort((a,b)=>a.score-b.score);
-    const assigned = scored.slice(0, game.slots).map(s=>s.p);
+    candidates.sort((a,b)=>a.score-b.score);
+
+    // From the fairness-sorted list, pick a group that satisfies strong+weak rule
+    // Strategy: try to include at most 1 weak player per group
+    let assigned = [];
+    const slots = game.slots;
+
+    // Greedy: take top candidates, but if 2+ weak would be added, defer the 2nd weak
+    const pool = candidates.map(c=>c.p);
+    const weakPool   = pool.filter(p => tier(p) === 'weak');
+    const nonWeakPool= pool.filter(p => tier(p) !== 'weak');
+
+    if (weakPool.length === 0 || slots <= 1) {
+      // No weak players available tonight or only 1 slot — just use fairness order
+      assigned = pool.slice(0, slots);
+    } else {
+      // Allow exactly 1 weak player in the group; fill rest from non-weak pool
+      // Also avoid re-pairing the same two players if possible
+      const weak1 = weakPool[0]; // least-played weak player (already sorted by fairness)
+
+      // Sort non-weak by score, then by re-pair penalty
+      const nonWeakSorted = nonWeakPool.slice().sort((a,b) => {
+        const aScore = candidates.find(c=>c.p===a).score
+          + (pairedWith[a].has(weak1) ? 0.3 : 0);
+        const bScore = candidates.find(c=>c.p===b).score
+          + (pairedWith[b].has(weak1) ? 0.3 : 0);
+        return aScore - bScore;
+      });
+
+      assigned = [weak1, ...nonWeakSorted.slice(0, slots - 1)];
+
+      // If we don't have enough non-weak, fill with remaining weak (unavoidable)
+      if (assigned.length < slots) {
+        const extra = weakPool.filter(p=>p!==weak1);
+        assigned = [...assigned, ...extra.slice(0, slots - assigned.length)];
+      }
+    }
+
+    // Update pair tracking
+    for (let i = 0; i < assigned.length; i++) {
+      for (let j = i+1; j < assigned.length; j++) {
+        pairedWith[assigned[i]].add(assigned[j]);
+        pairedWith[assigned[j]].add(assigned[i]);
+      }
+    }
     assigned.forEach(p => { counts[p]++; lastPlayed[p] = gi; });
     return { ...game, assigned };
   });
-  return [schedule, counts];
+  return [schedule, counts, tier];
 }
-function schedRender(schedule, counts) {
+
+function schedRender(schedule, counts, tierFn) {
   const gamesEl = document.getElementById('sched-games');
   gamesEl.innerHTML = schedule.map(g => {
-    const throws = g.assigned.map((p, i) =>
-      `<div class="sched-throw-item">
-        <span class="sched-pos-badge sp${i}">P${i+1}</span>
-        <span class="sched-throw-name">${p}</span>
-        ${i < g.assigned.length-1 ? '<span class="sched-arrow">→</span>' : ''}
-      </div>`
-    ).join('');
+    const players = g.assigned.map(p => {
+      const hasPref = prefMatches(p, g.type);
+      return `<span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
+        <span class="tier-dot ${tierClass(p)}"></span><span class="sched-throw-name">${p}</span>${hasPref ? '<span style="color:var(--yellow);font-size:.75rem;line-height:1">★</span>' : ''}
+      </span>`;
+    }).join('<span class="sched-arrow" style="margin:0 6px;color:var(--border-light)">|</span>');
     return `<div class="sched-game-card">
       <div class="sched-game-top">
         <span class="sched-game-num">${g.id}</span>
         <span class="sched-game-name">${g.label}</span>
         <span class="sched-type-badge st-${g.type}">${g.type}</span>
       </div>
-      <div class="sched-throw-row">${throws}</div>
+      <div class="sched-throw-row" style="flex-wrap:wrap;gap:6px 0">${players}</div>
     </div>`;
   }).join('');
   const maxC = Math.max(...Object.values(counts));
   const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   const bars = sorted.map(([n,c]) =>
     `<div class="sched-bar-row">
-      <span class="sched-bar-name">${n}</span>
+      <span style="display:inline-flex;align-items:center;gap:6px" class="sched-bar-name">
+        <span class="tier-dot ${tierClass(n)}"></span>${n}
+      </span>
       <div class="sched-bar-track"><div class="sched-bar-fill" style="width:${Math.round((c/maxC)*100)}%"></div></div>
       <span class="sched-bar-count">${c}</span>
     </div>`
   ).join('');
   document.getElementById('sched-summary').innerHTML =
-    `<div class="sched-sum-title">Games Per Player</div>${bars}`;
+    `<div class="sched-sum-title">Games Per Player</div>
+     <div style="font-family:var(--font-ui);font-size:.75rem;color:var(--text-dim);margin-bottom:8px">
+       ● <span style="color:var(--green-bright)">●</span> Strong &nbsp;
+       <span style="color:var(--yellow)">●</span> Mid &nbsp;
+       <span style="color:var(--red-bright)">●</span> Weaker &nbsp;|&nbsp; ★ preferred game
+     </div>${bars}`;
 }
+
+/* PIN + ADMIN */
+let _pinCallback = null;
+let _pinValue = '';
+
+function showPinModal(onSuccess) {
+  _pinCallback = onSuccess;
+  _pinValue = '';
+  renderPinDisplay();
+  document.getElementById('pin-error').textContent = '';
+  buildPinGrid();
+  document.getElementById('pin-modal').classList.add('open');
+}
+
+function buildPinGrid() {
+  const grid = document.getElementById('pin-grid');
+  grid.innerHTML = '';
+  [1,2,3,4,5,6,7,8,9].forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'pin-key'; b.textContent = n;
+    b.addEventListener('click', () => pinDigit(String(n)));
+    grid.appendChild(b);
+  });
+  const clr = document.createElement('button');
+  clr.className = 'pin-clear'; clr.textContent = 'CLR';
+  clr.addEventListener('click', () => { _pinValue = ''; renderPinDisplay(); document.getElementById('pin-error').textContent = ''; });
+  grid.appendChild(clr);
+  const z = document.createElement('button');
+  z.className = 'pin-key'; z.textContent = '0';
+  z.addEventListener('click', () => pinDigit('0'));
+  grid.appendChild(z);
+  // backspace
+  const bk = document.createElement('button');
+  bk.className = 'pin-key'; bk.textContent = '⌫';
+  bk.addEventListener('click', () => { _pinValue = _pinValue.slice(0,-1); renderPinDisplay(); });
+  grid.appendChild(bk);
+}
+
+function pinDigit(d) {
+  if (_pinValue.length >= 4) return;
+  _pinValue += d;
+  renderPinDisplay();
+  if (_pinValue.length === 4) {
+    setTimeout(() => {
+      if (_pinValue === getAdminPin()) {
+        document.getElementById('pin-modal').classList.remove('open');
+        _pinValue = '';
+        if (_pinCallback) _pinCallback();
+      } else {
+        document.getElementById('pin-error').textContent = 'Incorrect PIN';
+        _pinValue = '';
+        renderPinDisplay();
+      }
+    }, 150);
+  }
+}
+
+function renderPinDisplay() {
+  const dots = _pinValue.split('').map(()=>'●').join(' ');
+  const empty = Array(4 - _pinValue.length).fill('–').join(' ');
+  document.getElementById('pin-display').textContent =
+    (dots + (dots && empty ? ' ' : '') + empty);
+}
+
+document.getElementById('pin-cancel').addEventListener('click', () => {
+  document.getElementById('pin-modal').classList.remove('open');
+  _pinValue = '';
+});
+
+document.getElementById('admin-launch-btn').addEventListener('click', () => {
+  showPinModal(openAdminScreen);
+});
+
+/* ADMIN SCREEN */
+let adminDraft = []; // working copy during admin session
+
+function openAdminScreen() {
+  adminDraft = playerData.map(p=>({...p}));
+  renderAdminList();
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('admin-screen').classList.add('open');
+}
+
+function renderAdminList() {
+  const list = document.getElementById('admin-player-list');
+  list.innerHTML = '';
+  adminDraft.forEach((pd, idx) => {
+    const card = document.createElement('div');
+    card.className = 'admin-player-card';
+    card.innerHTML = `
+      <div class="admin-player-top">
+        <div class="admin-player-name">
+          <input type="text" value="${pd.name}" data-idx="${idx}" class="admin-name-input" placeholder="Name" />
+        </div>
+        <button class="admin-del-btn" data-idx="${idx}">✕</button>
+      </div>
+      <div class="admin-player-fields">
+        <div class="admin-field">
+          <div class="admin-field-label">Skill (1–10)</div>
+          <input type="number" min="1" max="10" step="0.1" value="${pd.skill}" data-idx="${idx}" class="admin-skill-input" />
+        </div>
+        <div class="admin-field">
+          <div class="admin-field-label">Game Preference</div>
+          <select data-idx="${idx}" class="admin-pref-input">
+            <option value="">No preference</option>
+            <option value="Cricket" ${pd.pref==='Cricket'?'selected':''}>Cricket</option>
+            <option value="01"      ${pd.pref==='01'?'selected':''}>01 (301/501)</option>
+          </select>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  // Wire up live changes
+  list.querySelectorAll('.admin-name-input').forEach(el => {
+    el.addEventListener('change', e => {
+      adminDraft[+e.target.dataset.idx].name = e.target.value.trim();
+    });
+  });
+  list.querySelectorAll('.admin-skill-input').forEach(el => {
+    el.addEventListener('change', e => {
+      adminDraft[+e.target.dataset.idx].skill = parseFloat(e.target.value) || 5.0;
+    });
+  });
+  list.querySelectorAll('.admin-pref-input').forEach(el => {
+    el.addEventListener('change', e => {
+      adminDraft[+e.target.dataset.idx].pref = e.target.value || null;
+    });
+  });
+  list.querySelectorAll('.admin-del-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const idx = +e.target.dataset.idx;
+      if (!confirm(`Remove ${adminDraft[idx].name}?`)) return;
+      adminDraft.splice(idx, 1);
+      renderAdminList();
+    });
+  });
+}
+
+document.getElementById('admin-add-btn').addEventListener('click', () => {
+  adminDraft.push({ name:'New Player', skill:5.0, ratingCount:1, pref:null });
+  renderAdminList();
+  // Scroll to bottom to show new card
+  document.getElementById('admin-screen').scrollTop = 99999;
+});
+
+document.getElementById('admin-save-btn').addEventListener('click', () => {
+  // Validate: no empty names, no duplicate names
+  const names = adminDraft.map(p=>p.name.trim()).filter(Boolean);
+  if (names.length !== adminDraft.length) { alert('All players must have a name.'); return; }
+  const unique = new Set(names);
+  if (unique.size !== names.length) { alert('Duplicate player names found.'); return; }
+  playerData = adminDraft.map(p=>({...p, name: p.name.trim()}));
+  savePlayerData(playerData);
+  document.getElementById('admin-screen').classList.remove('open');
+  document.getElementById('setup').style.display = 'flex';
+  alert('Saved!');
+});
+
+document.getElementById('admin-back').addEventListener('click', () => {
+  if (confirm('Discard unsaved changes?')) {
+    document.getElementById('admin-screen').classList.remove('open');
+    document.getElementById('setup').style.display = 'flex';
+  }
+});
+
+document.getElementById('admin-change-pin-btn').addEventListener('click', () => {
+  const np = prompt('Enter new 4-digit PIN:');
+  if (!np) return;
+  if (!/^\d{4}$/.test(np)) { alert('PIN must be exactly 4 digits.'); return; }
+  setAdminPin(np);
+  alert('PIN updated.');
+});
 </script>
 </body>
 </html>
