@@ -54,6 +54,7 @@ tr:last-child td{border-bottom:none}
 .shot:last-child{border-bottom:none}
 .shot strong{color:var(--cream)}
 .empty{color:var(--dim);font-style:italic;padding:8px 0}
+.note{color:var(--dim);font-size:.82rem;margin-top:8px;line-height:1.35}
 .toast{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
   background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;
@@ -119,7 +120,7 @@ footer{text-align:center;color:var(--dim);font-size:.75rem;margin-top:24px}
   }
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      .replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
   }
 
   let season = null;
@@ -137,23 +138,28 @@ footer{text-align:center;color:var(--dim);font-size:.75rem;margin-top:24px}
   }
 
   const teams = season.teams || [];
+  const seedNote = season.seed && season.seed.asOfWeek
+    ? '<div class="note">Through Week ' + season.seed.asOfWeek +
+      (season.seed.asOfDate ? ' (' + esc(season.seed.asOfDate) + ')' : '') +
+      ' · seeded from Kevin&Ray organizer emails</div>'
+    : '';
   if (!teams.length) {
     document.getElementById('standings-body').innerHTML = '<div class="empty">No matches submitted yet.</div>';
   } else {
-    let html = '<table><thead><tr><th class="rank">#</th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num">GW</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th class="rank">#</th><th>Team</th><th class="num">W</th><th class="num">L</th></tr></thead><tbody>';
     teams.forEach((t, i) => {
       html += '<tr><td class="rank">' + (i + 1) + '</td><td class="name">' + esc(t.name) +
         '</td><td class="num wl">' + fmtWL(t.wins) + '</td><td class="num">' + fmtWL(t.losses) +
-        '</td><td class="num">' + fmtWL(t.gameWins) + '</td></tr>';
+        '</td></tr>';
     });
-    html += '</tbody></table>';
+    html += '</tbody></table>' + seedNote;
     document.getElementById('standings-body').innerHTML = html;
   }
 
   const week = (season.weeks && season.weeks[0]) || null;
-  if (!week || !(week.results || []).length) {
+  if (!week) {
     document.getElementById('week-body').innerHTML = '<div class="empty">No results this week yet.</div>';
-  } else {
+  } else if ((week.results || []).length) {
     document.getElementById('week-body').innerHTML =
       '<div class="sub" style="margin-bottom:8px">' + esc(week.dateLabel || week.date) + '</div>' +
       week.results.map(r =>
@@ -162,14 +168,29 @@ footer{text-align:center;color:var(--dim);font-size:.75rem;margin-top:24px}
         '<span class="score">' + fmtWL(r.wins.left) + ' – ' + fmtWL(r.wins.right) + '</span>' +
         '<span>' + esc(r.rightName) + '</span></div>'
       ).join('');
+  } else {
+    let body = '<div class="sub" style="margin-bottom:8px">' + esc(week.dateLabel || week.date) + '</div>';
+    if (week.source === 'kevin-ray-email') {
+      body += '<div class="empty">Per-match board scores not recorded for this week.</div>' +
+        '<div class="note">Standings and Great Shots come from the Kevin&Ray organizer email. Individual match lineups were not invented.</div>';
+    } else {
+      body += '<div class="empty">No board results posted for this week yet.</div>';
+    }
+    document.getElementById('week-body').innerHTML = body;
   }
 
   const shots = (week && week.greatShots) || [];
-  if (!shots.length) {
-    document.getElementById('shots-body').innerHTML = '<div class="empty">None recorded this week.</div>';
-  } else {
+  const gst = week && week.greatShotsText;
+  if (shots.length) {
     document.getElementById('shots-body').innerHTML =
       shots.map(s => '<div class="shot">' + shotLine(s) + '</div>').join('');
+  } else if (gst && (gst.cricket || gst.oh1)) {
+    let html = '';
+    if (gst.cricket) html += '<div class="shot"><strong>Cricket</strong> — ' + esc(gst.cricket) + '</div>';
+    if (gst.oh1) html += '<div class="shot"><strong>\'01</strong> — ' + esc(gst.oh1) + '</div>';
+    document.getElementById('shots-body').innerHTML = html;
+  } else {
+    document.getElementById('shots-body').innerHTML = '<div class="empty">None recorded this week.</div>';
   }
 
   document.getElementById('copy-digest').addEventListener('click', () => {
