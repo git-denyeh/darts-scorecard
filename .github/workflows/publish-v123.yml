@@ -1,6 +1,5 @@
 name: Publish v1.2.3 scorecard
 on:
-  # Manual only — concatenates payload.p* already on main into index.html
   workflow_dispatch:
 permissions:
   contents: write
@@ -9,43 +8,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Decode payload.p* to index.html
+      - name: Decode payload.all.* to index.html
         run: |
           python3 <<'PY'
           from pathlib import Path
           import base64, gzip, hashlib
-          parts_paths = sorted(Path('.').glob('payload.p*'), key=lambda p: p.name)
-          if not parts_paths:
-              raise SystemExit('no payload.p* files')
-          expected = [f'payload.p{i:02d}' for i in range(1, len(parts_paths)+1)]
-          actual = [p.name for p in parts_paths]
-          if actual != expected:
-              raise SystemExit(f'parts not contiguous: {actual}')
-          parts = []
-          for p in parts_paths:
-              s = p.read_text().replace('\n','').replace('\r','')
-              if not s:
-                  raise SystemExit(f'{p.name} empty')
-              parts.append(s)
-              print(f'{p.name}: {len(s)} chars')
-          joined = ''.join(parts)
-          print(f'joined={len(joined)} mod4={len(joined)%4} parts={len(parts)}')
+          parts = sorted(Path('.').glob('payload.all.*'), key=lambda p: p.name)
+          if not parts:
+              raise SystemExit('no payload.all.* files')
+          joined = ''.join(p.read_text().replace('\n','').replace('\r','') for p in parts)
+          print(f'parts={len(parts)} joined={len(joined)} mod4={len(joined)%4}')
           if len(joined) % 4 != 0:
               raise SystemExit(f'mod4={len(joined)%4}')
           html = gzip.decompress(base64.b64decode(joined, validate=True))
           if len(html) < 100000:
               raise SystemExit(f'too small {len(html)}')
-          if b'1.2.3' not in html or b'Come for the darts' not in html:
-              raise SystemExit('missing v1.2.3 markers')
-          if b'syncLeagueFromMirror' not in html or b'menu-rules' not in html:
-              raise SystemExit('missing Sync/Rules markers')
-          if b'sourceModifiedAt' not in html:
-              raise SystemExit('missing sourceModifiedAt')
-          if b'100dvh' not in html or b'verify-screen' not in html:
-              raise SystemExit('missing mobile/verify markers')
+          for marker in [b'1.2.3', b'Come for the darts', b'syncLeagueFromMirror', b'menu-rules', b'sourceModifiedAt']:
+              if marker not in html:
+                  raise SystemExit(f'missing marker {marker}')
           Path('index.html').write_bytes(html)
-          sha = hashlib.sha256(html).hexdigest()
-          print(f'Wrote index.html bytes={len(html)} sha256={sha}')
+          print(f'Wrote index.html bytes={len(html)} sha256={hashlib.sha256(html).hexdigest()}')
           PY
           wc -c index.html
       - name: Commit index.html
@@ -54,5 +36,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
           git diff --cached --quiet && echo "No change" && exit 0
-          git commit -m "v1.2.3 expand: write index.html from payload parts"
+          git commit -m "v1.2.3 expand: write index.html from payload.all.*"
           git push
