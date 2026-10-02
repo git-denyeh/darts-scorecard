@@ -1,0 +1,27 @@
+name: Expand scorecard
+on:
+  push:
+    paths:
+      - 'payload.p*'
+      - '.github/workflows/expand-scorecard.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  expand:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode payload to index.html
+        run: |
+          cat payload.p01 payload.p02 payload.p03 payload.p04 payload.p05 payload.p06 payload.p07 payload.p08 payload.p09 payload.p10 payload.p11 payload.p12 | base64 -d | gzip -dc > index.html
+          wc -c index.html
+          grep -F '1.0.4' index.html | head -1
+      - name: Commit index.html
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && echo "No change" && exit 0
+          git commit -m "v1.0.4 expand: count labels + doubles throwers for mobile test"
+          git push
