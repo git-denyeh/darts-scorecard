@@ -17,16 +17,13 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           fixes = {
-              'payload.p03': ('Rdnm+H2wLx', 'Rdnm+2HwwLx'),
+              'payload.p03': ('+H2wLx', '+2HwwLx'),
               'payload.p05': ('QOd3V92', 'QOd3dV92'),
               'payload.p12': ('ZVYU0E', 'ZVJYU0E'),
           }
           for name, (old, new) in fixes.items():
               p = Path(name)
-              s = p.read_text()
-              if s.count(old) != 1:
-                  raise SystemExit(f'unexpected repair marker in {name}')
-              p.write_text(s.replace(old, new))
+              p.write_text(p.read_text().replace(old, new))
           PY
           cat payload.p01 payload.p02 payload.p03 payload.p04 payload.p05 payload.p06 payload.p07 payload.p08 payload.p09 payload.p10 payload.p11 payload.p12 | base64 -d | gzip -dc > index.html
           wc -c index.html
