@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TVYC Darts — Standings</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#140e0a; --panel:#1c1410; --panel2:#2a1f16; --border:#3d2e22;
+  --yellow:#c9a227; --cream:#f3e6c8; --text:#f5efe0; --mid:#c4b59a; --dim:#8a7a62;
+  --green:#3d7a4e; --red:#8b2a3e;
+  --font-d:'Oswald',sans-serif; --font-u:'Roboto Condensed',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font-u); background:
+    radial-gradient(ellipse 120% 80% at 50% -10%, rgba(232,168,56,.14), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(107,30,46,.18), transparent 50%),
+    var(--bg);
+  color:var(--text); min-height:100dvh; padding:16px; padding-bottom:48px;
+}
+.wrap{max-width:720px;margin:0 auto}
+header{text-align:center;margin-bottom:20px}
+h1{font-family:var(--font-d);letter-spacing:3px;font-size:1.6rem;color:var(--yellow)}
+.sub{color:var(--mid);font-size:.9rem;margin-top:4px}
+.nav{display:flex;gap:10px;justify-content:center;margin:12px 0 20px;flex-wrap:wrap}
+.nav a,.btn{
+  font-family:var(--font-u); font-size:.8rem; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; text-decoration:none; color:var(--cream);
+  border:1px solid var(--border); background:var(--panel2); padding:8px 14px; border-radius:6px;
+  cursor:pointer;
+}
+.btn.primary{background:var(--yellow);color:#1c1410;border-color:var(--yellow)}
+.btn:disabled{opacity:.45;cursor:default}
+.card{
+  background:var(--panel); border:1px solid var(--border); border-radius:8px;
+  padding:14px 16px; margin-bottom:16px;
+}
+.card h2{font-family:var(--font-d);letter-spacing:2px;color:var(--yellow);font-size:1.05rem;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--dim);font-weight:600;font-size:.72rem;letter-spacing:1px;text-transform:uppercase}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+.rank{color:var(--dim);width:2rem}
+.name{font-weight:600}
+.wl{color:var(--cream);font-weight:700}
+.result-row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+.result-row:last-child{border-bottom:none}
+.bd{color:var(--dim);min-width:3rem}
+.score{font-weight:700;color:var(--yellow);white-space:nowrap}
+.shot{padding:6px 0;border-bottom:1px solid var(--border);font-size:.88rem;color:var(--mid)}
+.shot:last-child{border-bottom:none}
+.shot strong{color:var(--cream)}
+.empty{color:var(--dim);font-style:italic;padding:8px 0}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--green);color:#fff;padding:10px 18px;border-radius:8px;
+  font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;
+}
+.toast.show{opacity:1}
+.err{color:var(--red);font-size:.85rem;margin-top:8px}
+footer{text-align:center;color:var(--dim);font-size:.75rem;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>TVYC DARTS</h1>
+    <div class="sub">Tellico Village Yacht Club · 2026–27 Standings</div>
+  </header>
+  <div class="nav">
+    <a href="./">Scorecard</a>
+    <button type="button" class="btn primary" id="copy-digest">Copy week digest</button>
+  </div>
+
+  <section class="card" id="standings-card">
+    <h2>Season standings</h2>
+    <div id="standings-body"><div class="empty">Loading…</div></div>
+  </section>
+
+  <section class="card" id="week-card">
+    <h2>This week</h2>
+    <div id="week-body"><div class="empty">Loading…</div></div>
+  </section>
+
+  <section class="card" id="shots-card">
+    <h2>Great Shots — this week</h2>
+    <div id="shots-body"><div class="empty">Loading…</div></div>
+  </section>
+
+  <footer>Scores submit from the scorecard after Verify · schema tvyc-darts-night/v1</footer>
+</div>
+<div class="toast" id="toast">Copied ✓</div>
+<script src="scripts/rollup-season.js"></script>
+<script>
+(async function () {
+  const toast = document.getElementById('toast');
+  function showToast(msg) {
+    toast.textContent = msg || 'Copied ✓';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+  function fmtWL(n) {
+    if (n == null) return '0';
+    return (n % 1 === 0) ? String(n) : n.toFixed(1);
+  }
+  function shotLine(s) {
+    let bit = '<strong>' + esc(s.player || '?') + '</strong>';
+    if (s.kind === 'ton') bit += ' — ' + s.value;
+    else if (s.kind === 'marks') bit += ' — ' + s.value + ' count' + (s.detail ? ' (' + esc(s.detail) + ')' : '');
+    else if (s.kind === 'bulls') bit += ' — ' + s.value + ' bulls';
+    else if (s.kind === 'highOut') bit += ' — out ' + s.value;
+    else if (s.kind === 'firstOut') bit += ' — first out ' + s.value;
+    else bit += ' — ' + esc(s.kind || '') + ' ' + (s.value || '');
+    if (s.board) bit += ' <span style="color:var(--dim)">[Bd ' + esc(s.board) + ']</span>';
+    return bit;
+  }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  let season = null;
+  try {
+    const res = await fetch('stats/2026-27/season.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    season = await res.json();
+  } catch (e) {
+    document.getElementById('standings-body').innerHTML =
+      '<div class="empty">No season data yet. Submit a night from the scorecard.</div><div class="err">' + esc(e.message) + '</div>';
+    document.getElementById('week-body').innerHTML = '<div class="empty">—</div>';
+    document.getElementById('shots-body').innerHTML = '<div class="empty">—</div>';
+    document.getElementById('copy-digest').disabled = true;
+    return;
+  }
+
+  const teams = season.teams || [];
+  if (!teams.length) {
+    document.getElementById('standings-body').innerHTML = '<div class="empty">No matches submitted yet.</div>';
+  } else {
+    let html = '<table><thead><tr><th class="rank">#</th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num">GW</th></tr></thead><tbody>';
+    teams.forEach((t, i) => {
+      html += '<tr><td class="rank">' + (i + 1) + '</td><td class="name">' + esc(t.name) +
+        '</td><td class="num wl">' + fmtWL(t.wins) + '</td><td class="num">' + fmtWL(t.losses) +
+        '</td><td class="num">' + fmtWL(t.gameWins) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('standings-body').innerHTML = html;
+  }
+
+  const week = (season.weeks && season.weeks[0]) || null;
+  if (!week || !(week.results || []).length) {
+    document.getElementById('week-body').innerHTML = '<div class="empty">No results this week yet.</div>';
+  } else {
+    document.getElementById('week-body').innerHTML =
+      '<div class="sub" style="margin-bottom:8px">' + esc(week.dateLabel || week.date) + '</div>' +
+      week.results.map(r =>
+        '<div class="result-row"><span class="bd">Bd ' + esc(r.board || '?') + '</span>' +
+        '<span>' + esc(r.leftName) + '</span>' +
+        '<span class="score">' + fmtWL(r.wins.left) + ' – ' + fmtWL(r.wins.right) + '</span>' +
+        '<span>' + esc(r.rightName) + '</span></div>'
+      ).join('');
+  }
+
+  const shots = (week && week.greatShots) || [];
+  if (!shots.length) {
+    document.getElementById('shots-body').innerHTML = '<div class="empty">None recorded this week.</div>';
+  } else {
+    document.getElementById('shots-body').innerHTML =
+      shots.map(s => '<div class="shot">' + shotLine(s) + '</div>').join('');
+  }
+
+  document.getElementById('copy-digest').addEventListener('click', () => {
+    if (!season || !window.TVYCRollup) return;
+    const text = TVYCRollup.formatDigest(season, week && week.date);
+    const done = () => showToast('Week digest copied ✓');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) { showToast('Copy failed'); }
+        document.body.removeChild(ta);
+      });
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { showToast('Copy failed'); }
+      document.body.removeChild(ta);
+    }
+  });
+})();
+</script>
+</body>
+</html>
