@@ -40,11 +40,27 @@ jobs:
           print(f'Wrote index.html bytes={len(html)} sha256={hashlib.sha256(html).hexdigest()}')
           PY
           wc -c index.html
+      - name: Assemble league/2026-27.json from payload.league.*
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import json
+          parts = sorted(Path('.').glob('payload.league.*'), key=lambda p: p.name)
+          if not parts:
+              print('no payload.league.*; skip')
+              raise SystemExit(0)
+          joined = ''.join(p.read_text().replace('\n','').replace('\r','') for p in parts)
+          obj = json.loads(joined)
+          assert obj.get('schema') == 'tvyc-darts-league/v1'
+          Path('league').mkdir(exist_ok=True)
+          Path('league/2026-27.json').write_text(json.dumps(obj, separators=(',',':')))
+          print('wrote league/2026-27.json', Path('league/2026-27.json').stat().st_size)
+          PY
       - name: Commit index.html
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
+          git add index.html league/2026-27.json || git add index.html
           git diff --cached --quiet && echo "No change" && exit 0
           git commit -m "v1.2.3 expand: write index.html from payload.all.*"
           git push
