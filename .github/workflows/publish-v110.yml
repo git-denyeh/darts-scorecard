@@ -1,0 +1,74 @@
+name: Publish v1.1.0 scorecard
+on:
+  workflow_dispatch:
+    inputs:
+      b64a:
+        description: first half gzip+base64 of TVYC-Darts.html
+        required: true
+        type: string
+      b64b:
+        description: second half gzip+base64 of TVYC-Darts.html
+        required: true
+        type: string
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode and write index.html + loader payloads
+        env:
+          B64A: ${{ inputs.b64a }}
+          B64B: ${{ inputs.b64b }}
+        run: |
+          python3 <<'PY'
+          import os, base64, gzip, hashlib, math
+          from pathlib import Path
+          b64 = os.environ['B64A'] + os.environ['B64B']
+          html = gzip.decompress(base64.b64decode(b64, validate=True))
+          assert b'1.1.0' in html and b'post-war pub theme' in html
+          assert b'100dvh' in html
+          Path('index.html').write_bytes(html)
+          print('index.html', len(html), hashlib.sha256(html).hexdigest())
+          CHUNK = 2500
+          n = math.ceil(len(b64) / CHUNK)
+          for i in range(n):
+              chunk = b64[i*CHUNK:(i+1)*CHUNK] + '\n'
+              Path(f'payload.p{i+1:02d}').write_text(chunk)
+          for p in Path('.').glob('payload.p*'):
+              num = int(p.name.replace('payload.p',''))
+              if num > n:
+                  p.unlink()
+          loader = f"""<!DOCTYPE html>
+<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no\"><title>TVYC Darts</title></head>
+<body style=\"margin:0;background:#140e0a;color:#c4b59a;font-family:system-ui;padding:16px\">
+<p>Loading TVYC Darts v1.1.0…</p>
+<script>
+(async () => {{
+  const n = {n}; const v = '110'; const parts = [];
+  for (let i = 1; i <= n; i++) {{
+    const id = String(i).padStart(2, '0');
+    const r = await fetch('./payload.p' + id + '?v=' + v);
+    if (!r.ok) throw new Error('payload.p' + id + ' ' + r.status);
+    parts.push((await r.text()).replace(/\\n+$/,''));
+  }}
+  const bin = Uint8Array.from(atob(parts.join('')), c => c.charCodeAt(0));
+  const html = await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  document.open(); document.write(html); document.close();
+}})().catch(e => {{ document.body.innerHTML = '<pre style=\"color:#c9a227\">Load failed: ' + e + '</pre>'; }});
+</script></body></html>
+"""
+          Path('loader.html').write_text(loader)
+          print('parts', n)
+          PY
+      - name: Commit published files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html loader.html payload.p*
+          git add -u payload.p* || true
+          git status
+          git diff --cached --quiet && echo "No change" && exit 0
+          git commit -m "v1.1.0 post-war pub theme — publish full index + payloads"
+          git push
