@@ -1,0 +1,35 @@
+name: Seed payloads from rem parts
+on:
+  workflow_dispatch:
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack remaining payloads
+        run: |
+          cat rem.p01 rem.p02 rem.p03 rem.p04 rem.p05 rem.p06 rem.p07 rem.p08 | tr -d '\n' | base64 -d > rem.tar.gz
+          tar -xzf rem.tar.gz
+          ls -la payload.p18 payload.p2* payload.p3*
+      - name: Full decode verify
+        run: |
+          python3 - <<'PY'
+          import base64,gzip,hashlib,pathlib
+          parts=[pathlib.Path(f"payload.p{i:02d}").read_text().strip() for i in range(1,33)]
+          html=gzip.decompress(base64.b64decode("".join(parts)))
+          h=hashlib.sha256(html).hexdigest()
+          print(len(html), h)
+          assert h=="976886aeab9abdfbba46441545ddddcdaa1161e6ab20161744180f9e074db426"
+          assert b"1.2.0" in html
+          print("OK")
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add payload.p18 payload.p21 payload.p22 payload.p23 payload.p24 payload.p25 payload.p26 payload.p27 payload.p28 payload.p29 payload.p30 payload.p31 payload.p32
+          git status
+          git diff --cached --quiet || git commit -m "v1.2.0 remaining payloads via rem parts"
+          git push
