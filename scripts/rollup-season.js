@@ -139,13 +139,22 @@
     const lines = [];
     lines.push('TVYC Darts — Week of ' + (week.dateLabel || week.date));
     lines.push('');
-    lines.push('RESULTS');
-    (week.results || []).forEach(function (r) {
-      lines.push(
-        'Bd ' + (r.board || '?') + ': ' +
-        r.leftName + ' ' + r.wins.left + ' – ' + r.wins.right + ' ' + r.rightName
-      );
-    });
+    const results = week.results || [];
+    if (results.length) {
+      lines.push('RESULTS');
+      results.forEach(function (r) {
+        lines.push(
+          'Bd ' + (r.board || '?') + ': ' +
+          r.leftName + ' ' + r.wins.left + ' – ' + r.wins.right + ' ' + r.rightName
+        );
+      });
+    } else if (week.source === 'kevin-ray-email') {
+      lines.push('RESULTS');
+      lines.push('(from Kevin&Ray email — per-match board scores not recorded)');
+    } else {
+      lines.push('RESULTS');
+      lines.push('(none posted)');
+    }
     lines.push('');
     lines.push('STANDINGS (season)');
     (season.teams || []).forEach(function (t, i) {
@@ -156,8 +165,8 @@
     lines.push('');
     lines.push('GREAT SHOTS');
     const shots = week.greatShots || [];
-    if (!shots.length) lines.push('(none recorded)');
-    else {
+    const gst = week.greatShotsText || null;
+    if (shots.length) {
       shots.forEach(function (s) {
         let bit = s.player || '?';
         if (s.kind === 'ton') bit += ' — ' + s.value;
@@ -169,6 +178,11 @@
         if (s.board) bit += ' [Bd ' + s.board + ']';
         lines.push(bit);
       });
+    } else if (gst && (gst.cricket || gst.oh1)) {
+      if (gst.cricket) lines.push('Cricket: ' + gst.cricket);
+      if (gst.oh1) lines.push("'01: " + gst.oh1);
+    } else {
+      lines.push('(none recorded)');
     }
     lines.push('');
     lines.push('— TVYC Darts');
