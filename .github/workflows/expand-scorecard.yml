@@ -1,9 +1,6 @@
 name: Expand scorecard
 on:
-  push:
-    paths:
-      - 'payload.p*'
-      - '.github/workflows/expand-scorecard.yml'
+  # Manual only — do not run on every payload.p* push (was flooding failure emails).
   workflow_dispatch:
 permissions:
   contents: write
@@ -16,30 +13,27 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import base64, gzip
-          fixes = {
-              'payload.p03': ('EWm+JwUZ', 'EW3m+JwUZ'),
-              'payload.p05': ('QOd3V92', 'QOd3dV92'),
-              'payload.p12': ('ZVYU0E', 'ZVJYU0E'),
-          }
+          import base64, gzip, re
           parts = []
-          for i in range(1, 13):
-              p = Path(f'payload.p{i:02d}')
-              s = p.read_text()
-              if p.name in fixes:
-                  old, new = fixes[p.name]
-                  s = s.replace(old, new)
-              parts.append(s)
+          files = sorted(Path('.').glob('payload.p*'), key=lambda p: p.name)
+          if not files:
+              raise SystemExit('no payload.p* files')
+          for p in files:
+              parts.append(p.read_text().rstrip('\n'))
           payload = base64.b64decode(''.join(parts), validate=True)
-          Path('index.html').write_bytes(gzip.decompress(payload))
+          html = gzip.decompress(payload)
+          Path('index.html').write_bytes(html)
+          print('bytes', len(html))
+          m = re.search(rb'1\.0\.\d[^<]{0,60}', html)
+          print('version', m.group(0).decode() if m else 'unknown')
           PY
           wc -c index.html
-          grep -F '1.0.4' index.html | head -1
       - name: Commit index.html
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
           git diff --cached --quiet && echo "No change" && exit 0
-          git commit -m "v1.0.4 expand: count labels + doubles throwers for mobile test"
+          VER=$(grep -oE '1\.0\.[0-9]+' index.html | head -1 || echo 'scorecard')
+          git commit -m "${VER} expand: write index.html from payload parts"
           git push
