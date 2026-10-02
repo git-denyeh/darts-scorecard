@@ -16,16 +16,23 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import base64, gzip
           fixes = {
               'payload.p03': ('+H2wLx', '+2HwwLx'),
               'payload.p05': ('QOd3V92', 'QOd3dV92'),
               'payload.p12': ('ZVYU0E', 'ZVJYU0E'),
           }
-          for name, (old, new) in fixes.items():
-              p = Path(name)
-              p.write_text(p.read_text().replace(old, new))
+          parts = []
+          for i in range(1, 13):
+              p = Path(f'payload.p{i:02d}')
+              s = p.read_text()
+              if p.name in fixes:
+                  old, new = fixes[p.name]
+                  s = s.replace(old, new)
+              parts.append(s)
+          payload = base64.b64decode(''.join(parts), validate=True)
+          Path('index.html').write_bytes(gzip.decompress(payload))
           PY
-          cat payload.p01 payload.p02 payload.p03 payload.p04 payload.p05 payload.p06 payload.p07 payload.p08 payload.p09 payload.p10 payload.p11 payload.p12 | base64 -d | gzip -dc > index.html
           wc -c index.html
           grep -F '1.0.4' index.html | head -1
       - name: Commit index.html
