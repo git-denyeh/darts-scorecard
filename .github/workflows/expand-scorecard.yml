@@ -18,7 +18,7 @@ jobs:
           from pathlib import Path
           import base64, gzip
           fixes = {
-              'payload.p03': ('+H2wLx', '+2HwwLx'),
+              'payload.p03': ('EWm+JwUZ', 'EW3m+JwUZ'),
               'payload.p05': ('QOd3V92', 'QOd3dV92'),
               'payload.p12': ('ZVYU0E', 'ZVJYU0E'),
           }
