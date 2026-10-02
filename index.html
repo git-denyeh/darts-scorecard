@@ -1,31 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-<title>TVYC Darts</title>
-</head>
+<html lang="en"><head><meta charset="UTF-8"><title>TVYC Darts</title></head>
 <body style="margin:0;background:#140e0a;color:#c4b59a;font-family:system-ui;padding:16px">
 <p>Loading TVYC Darts v1.2.0…</p>
 <script>
 (async () => {
-  const n = 32;
-  const v = '120';
+  const n = 4;
   const parts = [];
   for (let i = 1; i <= n; i++) {
-    const id = String(i).padStart(2, '0');
-    const r = await fetch('./payload.p' + id + '?v=' + v);
-    if (!r.ok) throw new Error('payload.p' + id + ' ' + r.status);
-    parts.push((await r.text()).replace(/\n+$/,''));
+    const id = String(i).padStart(2,'0');
+    const r = await fetch('./boot.p' + id + '?v=120');
+    if (!r.ok) throw new Error('boot.p' + id + ' ' + r.status);
+    parts.push(await r.text());
   }
-  const B64 = parts.join('');
-  const bin = Uint8Array.from(atob(B64), c => c.charCodeAt(0));
-  const ds = new DecompressionStream('gzip');
-  const html = await new Response(new Blob([bin]).stream().pipeThrough(ds)).text();
-  document.open(); document.write(html); document.close();
+  document.open(); document.write(parts.join('')); document.close();
 })().catch(e => {
   document.body.innerHTML = '<pre style="color:#c9a227">Load failed: ' + e + '</pre>';
 });
-</script>
-</body>
-</html>
+</script></body></html>
