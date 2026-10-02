@@ -1323,7 +1323,7 @@ button:disabled { cursor: default; }
 
 /* FLOW SCREENS (welcome / play / league night) */
 #welcome, #profile-setup, #play-local, #play-setup, #play-bot,
-#tournaments-stub, #friends, #standings, #home, #present, #lineup {
+#tournaments-stub, #friends, #standings, #rules, #home, #present, #lineup {
   display: none;
   flex-direction: column;
   width: 100%; max-width: 600px;
@@ -1338,7 +1338,7 @@ button:disabled { cursor: default; }
   box-sizing: border-box;
 }
 #welcome.show, #profile-setup.show, #play-local.show, #play-setup.show, #play-bot.show,
-#tournaments-stub.show, #friends.show, #standings.show,
+#tournaments-stub.show, #friends.show, #standings.show, #rules.show,
 #home.show, #present.show, #lineup.show { display: flex; }
 #profile-setup { align-items: stretch; max-width: 480px; padding-top: 28px; }
 #present {
@@ -2042,6 +2042,39 @@ button:disabled { cursor: default; }
 
 
 
+
+/* League Rules (v1.2.3) */
+#rules .rules-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin: 0;
+}
+#rules .rules-card h1 {
+  font-family: var(--font-display); letter-spacing: 1px;
+  color: var(--yellow); font-size: 1.15rem; margin: 0 0 6px;
+}
+#rules .rules-meta { color: var(--text-dim); font-size: .78rem; margin-bottom: 12px; }
+#rules .rules-card h2 {
+  font-family: var(--font-display); letter-spacing: 1px;
+  color: var(--cream, #f3e6c8); font-size: 1rem; margin: 16px 0 8px;
+}
+#rules .rules-card h3 {
+  color: var(--yellow); font-size: .92rem; margin: 14px 0 6px; letter-spacing: .5px;
+}
+#rules .rules-card p, #rules .rules-card li {
+  color: var(--text-mid, #d8c9a8); font-size: .9rem; line-height: 1.45;
+}
+#rules .rules-card ul { padding-left: 1.15rem; margin: 0 0 8px; }
+#rules .rules-card ol { padding-left: 1.15rem; margin: 0 0 8px; }
+#rules .rules-card ul ul { margin-top: 6px; }
+.settings-sync-row { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.settings-sync-row .sync-btn {
+  font-family: var(--font-ui); font-size: .85rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--cream, #f3e6c8); border: 1px solid var(--yellow);
+  background: var(--panel2); padding: 12px 14px; border-radius: 6px; cursor: pointer;
+}
+.settings-sync-row .sync-status { color: var(--text-dim); font-size: .75rem; line-height: 1.35; }
+
 /* In-app Standings (v1.2.2) */
 #standings .st-card {
   background: var(--panel); border: 1px solid var(--border);
@@ -2251,7 +2284,7 @@ button:disabled { cursor: default; }
   </div>
   <button type="button" class="nav-btn red" id="nav-play">Play</button>
   <button type="button" class="nav-btn red" id="nav-leagues">Leagues &amp; Groups</button>
-  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.2</span></div>
+  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.3</span></div>
 </div>
 
 <div class="menu-drawer" id="menu-drawer">
@@ -2260,6 +2293,8 @@ button:disabled { cursor: default; }
     <button type="button" class="menu-item" id="menu-profile">League profile / Change team</button>
     <button type="button" class="menu-item" id="menu-friends">Friends</button>
     <button type="button" class="menu-item" id="menu-standings">Standings</button>
+    <button type="button" class="menu-item" id="menu-rules">Rules</button>
+    <button type="button" class="menu-item" id="menu-sync">Sync / Check for updates</button>
     <button type="button" class="menu-item" id="menu-help">Help — night flow &amp; scoring</button>
     <button type="button" class="menu-item" id="menu-reset">Reset local data…</button>
     <button type="button" class="menu-close" id="menu-close">Close</button>
@@ -2487,6 +2522,23 @@ button:disabled { cursor: default; }
   </div>
 </div>
 
+
+<!-- RULES (in-app, v1.2.3) -->
+<div id="rules">
+  <div class="flow-header">
+    <button type="button" class="night-back" id="rules-back">← HOME</button>
+    <div class="flow-title">Rules</div>
+    <button type="button" class="flow-x" id="rules-close" aria-label="Close">✕</button>
+  </div>
+  <div class="flow-panel">
+    <div class="flow-panel-title">Tellico Village Dart League</div>
+    <div class="flow-panel-sub" id="rules-status">Bundled offline copy</div>
+  </div>
+  <div class="section">
+    <div class="rules-card" id="rules-body"></div>
+  </div>
+</div>
+
 <!-- LEAGUES & GROUPS = night Home / Week -->
 <div id="home">
   <div class="flow-header">
@@ -2699,6 +2751,10 @@ button:disabled { cursor: default; }
       <input type="text" id="set-gh-repo" value="darts-scorecard" autocomplete="off">
       <div id="set-gh-hint">Optional PAT with Contents: Write on git-denyeh/darts-scorecard.</div>
     </div>
+    <div class="settings-sync-row">
+      <button type="button" class="sync-btn" id="set-sync">Sync / Check for updates</button>
+      <div class="sync-status" id="set-sync-status">League data from Drive snapshot (offline Tuesday nights).</div>
+    </div>
     <div class="stub-note">Local prefs only — stored on this device.</div>
     <button type="button" class="start-btn" id="settings-close">Close</button>
   </div>
@@ -2807,7 +2863,98 @@ button:disabled { cursor: default; }
 <div class="sum-copy-toast" id="sum-copy-toast">Copied to clipboard ✓</div>
 
 <script>
-const LEAGUE = {"season":{"id":"2026-2027","label":"Tellico Village Dart League ’26-27’","roster_as_of":"2026-09-16"},"branding":{"product":"TVYC Darts","club":"Tellico Village Yacht Club"},"rounds_per_match":8,"data_model":{"entities":["Season","Team","Player","ScheduleNight","Match","NightOpsSession","Round"],"night_flow":["Resolve Match for focus_team_number on tonight's ScheduleNight","Load both teams' Player lists (print_order)","Create NightOpsSession","Fill eight Round rows from those rosters only"],"fields":{"Team":["number","name_roster","name_schedule","captain"],"Player":["team_number","full_name","print_order"],"Match":["date_label","board","team_a","team_b"],"NightOpsSession":["date","focus_team_number","match_id","opponent_team_number","our_roster","opponent_roster"],"Round":["session_id","round_number (1-8)","our_player_ids","opponent_player_ids"]}},"tvra_no_darts_2nd_tuesdays":["Sept 8","Oct 13","Nov 10","Dec 8","Jan 12","Feb 9","Mar 9","Apr 13"],"teams":[{"number":1,"name_roster":"Cold Darted","name_schedule":"Cold Darted","captain":"Brett Petersen","players":[{"print_order":1,"full_name":"Brett Petersen"},{"print_order":2,"full_name":"Debbie Petersen"},{"print_order":3,"full_name":"Eric Ready"},{"print_order":4,"full_name":"Andrea Nielsen"},{"print_order":5,"full_name":"Ed Hanley"},{"print_order":6,"full_name":"Lori Hanley"},{"print_order":7,"full_name":"Allen Arnett"},{"print_order":8,"full_name":"Sarah Arnett"},{"print_order":9,"full_name":"Sylvia Astrop"},{"print_order":10,"full_name":"Justin Olson"},{"print_order":11,"full_name":"Kelly Olson"},{"print_order":12,"full_name":"John Astrop"}]},{"number":2,"name_roster":"Game of Throws","name_schedule":"Game of Throws","captain":"Allan Abney","players":[{"print_order":1,"full_name":"Allan Abney"},{"print_order":2,"full_name":"Lisa Abney"},{"print_order":3,"full_name":"Endre Pekarik"},{"print_order":4,"full_name":"Jeff Bell"},{"print_order":5,"full_name":"Richard Abney"},{"print_order":6,"full_name":"Mike Price"},{"print_order":7,"full_name":"Lloyd Langdon"},{"print_order":8,"full_name":"Derik Sandstrom"},{"print_order":9,"full_name":"Dan Bendik"},{"print_order":10,"full_name":"Terry Wilks"}]},{"number":3,"name_roster":"Darty Deeds","name_schedule":"Darty Deeds","captain":"Darin Johnson","players":[{"print_order":1,"full_name":"Darin Johnson"},{"print_order":2,"full_name":"Shannon Johnson"},{"print_order":3,"full_name":"Kim Rasiner"},{"print_order":4,"full_name":"Russ Rasiner"},{"print_order":5,"full_name":"Tim Waters"},{"print_order":6,"full_name":"Cath Waters"},{"print_order":7,"full_name":"Jeff May"},{"print_order":8,"full_name":"Sandra May"},{"print_order":9,"full_name":"Tim Figiel"},{"print_order":10,"full_name":"Dolly Figiel"}]},{"number":4,"name_roster":"Dartaholics","name_schedule":"Dart-A-Holics","captain":"Tom Dieter","players":[{"print_order":1,"full_name":"Tom Dieter"},{"print_order":2,"full_name":"Christian Malagon"},{"print_order":3,"full_name":"Louis Robles"},{"print_order":4,"full_name":"Jamie Griffin"},{"print_order":5,"full_name":"Matt Peery"},{"print_order":6,"full_name":"Jeff Griffin"},{"print_order":7,"full_name":"Chris Walters"},{"print_order":8,"full_name":"Chelsea Peery"},{"print_order":9,"full_name":"Jack Walters"},{"print_order":10,"full_name":"Rick Desnoyers"},{"print_order":11,"full_name":"Diana Kadel"},{"print_order":12,"full_name":"Jared Kadel"},{"print_order":13,"full_name":"Justin Walters"}]},{"number":5,"name_roster":"Down and Darty","name_schedule":"Down & Darty","captain":"Trisha Smith","players":[{"print_order":1,"full_name":"Trisha Smith"},{"print_order":2,"full_name":"Ron Cook"},{"print_order":3,"full_name":"Spencer Smith"},{"print_order":4,"full_name":"Jim Roccasalva"},{"print_order":5,"full_name":"Matt Eastman"},{"print_order":6,"full_name":"Paul Press"},{"print_order":7,"full_name":"Nilda Mitchell"},{"print_order":8,"full_name":"Eric Schultz"}]},{"number":6,"name_roster":"Snail Darters","name_schedule":"Snail Darters","captain":"Glenn Sheffield","players":[{"print_order":1,"full_name":"Glenn Sheffield"},{"print_order":2,"full_name":"David Egan"},{"print_order":3,"full_name":"Cortney Bell"},{"print_order":4,"full_name":"Scott Shapiro"},{"print_order":5,"full_name":"Mike Murphy"},{"print_order":6,"full_name":"Ken Camp"}]},{"number":7,"name_roster":"We're Sexy and We Throw It","name_schedule":"We're Sexy & We Throw It","captain":"Ken Moutvic","players":[{"print_order":1,"full_name":"Ken Moutvic"},{"print_order":2,"full_name":"Randy Zimnowski"},{"print_order":3,"full_name":"Steve Cossey"},{"print_order":4,"full_name":"Lee Smith"},{"print_order":5,"full_name":"Sandy Smith"},{"print_order":6,"full_name":"Greg Scaperlanda"},{"print_order":7,"full_name":"Eric Forbeck"},{"print_order":8,"full_name":"Tina Forbeck"},{"print_order":9,"full_name":"Bill Rickert"},{"print_order":10,"full_name":"Deb Rickert"}]},{"number":8,"name_roster":"Shooting Stars","name_schedule":"Shooting Stars","captain":"Kim Ferriter","players":[{"print_order":1,"full_name":"Kim Ferriter"},{"print_order":2,"full_name":"Bob Schlosser"},{"print_order":3,"full_name":"Don Kalenick Sr."},{"print_order":4,"full_name":"Don Kalenick"},{"print_order":5,"full_name":"Angie Guderjan"},{"print_order":6,"full_name":"Ron Gentile"},{"print_order":7,"full_name":"Lori Schlosser"},{"print_order":8,"full_name":"Marisella Kalenick"},{"print_order":9,"full_name":"Richard Moore"}]},{"number":9,"name_roster":"Snipers","name_schedule":"Snipers","captain":"Lisa Jackson","players":[{"print_order":1,"full_name":"Lisa Jackson"},{"print_order":2,"full_name":"Dave Roberts"},{"print_order":3,"full_name":"Mary Overland"},{"print_order":4,"full_name":"Scott Christiansen"},{"print_order":5,"full_name":"Herb Hanke"},{"print_order":6,"full_name":"Bryon Moses"},{"print_order":7,"full_name":"Rick Peare"}]},{"number":10,"name_roster":"Flighty","name_schedule":"Flighty","captain":"Richard Sciarretta","players":[{"print_order":1,"full_name":"Richard Sciarretta"},{"print_order":2,"full_name":"Deb Sciarretta"},{"print_order":3,"full_name":"Colleen Fitch"},{"print_order":4,"full_name":"Dan Mooney"},{"print_order":5,"full_name":"Dennis Fitch"},{"print_order":6,"full_name":"Cindy Hegle"},{"print_order":7,"full_name":"Kristie Rouse"},{"print_order":8,"full_name":"John Loomis"}]},{"number":11,"name_roster":"Flight Risk","name_schedule":"Flight Risk","captain":"Dave Hoernig","players":[{"print_order":1,"full_name":"Dave Hoernig"},{"print_order":2,"full_name":"Susan Murray"},{"print_order":3,"full_name":"Michelle Ham"},{"print_order":4,"full_name":"Jeff Ham"},{"print_order":5,"full_name":"Beth Hritz"},{"print_order":6,"full_name":"Dave Doucey"},{"print_order":7,"full_name":"Tom Stiff"},{"print_order":8,"full_name":"Ted Sherry"}]},{"number":12,"name_roster":"Whats the Point","name_schedule":"What's the Point?","captain":"Todd Elliott","players":[{"print_order":1,"full_name":"Todd Elliott"},{"print_order":2,"full_name":"Elizabeth Luckhardt"},{"print_order":3,"full_name":"Ryan Moreno"},{"print_order":4,"full_name":"Mesha Elliott"},{"print_order":5,"full_name":"Sam Moreno"},{"print_order":6,"full_name":"Yvette Moreno"},{"print_order":7,"full_name":"Jacob Moreno"},{"print_order":8,"full_name":"Brad Norris"},{"print_order":9,"full_name":"Cindy Norris"},{"print_order":10,"full_name":"Chris Layshot"},{"print_order":11,"full_name":"Melissa Layshot"},{"print_order":12,"full_name":"Jan Krusick"},{"print_order":13,"full_name":"John Krusick"}]},{"number":13,"name_roster":"Pointless","name_schedule":"Pointless","captain":"Mike Lackey","players":[{"print_order":1,"full_name":"Mike Lackey"},{"print_order":2,"full_name":"Tena Mathis"},{"print_order":3,"full_name":"Barry Mathis"},{"print_order":4,"full_name":"Wally Whitaker"},{"print_order":5,"full_name":"Sylvia Harwell"},{"print_order":6,"full_name":"Kari Lackey"},{"print_order":7,"full_name":"Martin Biter"},{"print_order":8,"full_name":"Denise Biter"}]},{"number":14,"name_roster":"Armed and Hazardous","name_schedule":"Armed & Hazardous","captain":"Randy Wilson","players":[{"print_order":1,"full_name":"Randy Wilson"},{"print_order":2,"full_name":"Ron Shoultz"},{"print_order":3,"full_name":"Carl Nordman"},{"print_order":4,"full_name":"Shawn Smith"},{"print_order":5,"full_name":"Tom Peterson"},{"print_order":6,"full_name":"Bret Corey"},{"print_order":7,"full_name":"Dan Campion"},{"print_order":8,"full_name":"Doug Stephens"},{"print_order":9,"full_name":"John Hennessy"}]},{"number":15,"name_roster":"Hit or Miss","name_schedule":"Hit or Miss","captain":"Karen Adame","players":[{"print_order":1,"full_name":"Karen Adame"},{"print_order":2,"full_name":"Harry Humbert"},{"print_order":3,"full_name":"Rob Knox"},{"print_order":4,"full_name":"Sue Rogers"},{"print_order":5,"full_name":"Linda Humbert"},{"print_order":6,"full_name":"Dave Proulx"},{"print_order":7,"full_name":"Karen Proulx"},{"print_order":8,"full_name":"Bill Cooley"},{"print_order":9,"full_name":"Pam Cooley"},{"print_order":10,"full_name":"Sandy Keilman"},{"print_order":11,"full_name":"Dave Keilman"},{"print_order":12,"full_name":"Jeri Krieg"}]},{"number":16,"name_roster":"Rat Pack","name_schedule":"Rat Pack","captain":"Jack Galvin","players":[{"print_order":1,"full_name":"Jack Galvin"},{"print_order":2,"full_name":"Shawna Galvin"},{"print_order":3,"full_name":"Ray Hoppenjans"},{"print_order":4,"full_name":"Bob Park"},{"print_order":5,"full_name":"Gail Henn"},{"print_order":6,"full_name":"Bob Brochetti"},{"print_order":7,"full_name":"Dave Webb"},{"print_order":8,"full_name":"Todd Haupt"}]},{"number":17,"name_roster":"Who Darted?","name_schedule":"Who Darted?","captain":"Pat Phee","players":[{"print_order":1,"full_name":"Pat Phee"},{"print_order":2,"full_name":"Tom Lahowetz"},{"print_order":3,"full_name":"Lou Dubois"},{"print_order":4,"full_name":"Tom Bradley"},{"print_order":5,"full_name":"Mike Gavin"},{"print_order":6,"full_name":"Shelley Phee"},{"print_order":7,"full_name":"Greg Stoker"},{"print_order":8,"full_name":"Clint Dubois"},{"print_order":9,"full_name":"Tom Brauer"}]},{"number":18,"name_roster":"Darty Dogs","name_schedule":"Darty Dogs","captain":"Bruce Lavoie","players":[{"print_order":1,"full_name":"Bruce Lavoie"},{"print_order":2,"full_name":"Craig Wilson"},{"print_order":3,"full_name":"Peter Daly"},{"print_order":4,"full_name":"Glenn Gallington"},{"print_order":5,"full_name":"Finbar Keenan"},{"print_order":6,"full_name":"Dwayne Elliot"},{"print_order":7,"full_name":"Bob VanVogelpoel"},{"print_order":8,"full_name":"Lori VanVogelpoel"}]}],"schedule_notes":{"start_time":null,"home_away":"not labeled in PDF; format is Team# — Board — Team#","boards":"A-I","team_4_regular_season":[{"date_label":"1 - Sept","opponent":13,"board":"E"},{"date_label":"15-Sept","opponent":11,"board":"G"},{"date_label":"22 – Sept","opponent":9,"board":"C"},{"date_label":"29 - Sept","opponent":7,"board":"F"},{"date_label":"6-Oct","opponent":5,"board":"E"},{"date_label":"20- Oct","opponent":3,"board":"H"},{"date_label":"27 - Oct","opponent":1,"board":"H"},{"date_label":"2- Nov *Monday*","opponent":16,"board":"A","is_monday_exception":true},{"date_label":"17 – Nov","opponent":14,"board":"B"},{"date_label":"24 - Nov","opponent":12,"board":"F"},{"date_label":"1 - Dec","opponent":10,"board":"D"},{"date_label":"15 - Dec","opponent":8,"board":"I"},{"date_label":"5 - Jan","opponent":6,"board":"B"},{"date_label":"19 - Jan","opponent":18,"board":"H"},{"date_label":"26 - Jan","opponent":2,"board":"G"},{"date_label":"2 - Feb","opponent":17,"board":"H"},{"date_label":"16 - Feb","opponent":15,"board":"H"}],"full_grid":"see schedule PDF; team_4_regular_season extracted for ops focus"}};
+const LEAGUE_BUNDLED = {"schema":"tvyc-darts-league/v1","updatedAt":"2026-10-02T15:46:55.000Z","sourceModifiedAt":"2026-09-29T00:00:00.000Z","season":{"id":"2026-2027","label":"Tellico Village Dart League ’26-27’","roster_as_of":"2026-09-16","subs_as_of":"2026-09-29"},"branding":{"product":"TVYC Darts","club":"Tellico Village Yacht Club"},"rounds_per_match":8,"data_model":{"entities":["Season","Team","Player","ScheduleNight","Match","NightOpsSession","Round"],"night_flow":["Resolve Match for focus_team_number on tonight's ScheduleNight","Load both teams' Player lists (print_order)","Create NightOpsSession","Fill eight Round rows from those rosters only"],"fields":{"Team":["number","name_roster","name_schedule","captain"],"Player":["team_number","full_name","print_order"],"Match":["date_label","board","team_a","team_b"],"NightOpsSession":["date","focus_team_number","match_id","opponent_team_number","our_roster","opponent_roster"],"Round":["session_id","round_number (1-8)","our_player_ids","opponent_player_ids"]}},"tvra_no_darts_2nd_tuesdays":["Sept 8","Oct 13","Nov 10","Dec 8","Jan 12","Feb 9","Mar 9","Apr 13"],"teams":[{"number":1,"name_roster":"Cold Darted","name_schedule":"Cold Darted","captain":"Brett Petersen","players":[{"print_order":1,"full_name":"Brett Petersen"},{"print_order":2,"full_name":"Debbie Petersen"},{"print_order":3,"full_name":"Eric Ready"},{"print_order":4,"full_name":"Andrea Nielsen"},{"print_order":5,"full_name":"Ed Hanley"},{"print_order":6,"full_name":"Lori Hanley"},{"print_order":7,"full_name":"Allen Arnett"},{"print_order":8,"full_name":"Sarah Arnett"},{"print_order":9,"full_name":"Sylvia Astrop"},{"print_order":10,"full_name":"Justin Olson"},{"print_order":11,"full_name":"Kelly Olson"},{"print_order":12,"full_name":"John Astrop"}]},{"number":2,"name_roster":"Game of Throws","name_schedule":"Game of Throws","captain":"Allan Abney","players":[{"print_order":1,"full_name":"Allan Abney"},{"print_order":2,"full_name":"Lisa Abney"},{"print_order":3,"full_name":"Endre Pekarik"},{"print_order":4,"full_name":"Jeff Bell"},{"print_order":5,"full_name":"Richard Abney"},{"print_order":6,"full_name":"Mike Price"},{"print_order":7,"full_name":"Lloyd Langdon"},{"print_order":8,"full_name":"Derik Sandstrom"},{"print_order":9,"full_name":"Dan Bendik"},{"print_order":10,"full_name":"Terry Wilks"}]},{"number":3,"name_roster":"Darty Deeds","name_schedule":"Darty Deeds","captain":"Darin Johnson","players":[{"print_order":1,"full_name":"Darin Johnson"},{"print_order":2,"full_name":"Shannon Johnson"},{"print_order":3,"full_name":"Kim Rasiner"},{"print_order":4,"full_name":"Russ Rasiner"},{"print_order":5,"full_name":"Tim Waters"},{"print_order":6,"full_name":"Cath Waters"},{"print_order":7,"full_name":"Jeff May"},{"print_order":8,"full_name":"Sandra May"},{"print_order":9,"full_name":"Tim Figiel"},{"print_order":10,"full_name":"Dolly Figiel"}]},{"number":4,"name_roster":"Dartaholics","name_schedule":"Dart-A-Holics","captain":"Tom Dieter","players":[{"print_order":1,"full_name":"Tom Dieter"},{"print_order":2,"full_name":"Christian Malagon"},{"print_order":3,"full_name":"Louis Robles"},{"print_order":4,"full_name":"Jamie Griffin"},{"print_order":5,"full_name":"Matt Peery"},{"print_order":6,"full_name":"Jeff Griffin"},{"print_order":7,"full_name":"Chris Walters"},{"print_order":8,"full_name":"Chelsea Peery"},{"print_order":9,"full_name":"Jack Walters"},{"print_order":10,"full_name":"Rick Desnoyers"},{"print_order":11,"full_name":"Diana Kadel"},{"print_order":12,"full_name":"Jared Kadel"},{"print_order":13,"full_name":"Justin Walters"}]},{"number":5,"name_roster":"Down and Darty","name_schedule":"Down & Darty","captain":"Trisha Smith","players":[{"print_order":1,"full_name":"Trisha Smith"},{"print_order":2,"full_name":"Ron Cook"},{"print_order":3,"full_name":"Spencer Smith"},{"print_order":4,"full_name":"Jim Roccasalva"},{"print_order":5,"full_name":"Matt Eastman"},{"print_order":6,"full_name":"Paul Press"},{"print_order":7,"full_name":"Nilda Mitchell"},{"print_order":8,"full_name":"Eric Schultz"}]},{"number":6,"name_roster":"Snail Darters","name_schedule":"Snail Darters","captain":"Glenn Sheffield","players":[{"print_order":1,"full_name":"Glenn Sheffield"},{"print_order":2,"full_name":"David Egan"},{"print_order":3,"full_name":"Cortney Bell"},{"print_order":4,"full_name":"Scott Shapiro"},{"print_order":5,"full_name":"Mike Murphy"},{"print_order":6,"full_name":"Ken Camp"}]},{"number":7,"name_roster":"We're Sexy and We Throw It","name_schedule":"We're Sexy & We Throw It","captain":"Ken Moutvic","players":[{"print_order":1,"full_name":"Ken Moutvic"},{"print_order":2,"full_name":"Randy Zimnowski"},{"print_order":3,"full_name":"Steve Cossey"},{"print_order":4,"full_name":"Lee Smith"},{"print_order":5,"full_name":"Sandy Smith"},{"print_order":6,"full_name":"Greg Scaperlanda"},{"print_order":7,"full_name":"Eric Forbeck"},{"print_order":8,"full_name":"Tina Forbeck"},{"print_order":9,"full_name":"Bill Rickert"},{"print_order":10,"full_name":"Deb Rickert"}]},{"number":8,"name_roster":"Shooting Stars","name_schedule":"Shooting Stars","captain":"Kim Ferriter","players":[{"print_order":1,"full_name":"Kim Ferriter"},{"print_order":2,"full_name":"Bob Schlosser"},{"print_order":3,"full_name":"Don Kalenick Sr."},{"print_order":4,"full_name":"Don Kalenick"},{"print_order":5,"full_name":"Angie Guderjan"},{"print_order":6,"full_name":"Ron Gentile"},{"print_order":7,"full_name":"Lori Schlosser"},{"print_order":8,"full_name":"Marisella Kalenick"},{"print_order":9,"full_name":"Richard Moore"}]},{"number":9,"name_roster":"Snipers","name_schedule":"Snipers","captain":"Lisa Jackson","players":[{"print_order":1,"full_name":"Lisa Jackson"},{"print_order":2,"full_name":"Dave Roberts"},{"print_order":3,"full_name":"Mary Overland"},{"print_order":4,"full_name":"Scott Christiansen"},{"print_order":5,"full_name":"Herb Hanke"},{"print_order":6,"full_name":"Bryon Moses"},{"print_order":7,"full_name":"Rick Peare"}]},{"number":10,"name_roster":"Flighty","name_schedule":"Flighty","captain":"Richard Sciarretta","players":[{"print_order":1,"full_name":"Richard Sciarretta"},{"print_order":2,"full_name":"Deb Sciarretta"},{"print_order":3,"full_name":"Colleen Fitch"},{"print_order":4,"full_name":"Dan Mooney"},{"print_order":5,"full_name":"Dennis Fitch"},{"print_order":6,"full_name":"Cindy Hegle"},{"print_order":7,"full_name":"Kristie Rouse"},{"print_order":8,"full_name":"John Loomis"}]},{"number":11,"name_roster":"Flight Risk","name_schedule":"Flight Risk","captain":"Dave Hoernig","players":[{"print_order":1,"full_name":"Dave Hoernig"},{"print_order":2,"full_name":"Susan Murray"},{"print_order":3,"full_name":"Michelle Ham"},{"print_order":4,"full_name":"Jeff Ham"},{"print_order":5,"full_name":"Beth Hritz"},{"print_order":6,"full_name":"Dave Doucey"},{"print_order":7,"full_name":"Tom Stiff"},{"print_order":8,"full_name":"Ted Sherry"}]},{"number":12,"name_roster":"Whats the Point","name_schedule":"What's the Point?","captain":"Todd Elliott","players":[{"print_order":1,"full_name":"Todd Elliott"},{"print_order":2,"full_name":"Elizabeth Luckhardt"},{"print_order":3,"full_name":"Ryan Moreno"},{"print_order":4,"full_name":"Mesha Elliott"},{"print_order":5,"full_name":"Sam Moreno"},{"print_order":6,"full_name":"Yvette Moreno"},{"print_order":7,"full_name":"Jacob Moreno"},{"print_order":8,"full_name":"Brad Norris"},{"print_order":9,"full_name":"Cindy Norris"},{"print_order":10,"full_name":"Chris Layshot"},{"print_order":11,"full_name":"Melissa Layshot"},{"print_order":12,"full_name":"Jan Krusick"},{"print_order":13,"full_name":"John Krusick"}]},{"number":13,"name_roster":"Pointless","name_schedule":"Pointless","captain":"Mike Lackey","players":[{"print_order":1,"full_name":"Mike Lackey"},{"print_order":2,"full_name":"Tena Mathis"},{"print_order":3,"full_name":"Barry Mathis"},{"print_order":4,"full_name":"Wally Whitaker"},{"print_order":5,"full_name":"Sylvia Harwell"},{"print_order":6,"full_name":"Kari Lackey"},{"print_order":7,"full_name":"Martin Biter"},{"print_order":8,"full_name":"Denise Biter"}]},{"number":14,"name_roster":"Armed and Hazardous","name_schedule":"Armed & Hazardous","captain":"Randy Wilson","players":[{"print_order":1,"full_name":"Randy Wilson"},{"print_order":2,"full_name":"Ron Shoultz"},{"print_order":3,"full_name":"Carl Nordman"},{"print_order":4,"full_name":"Shawn Smith"},{"print_order":5,"full_name":"Tom Peterson"},{"print_order":6,"full_name":"Bret Corey"},{"print_order":7,"full_name":"Dan Campion"},{"print_order":8,"full_name":"Doug Stephens"},{"print_order":9,"full_name":"John Hennessy"}]},{"number":15,"name_roster":"Hit or Miss","name_schedule":"Hit or Miss","captain":"Karen Adame","players":[{"print_order":1,"full_name":"Karen Adame"},{"print_order":2,"full_name":"Harry Humbert"},{"print_order":3,"full_name":"Rob Knox"},{"print_order":4,"full_name":"Sue Rogers"},{"print_order":5,"full_name":"Linda Humbert"},{"print_order":6,"full_name":"Dave Proulx"},{"print_order":7,"full_name":"Karen Proulx"},{"print_order":8,"full_name":"Bill Cooley"},{"print_order":9,"full_name":"Pam Cooley"},{"print_order":10,"full_name":"Sandy Keilman"},{"print_order":11,"full_name":"Dave Keilman"},{"print_order":12,"full_name":"Jeri Krieg"}]},{"number":16,"name_roster":"Rat Pack","name_schedule":"Rat Pack","captain":"Jack Galvin","players":[{"print_order":1,"full_name":"Jack Galvin"},{"print_order":2,"full_name":"Shawna Galvin"},{"print_order":3,"full_name":"Ray Hoppenjans"},{"print_order":4,"full_name":"Bob Park"},{"print_order":5,"full_name":"Gail Henn"},{"print_order":6,"full_name":"Bob Brochetti"},{"print_order":7,"full_name":"Dave Webb"},{"print_order":8,"full_name":"Todd Haupt"}]},{"number":17,"name_roster":"Who Darted?","name_schedule":"Who Darted?","captain":"Pat Phee","players":[{"print_order":1,"full_name":"Pat Phee"},{"print_order":2,"full_name":"Tom Lahowetz"},{"print_order":3,"full_name":"Lou Dubois"},{"print_order":4,"full_name":"Tom Bradley"},{"print_order":5,"full_name":"Mike Gavin"},{"print_order":6,"full_name":"Shelley Phee"},{"print_order":7,"full_name":"Greg Stoker"},{"print_order":8,"full_name":"Clint Dubois"},{"print_order":9,"full_name":"Tom Brauer"}]},{"number":18,"name_roster":"Darty Dogs","name_schedule":"Darty Dogs","captain":"Bruce Lavoie","players":[{"print_order":1,"full_name":"Bruce Lavoie"},{"print_order":2,"full_name":"Craig Wilson"},{"print_order":3,"full_name":"Peter Daly"},{"print_order":4,"full_name":"Glenn Gallington"},{"print_order":5,"full_name":"Finbar Keenan"},{"print_order":6,"full_name":"Dwayne Elliot"},{"print_order":7,"full_name":"Bob VanVogelpoel"},{"print_order":8,"full_name":"Lori VanVogelpoel"}]}],"subs":[{"print_order":1,"full_name":"Tom Archakis"},{"print_order":2,"full_name":"Brad Ashton"},{"print_order":3,"full_name":"Nancy Ashton"},{"print_order":4,"full_name":"David Baum"},{"print_order":5,"full_name":"Ron Blust"},{"print_order":6,"full_name":"Chris Bogle"},{"print_order":7,"full_name":"Terry Brauer"},{"print_order":8,"full_name":"Tim Brinlee"},{"print_order":9,"full_name":"Tammy Brochetti"},{"print_order":10,"full_name":"Barb Campion"},{"print_order":11,"full_name":"Bob Cohan"},{"print_order":12,"full_name":"Jackie Colon"},{"print_order":13,"full_name":"Mike Colon"},{"print_order":14,"full_name":"Chris Conciat"},{"print_order":15,"full_name":"Jacquie Connor"},{"print_order":16,"full_name":"Jody Connor"},{"print_order":17,"full_name":"Evon Engelhaupt"},{"print_order":18,"full_name":"Mike Engelhaupt"},{"print_order":19,"full_name":"Bob Gaul"},{"print_order":20,"full_name":"Bruce Gibbons"},{"print_order":21,"full_name":"Rick Halpin"},{"print_order":22,"full_name":"Todd Harris"},{"print_order":23,"full_name":"Laura Haupt"},{"print_order":24,"full_name":"Mike Hormel"},{"print_order":25,"full_name":"John Hunt"},{"print_order":26,"full_name":"Terry Hunter"},{"print_order":27,"full_name":"Tom Hunter"},{"print_order":28,"full_name":"Donnie Iverson"},{"print_order":29,"full_name":"Brad Jones"},{"print_order":30,"full_name":"Donna Jones"},{"print_order":31,"full_name":"Justin Kesterson"},{"print_order":32,"full_name":"Tim Krantz"},{"print_order":33,"full_name":"Dan Langlois"},{"print_order":34,"full_name":"Kevin Laurence"},{"print_order":35,"full_name":"Kevin Lionarons"},{"print_order":36,"full_name":"Jim Long"},{"print_order":37,"full_name":"Colleen Marley"},{"print_order":38,"full_name":"Mark Matiszik"},{"print_order":39,"full_name":"John May"},{"print_order":40,"full_name":"John McDonough"},{"print_order":41,"full_name":"Alex McGuinness"},{"print_order":42,"full_name":"Brandi Milsaps"},{"print_order":43,"full_name":"Margaret Moutvic"},{"print_order":44,"full_name":"Rich Murphy"},{"print_order":45,"full_name":"Kevin Naughton"},{"print_order":46,"full_name":"Jim Nold"},{"print_order":47,"full_name":"Nancy Parikh"},{"print_order":48,"full_name":"Lori Joe Peterson"},{"print_order":49,"full_name":"Kimberly Press"},{"print_order":50,"full_name":"Rob Reed"},{"print_order":51,"full_name":"Kevin Roe"},{"print_order":52,"full_name":"Ron Roe"},{"print_order":53,"full_name":"Kevin Rouse"},{"print_order":54,"full_name":"Terry Schultheiss"},{"print_order":55,"full_name":"Doug Sloan"},{"print_order":56,"full_name":"Dan Stewart"},{"print_order":57,"full_name":"Michelle Stewart"},{"print_order":58,"full_name":"Matt Stone"},{"print_order":59,"full_name":"Jeff Strange"},{"print_order":60,"full_name":"Bob Sullivan"},{"print_order":61,"full_name":"Ann Tinker"},{"print_order":62,"full_name":"Tim Tinker"},{"print_order":63,"full_name":"Jose Voto"},{"print_order":64,"full_name":"Kim Walters"},{"print_order":65,"full_name":"Rick Wilkes"},{"print_order":66,"full_name":"Cathy Woodman"},{"print_order":67,"full_name":"Ron Woodman"},{"print_order":68,"full_name":"Pete Young"}],"schedule_notes":{"start_time":null,"home_away":"not labeled in PDF; format is Team# — Board — Team#","boards":"A-I","regular_season_nights":[{"date_label":"1 - Sept","matches":[{"team_a":6,"board":"A","team_b":11},{"team_a":7,"board":"B","team_b":10},{"team_a":2,"board":"C","team_b":15},{"team_a":1,"board":"D","team_b":16},{"team_a":4,"board":"E","team_b":13},{"team_a":18,"board":"F","team_b":17},{"team_a":8,"board":"G","team_b":9},{"team_a":5,"board":"H","team_b":12},{"team_a":3,"board":"I","team_b":14}]},{"date_label":"15-Sept","matches":[{"team_a":7,"board":"A","team_b":8},{"team_a":5,"board":"B","team_b":10},{"team_a":18,"board":"C","team_b":16},{"team_a":2,"board":"D","team_b":13},{"team_a":1,"board":"E","team_b":14},{"team_a":17,"board":"F","team_b":15},{"team_a":4,"board":"G","team_b":11},{"team_a":6,"board":"H","team_b":9},{"team_a":3,"board":"I","team_b":12}]},{"date_label":"22 – Sept","matches":[{"team_a":3,"board":"A","team_b":10},{"team_a":16,"board":"B","team_b":14},{"team_a":4,"board":"C","team_b":9},{"team_a":5,"board":"D","team_b":8},{"team_a":2,"board":"E","team_b":11},{"team_a":6,"board":"F","team_b":7},{"team_a":18,"board":"G","team_b":15},{"team_a":17,"board":"H","team_b":13},{"team_a":1,"board":"I","team_b":12}]},{"date_label":"29 - Sept","matches":[{"team_a":16,"board":"A","team_b":12},{"team_a":1,"board":"B","team_b":10},{"team_a":18,"board":"C","team_b":14},{"team_a":15,"board":"D","team_b":13},{"team_a":3,"board":"E","team_b":8},{"team_a":4,"board":"F","team_b":7},{"team_a":5,"board":"G","team_b":6},{"team_a":17,"board":"H","team_b":11},{"team_a":2,"board":"I","team_b":9}]},{"date_label":"6-Oct","matches":[{"team_a":1,"board":"A","team_b":8},{"team_a":2,"board":"B","team_b":7},{"team_a":16,"board":"C","team_b":10},{"team_a":15,"board":"D","team_b":11},{"team_a":4,"board":"E","team_b":5},{"team_a":18,"board":"F","team_b":13},{"team_a":14,"board":"G","team_b":12},{"team_a":17,"board":"H","team_b":9},{"team_a":3,"board":"I","team_b":6}]},{"date_label":"20- Oct","matches":[{"team_a":16,"board":"A","team_b":8},{"team_a":2,"board":"B","team_b":5},{"team_a":14,"board":"C","team_b":10},{"team_a":17,"board":"D","team_b":7},{"team_a":18,"board":"E","team_b":12},{"team_a":15,"board":"F","team_b":9},{"team_a":13,"board":"G","team_b":11},{"team_a":3,"board":"H","team_b":4},{"team_a":1,"board":"I","team_b":6}]},{"date_label":"27 - Oct","matches":[{"team_a":14,"board":"A","team_b":8},{"team_a":17,"board":"B","team_b":5},{"team_a":16,"board":"C","team_b":6},{"team_a":13,"board":"D","team_b":9},{"team_a":2,"board":"E","team_b":3},{"team_a":15,"board":"F","team_b":7},{"team_a":12,"board":"G","team_b":10},{"team_a":1,"board":"H","team_b":4},{"team_a":18,"board":"I","team_b":11}]},{"date_label":"2- Nov *Monday*","matches":[{"team_a":16,"board":"A","team_b":4},{"team_a":13,"board":"B","team_b":7},{"team_a":1,"board":"C","team_b":2},{"team_a":17,"board":"D","team_b":3},{"team_a":11,"board":"E","team_b":9},{"team_a":14,"board":"F","team_b":6},{"team_a":12,"board":"G","team_b":8},{"team_a":18,"board":"H","team_b":10},{"team_a":15,"board":"I","team_b":5}],"is_monday_exception":true},{"date_label":"17 – Nov","matches":[{"team_a":18,"board":"A","team_b":9},{"team_a":14,"board":"B","team_b":4},{"team_a":17,"board":"C","team_b":1},{"team_a":11,"board":"D","team_b":7},{"team_a":12,"board":"E","team_b":6},{"team_a":16,"board":"F","team_b":2},{"team_a":15,"board":"G","team_b":3},{"team_a":10,"board":"H","team_b":8},{"team_a":13,"board":"I","team_b":5}]},{"date_label":"24 - Nov","matches":[{"team_a":11,"board":"A","team_b":5},{"team_a":18,"board":"B","team_b":8},{"team_a":13,"board":"C","team_b":3},{"team_a":9,"board":"D","team_b":7},{"team_a":16,"board":"E","team_b":17},{"team_a":12,"board":"F","team_b":4},{"team_a":14,"board":"G","team_b":2},{"team_a":15,"board":"H","team_b":1},{"team_a":10,"board":"I","team_b":6}]},{"date_label":"1 - Dec","matches":[{"team_a":12,"board":"A","team_b":2},{"team_a":14,"board":"B","team_b":17},{"team_a":13,"board":"C","team_b":1},{"team_a":10,"board":"D","team_b":4},{"team_a":9,"board":"E","team_b":5},{"team_a":11,"board":"F","team_b":3},{"team_a":18,"board":"G","team_b":7},{"team_a":15,"board":"H","team_b":16},{"team_a":8,"board":"I","team_b":6}]},{"date_label":"15 - Dec","matches":[{"team_a":11,"board":"A","team_b":1},{"team_a":13,"board":"B","team_b":16},{"team_a":18,"board":"C","team_b":6},{"team_a":9,"board":"D","team_b":3},{"team_a":10,"board":"E","team_b":2},{"team_a":7,"board":"F","team_b":5},{"team_a":12,"board":"G","team_b":17},{"team_a":14,"board":"H","team_b":15},{"team_a":8,"board":"I","team_b":4}]},{"date_label":"5 - Jan","matches":[{"team_a":10,"board":"A","team_b":17},{"team_a":6,"board":"B","team_b":4},{"team_a":11,"board":"C","team_b":16},{"team_a":12,"board":"D","team_b":15},{"team_a":18,"board":"E","team_b":5},{"team_a":8,"board":"F","team_b":2},{"team_a":13,"board":"G","team_b":7},{"team_a":9,"board":"H","team_b":1},{"team_a":7,"board":"I","team_b":3}]},{"date_label":"19 - Jan","matches":[{"team_a":8,"board":"A","team_b":17},{"team_a":7,"board":"B","team_b":1},{"team_a":10,"board":"C","team_b":15},{"team_a":12,"board":"D","team_b":13},{"team_a":9,"board":"E","team_b":16},{"team_a":6,"board":"F","team_b":2},{"team_a":5,"board":"G","team_b":3},{"team_a":18,"board":"H","team_b":4},{"team_a":11,"board":"I","team_b":14}]},{"date_label":"26 - Jan","matches":[{"team_a":9,"board":"A","team_b":14},{"team_a":8,"board":"B","team_b":15},{"team_a":11,"board":"C","team_b":12},{"team_a":5,"board":"D","team_b":1},{"team_a":18,"board":"E","team_b":3},{"team_a":6,"board":"F","team_b":17},{"team_a":4,"board":"G","team_b":2},{"team_a":10,"board":"H","team_b":13},{"team_a":7,"board":"I","team_b":16}]},{"date_label":"2 - Feb","matches":[{"team_a":3,"board":"A","team_b":1},{"team_a":7,"board":"B","team_b":14},{"team_a":9,"board":"C","team_b":12},{"team_a":10,"board":"D","team_b":11},{"team_a":5,"board":"E","team_b":16},{"team_a":8,"board":"F","team_b":13},{"team_a":18,"board":"G","team_b":2},{"team_a":4,"board":"H","team_b":17},{"team_a":6,"board":"I","team_b":15}]},{"date_label":"16 - Feb","matches":[{"team_a":18,"board":"A","team_b":1},{"team_a":5,"board":"B","team_b":14},{"team_a":9,"board":"C","team_b":10},{"team_a":2,"board":"D","team_b":17},{"team_a":8,"board":"E","team_b":11},{"team_a":3,"board":"F","team_b":16},{"team_a":7,"board":"G","team_b":12},{"team_a":4,"board":"H","team_b":15},{"team_a":6,"board":"I","team_b":13}]}],"playoff_nights":[{"date_label":"23 - Feb","phase":"playoffs","note":"Red/Blue/Green seed brackets per schedule PDF"},{"date_label":"2 - Mar","phase":"playoffs"},{"date_label":"16– Mar","phase":"playoffs"},{"date_label":"23- Mar","phase":"playoffs"},{"date_label":"30 - Mar","phase":"playoffs"},{"date_label":"6 - Apr","phase":"playoffs","note":"TBD"},{"date_label":"20 - Apr","phase":"playoffs","note":"TBD"},{"date_label":"27 - Apr","phase":"playoffs","note":"TBD"}],"team_4_regular_season":[{"date_label":"1 - Sept","opponent":13,"board":"E"},{"date_label":"15-Sept","opponent":11,"board":"G"},{"date_label":"22 – Sept","opponent":9,"board":"C"},{"date_label":"29 - Sept","opponent":7,"board":"F"},{"date_label":"6-Oct","opponent":5,"board":"E"},{"date_label":"20- Oct","opponent":3,"board":"H"},{"date_label":"27 - Oct","opponent":1,"board":"H"},{"date_label":"2- Nov *Monday*","opponent":16,"board":"A","is_monday_exception":true},{"date_label":"17 – Nov","opponent":14,"board":"B"},{"date_label":"24 - Nov","opponent":12,"board":"F"},{"date_label":"1 - Dec","opponent":10,"board":"D"},{"date_label":"15 - Dec","opponent":8,"board":"I"},{"date_label":"5 - Jan","opponent":6,"board":"B"},{"date_label":"19 - Jan","opponent":18,"board":"H"},{"date_label":"26 - Jan","opponent":2,"board":"G"},{"date_label":"2 - Feb","opponent":17,"board":"H"},{"date_label":"16 - Feb","opponent":15,"board":"H"}],"notes":["We play Monday night Nov 2nd.","NO Darts on TVRA Nights (2nd Tuesday each month).","5-Jan PDF lists team #1 on both boards G and H; preserved as printed."]},"sources":{"roster":{"fileId":"1lRiivuR8B_Fmjclnp5CSbARfIF8YBumo","name":"YC Team Roster 26-27.pdf","modifiedTime":"2026-09-23T00:00:00.000Z","asOf":"2026-09-16"},"schedule":{"fileId":"1yymSf_bEmPLYypRxgzfuLEP9h2qDswc7","name":"YC Schedule 26-27.pdf","modifiedTime":"2026-06-11T00:00:00.000Z"},"subs":{"fileId":"1SrVJxHlGeZCKRU39NKAYjB8-P72RCBjS","name":"YC Sub's List.pdf","modifiedTime":"2026-09-29T00:00:00.000Z","asOf":"2026-09-29"},"rules":{"fileId":"1UFIPbiS-m5dvtuNHO6qyVe_lzQPtD929","name":"Dart League Rules 2026.pdf","modifiedTime":"2026-09-17T00:00:00.000Z","asOf":"2026-09-06"}}};
+const RULES_HTML_BUNDLED = "<section class=\"league-rules\" data-source=\"Dart League Rules 2026.pdf\" data-as-of=\"2026-09-06\" data-drive-modified=\"2026-09-17\">\n  <header>\n    <h1>Tellico Village Dart League Rules</h1>\n    <p class=\"rules-meta\">As of 9/6/2026 · Source: Dart League Rules 2026.pdf (Drive modified 2026-09-17)</p>\n  </header>\n\n  <h2>Goals</h2>\n  <ol>\n    <li>Meet new people</li>\n    <li>Provide the opportunity to learn the game of darts and improve</li>\n    <li>Have FUN!</li>\n  </ol>\n\n  <h2>Mission Statement</h2>\n  <p>The league seeks to promote the playing and enjoyment of darts in a social environment. All players should realize we are guests of the Yacht Club and the Kahite Pub: we need to start and finish games promptly in order to vacate the premises on time. In addition, the players are responsible for setting up the boards, taking down and storing the equipment and cleaning up their space after their match.</p>\n\n  <h2>Rules</h2>\n  <ul>\n    <li>The Tellico Village Dart League has zero tolerance concerning physical and/or verbal abuse. Any violation will result in immediate ejection from the league.</li>\n    <li>Excessive swearing or badgering of players will not be tolerated. Violators may be subject to disciplinary action.</li>\n    <li>Only Tellico Village residents are permitted to play in the league. Non-residents currently in the league are grandfathered into the league.</li>\n    <li>Play will be at the Yacht Club on Tuesday from 6 – 9 pm and at the Kahite Pub on Thursday from 2 – 5 pm unless otherwise noted.</li>\n    <li>Any games not started by 9 pm or 5 pm, respectively will be considered a loss for both teams.</li>\n    <li>To compete in the league a team must have 4 or more players.</li>\n    <li>If a team has fewer than 4 players for a match, they will forfeit the 4 person game.</li>\n    <li>Each team should designate a captain. Captains will be responsible for:\n      <ul>\n        <li>Ensuring their team behaves in a sportsmanlike manner.</li>\n        <li>Obtain subs as needed.</li>\n        <li>Resolve minor disputes during a match with the opposing captain. If the team captains cannot come to a final resolution, the matter should be brought to either Kevin Lionarons or Ray Hoppenjans.</li>\n        <li>Team communications throughout the season.</li>\n        <li>Creating the roster for a match.</li>\n        <li>Keeping track of score sheet data.</li>\n      </ul>\n    </li>\n    <li>A “match” will consist of 8 games made up of ‘01 and cricket.</li>\n    <li>One sub list will be maintained for the Tellico Village Dart League. Anyone on the sub list can participate in either location. Only subs currently on the sub list can participate. To get on the list, an email must be sent to Kevin Lionarons (seaswallow@yahoo.com) or Ray Hoppenjans (ray.hoppenjans@gmail.com) containing the person’s name, phone number and email address. No one will be added to the list until all three pieces of information are provided.</li>\n    <li>To be eligible to play in a match, a sub must be added to the sub list by midnight of the previous Sunday. Subs cannot be added on the day of a match.</li>\n    <li>Use of a sub in a game that is not on the sub list will result in the loss of that game.</li>\n    <li>Anyone currently on a team roster can act as a sub at the other location, even if they are not listed on the sub list. Roster players may not sub at their own location.</li>\n    <li>Each player should play a minimum of 3 games in a match. A player has “right of refusal”, meaning he/she can opt out of their games, if desired.</li>\n  </ul>\n\n  <h3>Forfeit Rules</h3>\n  <ul>\n    <li>If a team cannot play, the captain must notify the other captain and Kevin Lionarons or Ray Hoppenjans as soon as possible. Failure to notify will result in a forfeiture.</li>\n    <li>The notifying captain is responsible for rescheduling the match. The match must be completed as soon as is practical, but must be completed before the final match of the season or the team will forfeit.</li>\n    <li>Both captains must do their best to find a time to play the match. Someone always gets hurt when a forfeit occurs; please try to play the match.</li>\n    <li>In the event of a forfeit, the forfeiting team will receive 2 wins and 6 losses; the opposing team will receive 6 wins and 2 losses.</li>\n  </ul>\n\n  <h3>Diddle / Starting</h3>\n  <ul>\n    <li>Each game starts with one player from each team throwing at the bullseye (the diddle).</li>\n    <li>Closest to the bull goes first.</li>\n    <li>If the first player throws a bull or double bull, the second player has the option of removing the dart prior to his/her throw or leaving it in the board.</li>\n    <li>If both players hit a single bull, double bull or if both throws are approximately the same distance from the bullseye, the players must re-throw in reverse order.</li>\n  </ul>\n\n  <h3>During Play</h3>\n  <ul>\n    <li>During play, players should leave the darts in the board until the score has been recognized by the scorekeeper and agreed to by the player.</li>\n    <li>Players may not touch any dart in the board during a turn. If a player touches his/her dart in the board during a turn before all three darts are thrown, the player’s turn will be considered complete. Subsequent darts thrown in that turn will not count.</li>\n    <li>Darts must stick in the board to be counted. If a dart falls out of the board prior to the scorekeeper recognizing the total score for the turn, it will not count.</li>\n  </ul>\n\n  <h3>Great Shots</h3>\n  <p>The Score Sheet includes a section to record “Great Shots.” Please clearly write the person’s name and describe the shot. Great shots include:</p>\n  <ul>\n    <li>5 or more marks in Cricket</li>\n    <li>Throwing three bulls in a single turn in Cricket</li>\n    <li>100 or more points in ’01</li>\n    <li>High out shots in ’01 (ie. 50 or more)</li>\n    <li>A person’s first time hitting the double for an out shot in ‘01</li>\n  </ul>\n\n  <h3>Long Games</h3>\n  <ul>\n    <li>If a game is running too long, the captains can decide to end the game.</li>\n    <li>The teams can split the point.</li>\n    <li>Another option for 301/501 is to allow play to continue until the current round is completed. If there is no winner, play continues with a “single” out, meaning the game will end when a team reaches zero (hitting a double is not required). All three darts can be used in a turn.</li>\n  </ul>\n</section>";
+const RULES_META_BUNDLED = {"updatedAt":"2026-10-02T15:46:55.000Z","sourceModifiedAt":"2026-09-17T00:00:00.000Z","asOf":"2026-09-06","source":{"fileId":"1UFIPbiS-m5dvtuNHO6qyVe_lzQPtD929","name":"Dart League Rules 2026.pdf","modifiedTime":"2026-09-17T00:00:00.000Z"}};
+const LEAGUE_CACHE_KEY = 'tvyc-darts-league-cache-v1';
+const RULES_CACHE_KEY = 'tvyc-darts-rules-cache-v1';
+const LEAGUE_JSON_REL = 'league/2026-27.json';
+const RULES_JSON_REL = 'league/2026-27-rules.json';
+const PAGES_BASE = 'https://git-denyeh.github.io/darts-scorecard/';
+const RAW_BASE = 'https://raw.githubusercontent.com/git-denyeh/darts-scorecard/main/';
+const APP_VERSION = '1.2.3';
+
+function readLeagueCache() {
+  try {
+    const raw = localStorage.getItem(LEAGUE_CACHE_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || !obj.league || !obj.league.teams) return null;
+    return obj;
+  } catch (e) { return null; }
+}
+function writeLeagueCache(league) {
+  try {
+    localStorage.setItem(LEAGUE_CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(),
+      sourceModifiedAt: league.sourceModifiedAt || null,
+      updatedAt: league.updatedAt || null,
+      league: league
+    }));
+  } catch (e) {}
+}
+function readRulesCache() {
+  try {
+    const raw = localStorage.getItem(RULES_CACHE_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || !obj.html) return null;
+    return obj;
+  } catch (e) { return null; }
+}
+function writeRulesCache(doc) {
+  try {
+    localStorage.setItem(RULES_CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(),
+      sourceModifiedAt: doc.sourceModifiedAt || null,
+      updatedAt: doc.updatedAt || null,
+      asOf: doc.asOf || null,
+      html: doc.html
+    }));
+  } catch (e) {}
+}
+function pickNewerLeague(a, b) {
+  // Return the newer of two league objects by sourceModifiedAt then updatedAt
+  function key(x) {
+    if (!x) return '';
+    return String(x.sourceModifiedAt || '') + '|' + String(x.updatedAt || '');
+  }
+  return key(b) > key(a) ? b : a;
+}
+(function initLeagueFromCache() {
+  const cached = readLeagueCache();
+  if (cached && cached.league) {
+    const newer = pickNewerLeague(LEAGUE_BUNDLED, cached.league);
+    if (newer === cached.league) {
+      // cached wins — assign into LEAGUE after declaration via mutation below
+      window.__LEAGUE_CACHE_BOOT = cached.league;
+    }
+  }
+  const rc = readRulesCache();
+  if (rc && rc.html) {
+    const bootMeta = { sourceModifiedAt: rc.sourceModifiedAt, updatedAt: rc.updatedAt };
+    const bundledMeta = RULES_META_BUNDLED;
+    if (String(bootMeta.sourceModifiedAt || '') + '|' + String(bootMeta.updatedAt || '') >
+        String(bundledMeta.sourceModifiedAt || '') + '|' + String(bundledMeta.updatedAt || '')) {
+      window.__RULES_CACHE_BOOT = rc;
+    }
+  }
+})();
+
+let LEAGUE = (window.__LEAGUE_CACHE_BOOT && window.__LEAGUE_CACHE_BOOT.teams)
+  ? window.__LEAGUE_CACHE_BOOT
+  : LEAGUE_BUNDLED;
+let RULES_HTML = (window.__RULES_CACHE_BOOT && window.__RULES_CACHE_BOOT.html)
+  ? window.__RULES_CACHE_BOOT.html
+  : RULES_HTML_BUNDLED;
+let RULES_META = (window.__RULES_CACHE_BOOT)
+  ? {
+      updatedAt: window.__RULES_CACHE_BOOT.updatedAt,
+      sourceModifiedAt: window.__RULES_CACHE_BOOT.sourceModifiedAt,
+      asOf: window.__RULES_CACHE_BOOT.asOf,
+      source: RULES_META_BUNDLED.source
+    }
+  : RULES_META_BUNDLED;
 const SCHED_GAMES = [
   { id:1, label:"Doubles Cricket", type:"Cricket", slots:2 },
   { id:2, label:"Doubles Cricket", type:"Cricket", slots:2 },
@@ -4724,7 +4871,7 @@ function showBust() {
 /* NAV */
 function hideNightScreens() {
   ['welcome','profile-setup','play-local','play-setup','play-bot',
-   'tournaments-stub','friends','standings','home','present','lineup','verify-screen'].forEach(id => {
+   'tournaments-stub','friends','standings','rules','home','present','lineup','verify-screen'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('show');
   });
@@ -4983,12 +5130,29 @@ function hideAllFlow() {
 }
 
 function matchesForFocus(focusNum) {
-  // Only use schedule data in JSON. Team #4 has full team_4_regular_season;
-  // other teams: nights where they appear vs #4 (derived from that extract).
-  const nights = (LEAGUE.schedule_notes && LEAGUE.schedule_notes.team_4_regular_season) || [];
-  const out = [];
   const focus = Number(focusNum);
-  nights.forEach((n, i) => {
+  const out = [];
+  const full = (LEAGUE.schedule_notes && LEAGUE.schedule_notes.regular_season_nights) || null;
+  if (full && full.length) {
+    full.forEach(function (night, i) {
+      (night.matches || []).forEach(function (m, j) {
+        const a = Number(m.team_a), b = Number(m.team_b);
+        if (a !== focus && b !== focus) return;
+        out.push({
+          key: 'n' + i + '-' + j,
+          dateLabel: night.date_label,
+          board: m.board || '',
+          focus: focus,
+          opponent: a === focus ? b : a,
+          isMonday: !!night.is_monday_exception
+        });
+      });
+    });
+    return out;
+  }
+  // Fallback: team_4 extract
+  const nights = (LEAGUE.schedule_notes && LEAGUE.schedule_notes.team_4_regular_season) || [];
+  nights.forEach(function (n, i) {
     if (focus === 4) {
       out.push({
         key: 't4-' + i,
@@ -4999,15 +5163,13 @@ function matchesForFocus(focusNum) {
         isMonday: !!n.is_monday_exception
       });
     } else if (Number(n.opponent) === focus) {
-      const t4 = teamByNumber(4);
       out.push({
         key: 'vs4-' + i,
         dateLabel: n.date_label,
         board: n.board || '',
         focus: focus,
         opponent: 4,
-        isMonday: !!n.is_monday_exception,
-        note: 'vs ' + teamShortName(t4) + ' (from Team #4 schedule extract)'
+        isMonday: !!n.is_monday_exception
       });
     }
   });
@@ -6013,6 +6175,8 @@ function showHelp() {
     '  Custom Match: pick Friends or League teams. No league team required.\n\n' +
     'Friends (☰) — house/casual names on this device; anyone can add/remove; Export/Import JSON.\n\n' +
     'Standings (☰) — season W–L + Great Shots (cached offline from Pages).\n\n' +
+    'Rules (☰) — Tellico Village Dart League rules (bundled; Sync updates from Pages).\n\n' +
+    'Sync (☰ / ↻) — fetch league JSON + rules from GitHub Pages if newer than cache.\n\n' +
     'Leagues & Groups — pick team+player if unset, then night flow: schedule → present → lineup → score.\n\n' +
     '01: D/T then number; type visit totals (e.g. 180) + ENTER; side shortcuts (no 100/140/180 keys).\n' +
     'Cricket: D / number / T; BACK; MISS.\n\n' +
@@ -6146,8 +6310,8 @@ wireUtil('su-gear', () => document.getElementById('settings-modal').classList.ad
 wireUtil('su-gear-c', () => document.getElementById('settings-modal').classList.add('open'));
 wireUtil('su-info', () => toastStub('Info — ' + (match ? (match.mode + ' · first to ' + match.legsToWin) : 'no match')));
 wireUtil('su-info-c', () => toastStub('Info — Cricket · first to ' + (match ? match.legsToWin : '?')));
-wireUtil('su-sync', () => toastStub('Sync — localStorage only'));
-wireUtil('su-sync-c', () => toastStub('Sync — localStorage only'));
+wireUtil('su-sync', () => syncLeagueFromMirror({ silent: false }));
+wireUtil('su-sync-c', () => syncLeagueFromMirror({ silent: false }));
 document.getElementById('settings-close').addEventListener('click', () => {
   document.getElementById('settings-modal').classList.remove('open');
 });
@@ -6238,6 +6402,139 @@ document.getElementById('end-night-btn').addEventListener('click', () => {
 });
 
 
+
+
+/* ===== LEAGUE SYNC + RULES (v1.2.3) ===== */
+function leagueStamp(obj) {
+  if (!obj) return '';
+  return String(obj.sourceModifiedAt || '') + '|' + String(obj.updatedAt || '');
+}
+function syncStatusLine() {
+  const sm = (LEAGUE && LEAGUE.sourceModifiedAt) || (LEAGUE_BUNDLED && LEAGUE_BUNDLED.sourceModifiedAt) || '?';
+  const ua = (LEAGUE && LEAGUE.updatedAt) || '';
+  return 'Cached sourceModifiedAt ' + sm + (ua ? ' · baked ' + ua.slice(0, 10) : '');
+}
+function refreshSyncStatusUI() {
+  const el = document.getElementById('set-sync-status');
+  if (el) el.textContent = syncStatusLine() + ' · Sync pulls league/2026-27.json from Pages when newer.';
+}
+async function fetchFirstOk(urls) {
+  let lastErr = null;
+  for (let i = 0; i < urls.length; i++) {
+    try {
+      const res = await fetch(urls[i], { cache: 'no-store' });
+      if (!res.ok) { lastErr = new Error(urls[i] + ' → ' + res.status); continue; }
+      return { url: urls[i], data: await res.json() };
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('All sync URLs failed');
+}
+function leagueSyncUrls() {
+  const urls = [];
+  if (location.protocol !== 'file:') {
+    try { urls.push(new URL(LEAGUE_JSON_REL, location.href).href); } catch (e) {}
+  }
+  urls.push(PAGES_BASE + LEAGUE_JSON_REL);
+  urls.push(RAW_BASE + LEAGUE_JSON_REL);
+  return urls;
+}
+function rulesSyncUrls() {
+  const urls = [];
+  if (location.protocol !== 'file:') {
+    try { urls.push(new URL(RULES_JSON_REL, location.href).href); } catch (e) {}
+  }
+  urls.push(PAGES_BASE + RULES_JSON_REL);
+  urls.push(RAW_BASE + RULES_JSON_REL);
+  return urls;
+}
+async function syncLeagueFromMirror(opts) {
+  opts = opts || {};
+  const silent = !!opts.silent;
+  try {
+    if (!silent) toastStub('Checking for league updates…');
+    const leagueHit = await fetchFirstOk(leagueSyncUrls());
+    const remote = leagueHit.data;
+    if (!remote || !remote.teams) throw new Error('Invalid league JSON');
+    const localKey = leagueStamp(LEAGUE);
+    const remoteKey = leagueStamp(remote);
+    let leagueUpdated = false;
+    if (remoteKey > localKey) {
+      LEAGUE = remote;
+      writeLeagueCache(remote);
+      leagueUpdated = true;
+    } else if (!readLeagueCache()) {
+      writeLeagueCache(LEAGUE);
+    }
+    let rulesUpdated = false;
+    try {
+      const rulesHit = await fetchFirstOk(rulesSyncUrls());
+      const rdoc = rulesHit.data;
+      if (rdoc && rdoc.html) {
+        const rLocal = leagueStamp(RULES_META);
+        const rRemote = leagueStamp(rdoc);
+        if (rRemote > rLocal) {
+          RULES_HTML = rdoc.html;
+          RULES_META = {
+            updatedAt: rdoc.updatedAt,
+            sourceModifiedAt: rdoc.sourceModifiedAt,
+            asOf: rdoc.asOf,
+            source: rdoc.source || RULES_META.source
+          };
+          writeRulesCache(rdoc);
+          rulesUpdated = true;
+          const body = document.getElementById('rules-body');
+          if (body) body.innerHTML = RULES_HTML;
+        }
+      }
+    } catch (re) {
+      // Rules optional if league ok
+      if (!silent) console.warn('Rules sync skipped', re);
+    }
+    refreshSyncStatusUI();
+    if (leagueUpdated || rulesUpdated) {
+      toastStub('Synced ✓' + (leagueUpdated ? ' league' : '') + (rulesUpdated ? ' rules' : ''));
+      // Refresh schedule list if on home
+      try { if (typeof renderMatchList === 'function') renderMatchList(); } catch (e) {}
+      return { ok: true, leagueUpdated: leagueUpdated, rulesUpdated: rulesUpdated, from: leagueHit.url };
+    }
+    toastStub('Already up to date');
+    return { ok: true, leagueUpdated: false, rulesUpdated: false, from: leagueHit.url };
+  } catch (e) {
+    toastStub('Sync failed — offline cache kept');
+    return { ok: false, error: e && e.message ? e.message : String(e) };
+  }
+}
+function showRules() {
+  showFlow('rules');
+  const body = document.getElementById('rules-body');
+  if (body) body.innerHTML = RULES_HTML || '<p class="st-empty">Rules not loaded</p>';
+  const st = document.getElementById('rules-status');
+  if (st) {
+    const asOf = (RULES_META && RULES_META.asOf) || '?';
+    const sm = (RULES_META && RULES_META.sourceModifiedAt) || '';
+    st.textContent = 'As of ' + asOf + (sm ? ' · Drive ' + sm.slice(0, 10) : '') + ' · offline OK';
+  }
+}
+function wireLeagueSyncUI() {
+  const run = function () {
+    closeMenu();
+    const sm = document.getElementById('settings-modal');
+    if (sm) sm.classList.remove('open');
+    syncLeagueFromMirror({ silent: false });
+  };
+  const ms = document.getElementById('menu-sync');
+  if (ms) ms.addEventListener('click', run);
+  const mr = document.getElementById('menu-rules');
+  if (mr) mr.addEventListener('click', function () { closeMenu(); showRules(); });
+  const ss = document.getElementById('set-sync');
+  if (ss) ss.addEventListener('click', run);
+  const rb = document.getElementById('rules-back');
+  const rc = document.getElementById('rules-close');
+  if (rb) rb.addEventListener('click', showWelcome);
+  if (rc) rc.addEventListener('click', showWelcome);
+  refreshSyncStatusUI();
+}
+wireLeagueSyncUI();
 
 /* ===== IN-APP STANDINGS (v1.2.2) ===== */
 const SEASON_CACHE_KEY = 'tvyc-darts-season-cache-v1';
@@ -6631,7 +6928,7 @@ function serializeNightJSON() {
     totalWins: totalWins,
     greatShots: collectGreatShotsFromNight(),
     submittedAt: new Date().toISOString(),
-    appVersion: '1.2.2'
+    appVersion: APP_VERSION
   };
   if (nightOps.forfeit) doc.forfeit = Object.assign({}, nightOps.forfeit);
   return { doc, path, filename };
