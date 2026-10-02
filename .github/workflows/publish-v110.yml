@@ -1,15 +1,7 @@
 name: Publish v1.1.0 scorecard
 on:
+  # Manual only — concatenates payload.p* already on main into index.html
   workflow_dispatch:
-    inputs:
-      b64a:
-        description: first half gzip+base64 of TVYC-Darts.html
-        required: true
-        type: string
-      b64b:
-        description: second half gzip+base64 of TVYC-Darts.html
-        required: true
-        type: string
 permissions:
   contents: write
 jobs:
@@ -17,58 +9,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Decode and write index.html + loader payloads
-        env:
-          B64A: ${{ inputs.b64a }}
-          B64B: ${{ inputs.b64b }}
+      - name: Decode payload.p* to index.html
         run: |
           python3 <<'PY'
-          import os, base64, gzip, hashlib, math
           from pathlib import Path
-          b64 = os.environ['B64A'] + os.environ['B64B']
-          html = gzip.decompress(base64.b64decode(b64, validate=True))
-          assert b'1.1.0' in html and b'post-war pub theme' in html
-          assert b'100dvh' in html
+          import base64, gzip, hashlib, re
+          parts_paths = sorted(Path('.').glob('payload.p*'), key=lambda p: p.name)
+          if not parts_paths:
+              raise SystemExit('no payload.p* files')
+          expected = [f'payload.p{i:02d}' for i in range(1, len(parts_paths)+1)]
+          actual = [p.name for p in parts_paths]
+          if actual != expected:
+              raise SystemExit(f'parts not contiguous: {actual}')
+          parts = []
+          for p in parts_paths:
+              s = p.read_text().replace('\n','').replace('\r','')
+              if not s:
+                  raise SystemExit(f'{p.name} empty')
+              parts.append(s)
+              print(f'{p.name}: {len(s)} chars')
+          joined = ''.join(parts)
+          print(f'joined={len(joined)} mod4={len(joined)%4} parts={len(parts)}')
+          if len(joined) % 4 != 0:
+              raise SystemExit(f'mod4={len(joined)%4}')
+          html = gzip.decompress(base64.b64decode(joined, validate=True))
+          if len(html) < 100000:
+              raise SystemExit(f'too small {len(html)}')
+          if b'1.1.0' not in html or b'post-war pub theme' not in html:
+              raise SystemExit('missing v1.1.0 theme markers')
+          if b'100dvh' not in html or b'max-width: none' not in html:
+              raise SystemExit('missing mobile markers')
           Path('index.html').write_bytes(html)
-          print('index.html', len(html), hashlib.sha256(html).hexdigest())
-          CHUNK = 2500
-          n = math.ceil(len(b64) / CHUNK)
-          for i in range(n):
-              chunk = b64[i*CHUNK:(i+1)*CHUNK] + '\n'
-              Path(f'payload.p{i+1:02d}').write_text(chunk)
-          for p in Path('.').glob('payload.p*'):
-              num = int(p.name.replace('payload.p',''))
-              if num > n:
-                  p.unlink()
-          loader = f"""<!DOCTYPE html>
-<html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no\"><title>TVYC Darts</title></head>
-<body style=\"margin:0;background:#140e0a;color:#c4b59a;font-family:system-ui;padding:16px\">
-<p>Loading TVYC Darts v1.1.0…</p>
-<script>
-(async () => {{
-  const n = {n}; const v = '110'; const parts = [];
-  for (let i = 1; i <= n; i++) {{
-    const id = String(i).padStart(2, '0');
-    const r = await fetch('./payload.p' + id + '?v=' + v);
-    if (!r.ok) throw new Error('payload.p' + id + ' ' + r.status);
-    parts.push((await r.text()).replace(/\\n+$/,''));
-  }}
-  const bin = Uint8Array.from(atob(parts.join('')), c => c.charCodeAt(0));
-  const html = await new Response(new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
-  document.open(); document.write(html); document.close();
-}})().catch(e => {{ document.body.innerHTML = '<pre style=\"color:#c9a227\">Load failed: ' + e + '</pre>'; }});
-</script></body></html>
-"""
-          Path('loader.html').write_text(loader)
-          print('parts', n)
+          sha = hashlib.sha256(html).hexdigest()
+          print(f'Wrote index.html bytes={len(html)} sha256={sha}')
           PY
-      - name: Commit published files
+          wc -c index.html
+      - name: Commit index.html
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html loader.html payload.p*
-          git add -u payload.p* || true
-          git status
+          git add index.html
           git diff --cached --quiet && echo "No change" && exit 0
-          git commit -m "v1.1.0 post-war pub theme — publish full index + payloads"
+          git commit -m "v1.1.0 expand: write index.html from payload parts"
           git push
