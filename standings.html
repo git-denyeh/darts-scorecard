@@ -120,7 +120,7 @@ footer{text-align:center;color:var(--dim);font-size:.75rem;margin-top:24px}
   }
   function esc(s) {
     return String(s == null ? '' : s)
-      .replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   let season = null;
@@ -141,8 +141,9 @@ footer{text-align:center;color:var(--dim);font-size:.75rem;margin-top:24px}
   const seedNote = season.seed && season.seed.asOfWeek
     ? '<div class="note">Through Week ' + season.seed.asOfWeek +
       (season.seed.asOfDate ? ' (' + esc(season.seed.asOfDate) + ')' : '') +
-      ' · seeded from Kevin&Ray organizer emails</div>'
-    : '';
+      (season.updatedAt ? ' · updated ' + esc(season.updatedAt) : '') +
+      '</div>'
+    : (season.updatedAt ? '<div class="note">updated ' + esc(season.updatedAt) + '</div>' : '');
   if (!teams.length) {
     document.getElementById('standings-body').innerHTML = '<div class="empty">No matches submitted yet.</div>';
   } else {
@@ -169,10 +170,10 @@ footer{text-align:center;color:var(--dim);font-size:.75rem;margin-top:24px}
         '<span>' + esc(r.rightName) + '</span></div>'
       ).join('');
   } else {
+    // Email-seeded week: no per-match scores
     let body = '<div class="sub" style="margin-bottom:8px">' + esc(week.dateLabel || week.date) + '</div>';
     if (week.source === 'kevin-ray-email') {
-      body += '<div class="empty">Per-match board scores not recorded for this week.</div>' +
-        '<div class="note">Standings and Great Shots come from the Kevin&Ray organizer email. Individual match lineups were not invented.</div>';
+      body += '<div class="empty">Per-match board scores not recorded for this week.</div>';
     } else {
       body += '<div class="empty">No board results posted for this week yet.</div>';
     }
