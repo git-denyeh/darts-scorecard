@@ -17,6 +17,16 @@ jobs:
           if not parts:
               raise SystemExit('no payload.all.* files')
           joined = ''.join(p.read_text().replace('\n','').replace('\r','') for p in parts)
+          repairs = [
+            ('65q+8GCydi5sWdI', '65q+8WCydi5sWdI'),
+            ('zQqVpooLW0yUs9U0', 'zQqVpooLU0yUs9U0'),
+            ('UfJRnVZKHU10BaT', 'UfJRnTZKHU10BaT'),
+            ('bJA0TuidGqCHbhv', 'bJA0TUidGqCHbhv'),
+          ]
+          for bad, good in repairs:
+              if bad in joined:
+                  joined = joined.replace(bad, good, 1)
+                  print('repaired', bad[:16])
           print(f'parts={len(parts)} joined={len(joined)} mod4={len(joined)%4}')
           if len(joined) % 4 != 0:
               raise SystemExit(f'mod4={len(joined)%4}')
