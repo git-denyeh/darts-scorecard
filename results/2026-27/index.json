@@ -2,5 +2,36 @@
   "schema": "tvyc-darts-results-index/v1",
   "seasonId": "2026-27",
   "nights": [],
-  "updatedAt": null
+  "weeks": [
+    {
+      "week": 1,
+      "date": "2026-09-01",
+      "dateLabel": "1-Sep (Week 1)",
+      "path": "weeks/w01.json",
+      "source": "kevin-ray-email"
+    },
+    {
+      "week": 2,
+      "date": "2026-09-15",
+      "dateLabel": "15-Sep (Week 2)",
+      "path": "weeks/w02.json",
+      "source": "kevin-ray-email"
+    },
+    {
+      "week": 3,
+      "date": "2026-09-22",
+      "dateLabel": "22-Sep (Week 3)",
+      "path": "weeks/w03.json",
+      "source": "kevin-ray-email"
+    },
+    {
+      "week": 4,
+      "date": "2026-09-29",
+      "dateLabel": "29-Sep (Week 4)",
+      "path": "weeks/w04.json",
+      "source": "kevin-ray-email"
+    }
+  ],
+  "note": "Weeks 1–4 seeded from Kevin&Ray organizer emails (cumulative W-L + Great Shots). No per-match night scores invented.",
+  "updatedAt": "2026-10-02T10:19:30-04:00"
 }
