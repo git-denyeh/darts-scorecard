@@ -4,8 +4,9 @@ League nights only. Scores stay local until End Night → Verify → Submit.
 
 ## Paths
 - `results/2026-27/nights/{YYYY-MM-DD}_{focusSlug}_vs_{oppSlug}_b{board}.json`
-- `results/2026-27/index.json` — list of night file paths + meta
-- `stats/2026-27/season.json` — rollup (W-L, great shots)
+- `results/2026-27/weeks/w{NN}.json` — weekly digest (standings snapshot + Great Shots); used when seeding from organizer emails without inventing per-match scores
+- `results/2026-27/index.json` — list of night/week file paths + meta
+- `stats/2026-27/season.json` — rollup (W-L, great shots); may include `seed` meta when backfilled from emails
 - `standings.html` — public standings + week digest
 
 ## Night file
@@ -44,3 +45,7 @@ League nights only. Scores stay local until End Night → Verify → Submit.
 
 `wins` per game may be `0`, `0.5`, or `1` (half-wins allowed in season totals).
 Great Shots: Cricket 5+ counts / 3+ bulls; 01 tons 100+, high out 50+, first out.
+
+## Week digest (email seed) — `tvyc-darts-week-digest/v1`
+Cumulative season W-L after that week + Great Shots list from Kevin&Ray email.
+`results` stays empty when per-match scores are unknown (do not invent them).
