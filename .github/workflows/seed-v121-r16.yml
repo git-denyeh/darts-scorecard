@@ -1,0 +1,34 @@
+name: Seed v1.2.1 remaining payloads (r16)
+on:
+  workflow_dispatch:
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack r16 parts
+        run: |
+          cat r16.p01 r16.p02 r16.p03 r16.p04 r16.p05 r16.p06 r16.p07 r16.p08 r16.p09 r16.p10 r16.p11 r16.p12 r16.p13 r16.p14 r16.p15 r16.p16 | tr -d '\n' | base64 -d > rem121.tar.gz
+          tar -xzf rem121.tar.gz
+          ls -la payload.p03 payload.p32
+      - name: Verify
+        run: |
+          python3 - <<'PY'
+          import base64,gzip,hashlib,pathlib
+          parts=[pathlib.Path(f"payload.p{i:02d}").read_text().strip() for i in range(1,33)]
+          html=gzip.decompress(base64.b64decode("".join(parts)))
+          h=hashlib.sha256(html).hexdigest()
+          print(len(html), h)
+          assert h=="b53b348cf7677a82143e46619a55a9f27fbd8df902e5f6a753385b151a33297b"
+          assert b"1.2.1" in html and b"menu-standings" in html
+          print("OK")
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add payload.p0[3-9] payload.p1* payload.p2* payload.p3*
+          git diff --cached --quiet || git commit -m "v1.2.1 remaining payloads via r16 parts"
+          git push
