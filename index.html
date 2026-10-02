@@ -1323,7 +1323,7 @@ button:disabled { cursor: default; }
 
 /* FLOW SCREENS (welcome / play / league night) */
 #welcome, #profile-setup, #play-local, #play-setup, #play-bot,
-#tournaments-stub, #friends, #home, #present, #lineup {
+#tournaments-stub, #friends, #standings, #home, #present, #lineup {
   display: none;
   flex-direction: column;
   width: 100%; max-width: 600px;
@@ -1338,7 +1338,7 @@ button:disabled { cursor: default; }
   box-sizing: border-box;
 }
 #welcome.show, #profile-setup.show, #play-local.show, #play-setup.show, #play-bot.show,
-#tournaments-stub.show, #friends.show,
+#tournaments-stub.show, #friends.show, #standings.show,
 #home.show, #present.show, #lineup.show { display: flex; }
 #profile-setup { align-items: stretch; max-width: 480px; padding-top: 28px; }
 #present {
@@ -1995,7 +1995,7 @@ button:disabled { cursor: default; }
 @media (max-width: 720px) {
   #setup, #game, #scheduler,
   #welcome, #profile-setup, #play-local, #play-setup, #play-bot,
-  #tournaments-stub, #friends, #home, #present, #lineup {
+  #tournaments-stub, #friends, #standings, #home, #present, #lineup {
     max-width: none !important;
     width: 100% !important;
     margin: 0 !important;
@@ -2018,13 +2018,65 @@ button:disabled { cursor: default; }
   }
   #setup, #game, #scheduler,
   #welcome, #profile-setup, #play-local, #play-setup, #play-bot,
-  #tournaments-stub, #friends, #home, #present, #lineup {
+  #tournaments-stub, #friends, #standings, #home, #present, #lineup {
     height: 100svh;
     min-height: 100svh;
     max-height: 100svh;
   }
 }
 
+
+
+/* In-app Standings (v1.2.1) */
+#standings .st-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin: 0;
+}
+#standings .st-card h2 {
+  font-family: var(--font-display); letter-spacing: 2px;
+  color: var(--yellow); font-size: 1.05rem; margin-bottom: 10px;
+}
+#standings .st-meta {
+  color: var(--text-dim); font-size: .78rem; margin-bottom: 8px; line-height: 1.35;
+}
+#standings .st-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+#standings .st-table th, #standings .st-table td {
+  padding: 8px 6px; text-align: left; border-bottom: 1px solid var(--border);
+}
+#standings .st-table th {
+  color: var(--text-dim); font-weight: 600; font-size: .72rem;
+  letter-spacing: 1px; text-transform: uppercase;
+}
+#standings .st-table td.num, #standings .st-table th.num {
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+#standings .st-table tr:last-child td { border-bottom: none; }
+#standings .st-rank { color: var(--text-dim); width: 2rem; }
+#standings .st-name { font-weight: 600; }
+#standings .st-wl { color: var(--cream, #f3e6c8); font-weight: 700; }
+#standings .st-shot {
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  font-size: .88rem; color: var(--text-mid);
+}
+#standings .st-shot:last-child { border-bottom: none; }
+#standings .st-shot strong { color: var(--white); }
+#standings .st-empty { color: var(--text-dim); font-style: italic; padding: 8px 0; }
+#standings .st-actions {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
+}
+#standings .st-actions button,
+#standings .st-actions a.st-linkbtn {
+  font-family: var(--font-ui); font-size: .8rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; text-decoration: none;
+  color: var(--cream, #f3e6c8); border: 1px solid var(--border);
+  background: var(--panel2); padding: 10px 14px; border-radius: 6px;
+  cursor: pointer; display: inline-block;
+}
+#standings .st-actions button.primary {
+  background: var(--yellow); color: #1c1410; border-color: var(--yellow);
+}
+#standings .st-actions button:disabled { opacity: .45; cursor: default; }
+#standings .st-err { color: var(--red, #8b2a3e); font-size: .85rem; margin-top: 6px; }
 
 /* Verify Scoresheet + Submit */
 #verify-screen {
@@ -2184,7 +2236,7 @@ button:disabled { cursor: default; }
   </div>
   <button type="button" class="nav-btn red" id="nav-play">Play</button>
   <button type="button" class="nav-btn red" id="nav-leagues">Leagues &amp; Groups</button>
-  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.0 · league submit + standings</span> · Local</div>
+  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.1 · in-app standings</span> · Local</div>
 </div>
 
 <div class="menu-drawer" id="menu-drawer">
@@ -2192,6 +2244,7 @@ button:disabled { cursor: default; }
     <h3>Menu</h3>
     <button type="button" class="menu-item" id="menu-profile">League profile / Change team</button>
     <button type="button" class="menu-item" id="menu-friends">Friends</button>
+    <button type="button" class="menu-item" id="menu-standings">Standings</button>
     <button type="button" class="menu-item" id="menu-help">Help — night flow &amp; scoring</button>
     <button type="button" class="menu-item" id="menu-reset">Reset local data…</button>
     <button type="button" class="menu-close" id="menu-close">Close</button>
@@ -2382,6 +2435,39 @@ button:disabled { cursor: default; }
       <button type="button" id="friends-export-btn">Export JSON</button>
       <label class="friends-io-btn" for="friends-import-file">Import file</label>
       <input type="file" id="friends-import-file" accept="application/json,.json,text/plain">
+    </div>
+  </div>
+</div>
+
+<!-- STANDINGS (in-app, v1.2.1) -->
+<div id="standings">
+  <div class="flow-header">
+    <button type="button" class="night-back" id="standings-back">← HOME</button>
+    <div class="flow-title">Standings</div>
+    <button type="button" class="flow-x" id="standings-close" aria-label="Close">✕</button>
+  </div>
+  <div class="flow-panel">
+    <div class="flow-panel-title" id="standings-season-label">Season standings</div>
+    <div class="flow-panel-sub" id="standings-status">Loading…</div>
+  </div>
+  <div class="section">
+    <div class="st-card">
+      <h2>W–L table</h2>
+      <div id="standings-table-body"><div class="st-empty">Loading…</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="st-card">
+      <h2 id="standings-shots-title">Great Shots</h2>
+      <div id="standings-shots-body"><div class="st-empty">Loading…</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="slabel">More</div>
+    <div class="st-actions">
+      <button type="button" class="primary" id="standings-copy-digest">Copy week digest</button>
+      <a class="st-linkbtn" id="standings-full-link" href="standings.html" target="_blank" rel="noopener">Full standings page</a>
+      <button type="button" id="standings-refresh">Refresh</button>
     </div>
   </div>
 </div>
@@ -4621,7 +4707,7 @@ function showBust() {
 /* NAV */
 function hideNightScreens() {
   ['welcome','profile-setup','play-local','play-setup','play-bot',
-   'tournaments-stub','friends','home','present','lineup','verify-screen'].forEach(id => {
+   'tournaments-stub','friends','standings','home','present','lineup','verify-screen'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('show');
   });
@@ -5828,6 +5914,10 @@ document.getElementById('menu-friends').addEventListener('click', () => {
   closeMenu();
   showFriends();
 });
+document.getElementById('menu-standings').addEventListener('click', () => {
+  closeMenu();
+  showStandings();
+});
 function showHelp() {
   closeMenu();
   alert(
@@ -5836,6 +5926,7 @@ function showHelp() {
     'Play — Local hub: display name / Friends, then Quick/Extended 501, Cricket, Chicago, Jarvis, Custom.\n' +
     '  Custom Match: pick Friends or League teams. No league team required.\n\n' +
     'Friends (☰) — house/casual names on this device; anyone can add/remove; Export/Import JSON.\n\n' +
+    'Standings (☰) — season W–L + Great Shots (cached offline from Pages).\n\n' +
     'Leagues & Groups — pick team+player if unset, then night flow: schedule → present → lineup → score.\n\n' +
     '01: D/T then number; type visit totals (e.g. 180) + ENTER; side shortcuts (no 100/140/180 keys).\n' +
     'Cricket: D / number / T; BACK; MISS.\n\n' +
@@ -6051,7 +6142,242 @@ document.getElementById('end-night-btn').addEventListener('click', () => {
 });
 
 
-/* ===== TVYC LEAGUE SUBMIT + VERIFY (v1.2.0) ===== */
+
+/* ===== IN-APP STANDINGS (v1.2.1) ===== */
+const SEASON_CACHE_KEY = 'tvyc-darts-season-cache-v1';
+const SEASON_JSON_REL = 'stats/2026-27/season.json';
+const STANDINGS_PAGE_ABS = 'https://git-denyeh.github.io/darts-scorecard/standings.html';
+
+function fmtStandingsWL(n) {
+  if (n == null) return '0';
+  return (n % 1 === 0) ? String(n) : Number(n).toFixed(1);
+}
+function standingsShotLine(s) {
+  let bit = '<strong>' + escapeHtml(s.player || '?') + '</strong>';
+  if (s.kind === 'ton') bit += ' — ' + escapeHtml(s.value);
+  else if (s.kind === 'marks') bit += ' — ' + escapeHtml(s.value) + ' count' + (s.detail ? ' (' + escapeHtml(s.detail) + ')' : '');
+  else if (s.kind === 'bulls') bit += ' — ' + escapeHtml(s.value) + ' bulls';
+  else if (s.kind === 'highOut') bit += ' — out ' + escapeHtml(s.value);
+  else if (s.kind === 'firstOut') bit += ' — first out ' + escapeHtml(s.value);
+  else bit += ' — ' + escapeHtml(s.kind || '') + ' ' + escapeHtml(s.value || '');
+  if (s.board) bit += ' <span style="color:var(--text-dim)">[Bd ' + escapeHtml(s.board) + ']</span>';
+  return bit;
+}
+function readSeasonCache() {
+  try {
+    const raw = localStorage.getItem(SEASON_CACHE_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || !obj.season) return null;
+    return obj;
+  } catch (e) { return null; }
+}
+function writeSeasonCache(season) {
+  try {
+    localStorage.setItem(SEASON_CACHE_KEY, JSON.stringify({
+      fetchedAt: Date.now(),
+      seasonId: (season && season.seasonId) || '2026-27',
+      season: season
+    }));
+  } catch (e) {}
+}
+function formatWeekDigest(season, week) {
+  if (!week) return 'No week results yet.';
+  const lines = [];
+  lines.push('TVYC Darts — Week of ' + (week.dateLabel || week.date));
+  lines.push('');
+  const results = week.results || [];
+  if (results.length) {
+    lines.push('RESULTS');
+    results.forEach(function (r) {
+      lines.push(
+        'Bd ' + (r.board || '?') + ': ' +
+        r.leftName + ' ' + (r.wins && r.wins.left) + ' – ' + (r.wins && r.wins.right) + ' ' + r.rightName
+      );
+    });
+  } else if (week.source === 'kevin-ray-email') {
+    lines.push('RESULTS');
+    lines.push('(from Kevin&Ray email — per-match board scores not recorded)');
+  } else {
+    lines.push('RESULTS');
+    lines.push('(none posted)');
+  }
+  lines.push('');
+  lines.push('STANDINGS (season)');
+  (season.teams || []).forEach(function (t, i) {
+    lines.push((i + 1) + '. ' + t.name + '  ' + fmtStandingsWL(t.wins) + '-' + fmtStandingsWL(t.losses));
+  });
+  lines.push('');
+  lines.push('GREAT SHOTS');
+  const shots = week.greatShots || [];
+  const gst = week.greatShotsText || null;
+  if (shots.length) {
+    shots.forEach(function (s) {
+      let bit = s.player || '?';
+      if (s.kind === 'ton') bit += ' — ' + s.value;
+      else if (s.kind === 'marks') bit += ' — ' + s.value + ' count' + (s.detail ? ' (' + s.detail + ')' : '');
+      else if (s.kind === 'bulls') bit += ' — ' + s.value + ' bulls';
+      else if (s.kind === 'highOut') bit += ' — out ' + s.value;
+      else if (s.kind === 'firstOut') bit += ' — first out ' + s.value;
+      else bit += ' — ' + (s.kind || '') + ' ' + (s.value || '');
+      if (s.board) bit += ' [Bd ' + s.board + ']';
+      lines.push(bit);
+    });
+  } else if (gst && (gst.cricket || gst.oh1)) {
+    if (gst.cricket) lines.push('Cricket: ' + gst.cricket);
+    if (gst.oh1) lines.push("'01: " + gst.oh1);
+  } else {
+    lines.push('(none recorded)');
+  }
+  lines.push('');
+  lines.push('— TVYC Darts');
+  return lines.join('\n');
+}
+function renderStandingsView(season, meta) {
+  meta = meta || {};
+  const labelEl = document.getElementById('standings-season-label');
+  const statusEl = document.getElementById('standings-status');
+  const tableEl = document.getElementById('standings-table-body');
+  const shotsEl = document.getElementById('standings-shots-body');
+  const shotsTitle = document.getElementById('standings-shots-title');
+  const copyBtn = document.getElementById('standings-copy-digest');
+  if (labelEl) labelEl.textContent = (season && season.label) || "Tellico Village Dart League '26-27'";
+  let status = '';
+  if (meta.fromCache) status = 'Offline / cached';
+  else if (meta.fresh) status = 'Live from Pages';
+  if (meta.fetchedAt) {
+    try {
+      const d = new Date(meta.fetchedAt);
+      status += (status ? ' · ' : '') + 'updated ' + d.toLocaleString();
+    } catch (e) {}
+  }
+  if (season && season.seed && season.seed.asOfWeek) {
+    status += (status ? ' · ' : '') + 'through Week ' + season.seed.asOfWeek;
+  }
+  if (statusEl) statusEl.textContent = status || '—';
+
+  const teams = (season && season.teams) ? season.teams.slice() : [];
+  teams.sort(function (a, b) {
+    const dw = (Number(b.wins) || 0) - (Number(a.wins) || 0);
+    if (dw) return dw;
+    return (Number(a.losses) || 0) - (Number(b.losses) || 0);
+  });
+  if (!teams.length) {
+    tableEl.innerHTML = '<div class="st-empty">No standings yet. Submit a night or open when online.</div>';
+  } else {
+    let html = '<table class="st-table"><thead><tr><th class="st-rank">#</th><th>Team</th><th class="num">W</th><th class="num">L</th></tr></thead><tbody>';
+    teams.forEach(function (t, i) {
+      html += '<tr><td class="st-rank">' + (i + 1) + '</td><td class="st-name">' + escapeHtml(t.name) +
+        '</td><td class="num st-wl">' + fmtStandingsWL(t.wins) + '</td><td class="num">' + fmtStandingsWL(t.losses) +
+        '</td></tr>';
+    });
+    html += '</tbody></table>';
+    if (season.seed && season.seed.note) {
+      html += '<div class="st-meta" style="margin-top:8px">' + escapeHtml(season.seed.note) + '</div>';
+    }
+    tableEl.innerHTML = html;
+  }
+
+  const week = (season && season.weeks && season.weeks[0]) || null;
+  if (shotsTitle) {
+    shotsTitle.textContent = week
+      ? ('Great Shots — ' + (week.dateLabel || week.date || 'latest week'))
+      : 'Great Shots';
+  }
+  const shots = (week && week.greatShots) || (season && season.greatShots) || [];
+  const gst = week && week.greatShotsText;
+  if (shots.length) {
+    shotsEl.innerHTML = shots.map(function (s) {
+      return '<div class="st-shot">' + standingsShotLine(s) + '</div>';
+    }).join('');
+  } else if (gst && (gst.cricket || gst.oh1)) {
+    let h = '';
+    if (gst.cricket) h += '<div class="st-shot"><strong>Cricket</strong> — ' + escapeHtml(gst.cricket) + '</div>';
+    if (gst.oh1) h += '<div class="st-shot"><strong>\'01</strong> — ' + escapeHtml(gst.oh1) + '</div>';
+    shotsEl.innerHTML = h;
+  } else {
+    shotsEl.innerHTML = '<div class="st-empty">None recorded for the latest week.</div>';
+  }
+  if (copyBtn) copyBtn.disabled = !season;
+  window._standingsSeason = season || null;
+  window._standingsWeek = week || null;
+}
+async function loadStandingsSeason(force) {
+  const cached = readSeasonCache();
+  if (cached && cached.season && !force) {
+    renderStandingsView(cached.season, { fromCache: true, fetchedAt: cached.fetchedAt });
+  }
+  let url = SEASON_JSON_REL;
+  try {
+    // Prefer relative (Pages); fall back to absolute Pages URL when opened as file://
+    if (location.protocol === 'file:') {
+      url = 'https://git-denyeh.github.io/darts-scorecard/' + SEASON_JSON_REL;
+    }
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const season = await res.json();
+    writeSeasonCache(season);
+    renderStandingsView(season, { fresh: true, fetchedAt: Date.now() });
+    return season;
+  } catch (e) {
+    if (cached && cached.season) {
+      renderStandingsView(cached.season, { fromCache: true, fetchedAt: cached.fetchedAt });
+      const statusEl = document.getElementById('standings-status');
+      if (statusEl) statusEl.textContent = (statusEl.textContent || '') + ' · fetch failed (' + (e.message || 'offline') + ')';
+      return cached.season;
+    }
+    const tableEl = document.getElementById('standings-table-body');
+    const shotsEl = document.getElementById('standings-shots-body');
+    const statusEl = document.getElementById('standings-status');
+    if (statusEl) statusEl.textContent = 'No data — open online once to cache';
+    if (tableEl) tableEl.innerHTML = '<div class="st-empty">Could not load season.json</div><div class="st-err">' + escapeHtml(e.message || String(e)) + '</div>';
+    if (shotsEl) shotsEl.innerHTML = '<div class="st-empty">—</div>';
+    const copyBtn = document.getElementById('standings-copy-digest');
+    if (copyBtn) copyBtn.disabled = true;
+    return null;
+  }
+}
+function showStandings() {
+  showFlow('standings');
+  // Fix full-page link when on Pages vs file
+  const link = document.getElementById('standings-full-link');
+  if (link) {
+    if (location.protocol === 'file:' || !location.pathname || location.pathname.indexOf('darts-scorecard') < 0) {
+      link.href = STANDINGS_PAGE_ABS;
+    } else {
+      link.href = 'standings.html';
+    }
+  }
+  loadStandingsSeason(false);
+}
+function copyStandingsDigest() {
+  const season = window._standingsSeason;
+  const week = window._standingsWeek;
+  if (!season) { toastStub('No standings loaded'); return; }
+  const text = formatWeekDigest(season, week);
+  const done = function () { toastStub('Week digest copied ✓'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(function () {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { toastStub('Copy failed'); }
+      document.body.removeChild(ta);
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toastStub('Copy failed'); }
+    document.body.removeChild(ta);
+  }
+}
+document.getElementById('standings-back').addEventListener('click', showWelcome);
+document.getElementById('standings-close').addEventListener('click', showWelcome);
+document.getElementById('standings-refresh').addEventListener('click', function () {
+  loadStandingsSeason(true);
+});
+document.getElementById('standings-copy-digest').addEventListener('click', copyStandingsDigest);
+
+/* ===== TVYC LEAGUE SUBMIT + VERIFY (v1.2.0) / STANDINGS VIEW (v1.2.1) ===== */
 const NIGHT_SCHEMA = 'tvyc-darts-night/v1';
 const SEASON_ID = '2026-27';
 const GH_DEFAULT_OWNER = 'git-denyeh';
@@ -6213,7 +6539,7 @@ function serializeNightJSON() {
     totalWins: totalWins,
     greatShots: collectGreatShotsFromNight(),
     submittedAt: new Date().toISOString(),
-    appVersion: '1.2.0'
+    appVersion: '1.2.1'
   };
   return { doc, path, filename };
 }
