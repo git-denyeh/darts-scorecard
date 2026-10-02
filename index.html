@@ -1397,8 +1397,9 @@ button:disabled { cursor: default; }
   display: block; width: 22px; height: 2px; background: var(--white); border-radius: 1px;
 }
 .welcome-club {
-  font-size: .78rem; font-weight: 500; letter-spacing: 3px; text-transform: uppercase;
+  font-size: .85rem; font-weight: 500; letter-spacing: .4px; text-transform: none;
   color: var(--text-dim); text-align: center; margin-top: -6px;
+  font-style: italic;
 }
 .welcome-box {
   width: 100%;
@@ -1677,6 +1678,20 @@ button:disabled { cursor: default; }
 .present-meta .present-hint strong { color: var(--white); }
 .present-meta .present-hint .warn { color: var(--yellow); font-weight: 700; }
 .present-meta span { color: var(--yellow); font-weight: 700; }
+.present-rule {
+  font-size: .78rem; color: var(--cream); text-align: center; line-height: 1.35;
+  padding: 8px 10px; margin-bottom: 6px;
+  background: rgba(201,162,39,.12); border: 1px solid rgba(201,162,39,.35); border-radius: 6px;
+}
+.present-rule strong { color: var(--yellow); }
+.present-forfeit-btn {
+  width: 100%; margin-top: 8px; padding: 12px 14px; border-radius: 6px;
+  font-family: var(--font-u); font-size: .85rem; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer;
+  background: var(--panel2); color: var(--cream); border: 1px solid var(--red, #8b2a3e);
+}
+.present-forfeit-btn:disabled { opacity: .45; cursor: default; }
+.present-forfeit-btn:not(:disabled):active { transform: scale(.98); }
 .swap-sides-btn {
   font-size: .8rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
   padding: 10px; background: transparent; border: 1px solid var(--border-light);
@@ -2027,7 +2042,7 @@ button:disabled { cursor: default; }
 
 
 
-/* In-app Standings (v1.2.1) */
+/* In-app Standings (v1.2.2) */
 #standings .st-card {
   background: var(--panel); border: 1px solid var(--border);
   border-radius: 8px; padding: 14px 16px; margin: 0;
@@ -2195,7 +2210,7 @@ button:disabled { cursor: default; }
 <!-- LEAGUE PROFILE (optional — used by Leagues & Groups; never blocks Welcome) -->
 <div id="profile-setup">
   <div class="welcome-brand" style="text-align:center;width:100%">TVYC <span>DARTS</span></div>
-  <div class="welcome-club">Tellico Village Yacht Club · Dart League</div>
+  <div class="welcome-club">Come for the darts. Stay for the friends.</div>
   <div class="flow-panel">
     <div class="flow-panel-title">League identity</div>
     <div class="flow-panel-sub">Pick your team and roster name for night schedule. Remembered on this device. Casual Play only needs a display name — skip back to Welcome anytime.</div>
@@ -2221,7 +2236,7 @@ button:disabled { cursor: default; }
       <span></span><span></span><span></span>
     </button>
   </div>
-  <div class="welcome-club">Tellico Village Yacht Club · Dart League</div>
+  <div class="welcome-club">Come for the darts. Stay for the friends.</div>
   <div id="resume-banner">
     <div class="rb-title" id="rb-title">⏸ Match In Progress</div>
     <div class="rb-detail" id="rb-detail"></div>
@@ -2236,7 +2251,7 @@ button:disabled { cursor: default; }
   </div>
   <button type="button" class="nav-btn red" id="nav-play">Play</button>
   <button type="button" class="nav-btn red" id="nav-leagues">Leagues &amp; Groups</button>
-  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.1 · in-app standings</span> · Local</div>
+  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.2</span></div>
 </div>
 
 <div class="menu-drawer" id="menu-drawer">
@@ -2439,7 +2454,7 @@ button:disabled { cursor: default; }
   </div>
 </div>
 
-<!-- STANDINGS (in-app, v1.2.1) -->
+<!-- STANDINGS (in-app, v1.2.2) -->
 <div id="standings">
   <div class="flow-header">
     <button type="button" class="night-back" id="standings-back">← HOME</button>
@@ -2529,8 +2544,10 @@ button:disabled { cursor: default; }
     </div>
   </div>
   <div class="present-footer">
+    <div class="present-rule" id="present-rule">League rule: each side needs at least <strong>4</strong> players present. Fewer than 4 = forfeit.</div>
     <div class="present-meta" id="present-meta">&nbsp;</div>
     <button class="start-btn" id="present-continue" disabled>Continue to Lineup</button>
+    <button type="button" class="present-forfeit-btn" id="present-forfeit" hidden disabled>Record forfeit…</button>
   </div>
 </div>
 
@@ -5133,16 +5150,78 @@ function renderPresentSide(side, teamNumber, presentArr, subsArr) {
 function updatePresentMeta() {
   const nL = nightOps.presentLeft.length;
   const nR = nightOps.presentRight.length;
-  const need = 2; // doubles minimum; Team 501 reuses if <4
+  const need = 4; // league minimum; fewer than 4 = forfeit
   const ok = nL >= need && nR >= need;
+  const leftShort = nL < need;
+  const rightShort = nR < need;
+  const canForfeit = (leftShort !== rightShort); // exactly one side short
   const counts = `Left <span>${nL}</span> · Right <span>${nR}</span>`;
-  let hint = `need ≥${need} each to continue`;
-  if (ok && (nL < 4 || nR < 4)) hint = `<span class="warn">(Team 501 will reuse players)</span>`;
-  else if (!ok) hint = `need ≥${need} each to continue — tap names on <strong>both</strong> sides`;
-  else hint = `Ready — continue to lineup`;
+  let hint;
+  if (ok) {
+    hint = `Ready — continue to lineup`;
+  } else if (leftShort && rightShort) {
+    hint = `<span class="warn">Need ≥${need} each</span> — tap names on <strong>both</strong> sides (or mark ≥4 on one side to claim a forfeit)`;
+  } else if (leftShort) {
+    hint = `<span class="warn">Left has &lt;${need}</span> — add players or <strong>Record forfeit</strong>`;
+  } else {
+    hint = `<span class="warn">Right has &lt;${need}</span> — add players or <strong>Record forfeit</strong>`;
+  }
   document.getElementById('present-meta').innerHTML =
     `<div class="present-counts">${counts}</div><div class="present-hint">${hint}</div>`;
-  document.getElementById('present-continue').disabled = !ok;
+  const cont = document.getElementById('present-continue');
+  if (cont) cont.disabled = !ok;
+  const ff = document.getElementById('present-forfeit');
+  if (ff) {
+    ff.hidden = ok;
+    ff.disabled = !canForfeit;
+  }
+}
+
+function applyPresentForfeit() {
+  if (!nightOps) return;
+  const need = 4;
+  const nL = nightOps.presentLeft.length;
+  const nR = nightOps.presentRight.length;
+  const leftShort = nL < need;
+  const rightShort = nR < need;
+  if (!leftShort && !rightShort) return;
+  if (leftShort && rightShort) {
+    alert('Both sides have fewer than 4 present. Mark ≥4 on one side to claim the forfeit win, or add players on both sides.');
+    return;
+  }
+  const L = teamByNumber(nightOps.leftTeamNumber);
+  const R = teamByNumber(nightOps.rightTeamNumber);
+  const forfeitSide = leftShort ? 0 : 1;
+  const winnerSide = leftShort ? 1 : 0;
+  const forfeitName = teamShortName(forfeitSide === 0 ? L : R);
+  const winnerName = teamShortName(winnerSide === 0 ? L : R);
+  const msg =
+    'League rule: fewer than 4 present = forfeit.\n\n' +
+    'Left: ' + nL + ' · Right: ' + nR + '\n\n' +
+    forfeitName + ' forfeits.\n' +
+    winnerName + ' wins 8–0.\n\n' +
+    'Record forfeit and open Verify?';
+  if (!confirm(msg)) return;
+  const leftPool = nightOps.presentLeft.length ? nightOps.presentLeft : ['(forfeit)'];
+  const rightPool = nightOps.presentRight.length ? nightOps.presentRight : ['(forfeit)'];
+  nightOps.rounds = buildNightLineup(leftPool, rightPool);
+  nightOps.rounds.forEach(r => {
+    r.result = {
+      winnerSide: winnerSide,
+      wins: winnerSide === 0 ? { left: 1, right: 0 } : { left: 0, right: 1 },
+      highlights: [],
+      forfeit: true
+    };
+  });
+  nightOps.forfeit = {
+    forfeitSide: forfeitSide,
+    winnerSide: winnerSide,
+    reason: 'fewer than 4 present',
+    leftCount: nL,
+    rightCount: nR
+  };
+  saveState();
+  showVerifyScoresheet();
 }
 
 function setPresentAll(side, on) {
@@ -5176,6 +5255,13 @@ function addSub(side) {
 
 function showLineup() {
   if (!nightOps) return;
+  const nL = (nightOps.presentLeft || []).length;
+  const nR = (nightOps.presentRight || []).length;
+  if ((nL < 4 || nR < 4) && !nightOps.forfeit) {
+    alert('Cannot open lineup with fewer than 4 present on a side. Add players or Record forfeit.');
+    showPresent();
+    return;
+  }
   hideAllFlow();
   document.getElementById('lineup').classList.add('show');
   nightOps.phase = 'lineup';
@@ -6102,9 +6188,19 @@ document.getElementById('present-left-none').addEventListener('click', () => set
 document.getElementById('present-right-all').addEventListener('click', () => setPresentAll('right', true));
 document.getElementById('present-right-none').addEventListener('click', () => setPresentAll('right', false));
 document.getElementById('present-continue').addEventListener('click', () => {
+  const nL = nightOps.presentLeft.length;
+  const nR = nightOps.presentRight.length;
+  if (nL < 4 || nR < 4) {
+    alert('League rule: each side needs at least 4 players present. Use Record forfeit if a side is short.');
+    return;
+  }
   nightOps.rounds = buildNightLineup(nightOps.presentLeft, nightOps.presentRight);
   showLineup();
 });
+(function wirePresentForfeit() {
+  const btn = document.getElementById('present-forfeit');
+  if (btn) btn.addEventListener('click', applyPresentForfeit);
+})();
 document.getElementById('lineup-back').addEventListener('click', () => {
   const scored = (nightOps.rounds || []).some(r => r.result);
   if (scored && !confirm('Going back will rebuild the lineup and clear round results. Continue?')) return;
@@ -6143,7 +6239,7 @@ document.getElementById('end-night-btn').addEventListener('click', () => {
 
 
 
-/* ===== IN-APP STANDINGS (v1.2.1) ===== */
+/* ===== IN-APP STANDINGS (v1.2.2) ===== */
 const SEASON_CACHE_KEY = 'tvyc-darts-season-cache-v1';
 const SEASON_JSON_REL = 'stats/2026-27/season.json';
 const STANDINGS_PAGE_ABS = 'https://git-denyeh.github.io/darts-scorecard/standings.html';
@@ -6244,7 +6340,6 @@ function renderStandingsView(season, meta) {
   if (labelEl) labelEl.textContent = (season && season.label) || "Tellico Village Dart League '26-27'";
   let status = '';
   if (meta.fromCache) status = 'Offline / cached';
-  else if (meta.fresh) status = 'Live from Pages';
   if (meta.fetchedAt) {
     try {
       const d = new Date(meta.fetchedAt);
@@ -6272,9 +6367,6 @@ function renderStandingsView(season, meta) {
         '</td></tr>';
     });
     html += '</tbody></table>';
-    if (season.seed && season.seed.note) {
-      html += '<div class="st-meta" style="margin-top:8px">' + escapeHtml(season.seed.note) + '</div>';
-    }
     tableEl.innerHTML = html;
   }
 
@@ -6377,7 +6469,7 @@ document.getElementById('standings-refresh').addEventListener('click', function 
 });
 document.getElementById('standings-copy-digest').addEventListener('click', copyStandingsDigest);
 
-/* ===== TVYC LEAGUE SUBMIT + VERIFY (v1.2.0) / STANDINGS VIEW (v1.2.1) ===== */
+/* ===== TVYC LEAGUE SUBMIT + VERIFY (v1.2.0) / STANDINGS VIEW (v1.2.2) ===== */
 const NIGHT_SCHEMA = 'tvyc-darts-night/v1';
 const SEASON_ID = '2026-27';
 const GH_DEFAULT_OWNER = 'git-denyeh';
@@ -6539,8 +6631,9 @@ function serializeNightJSON() {
     totalWins: totalWins,
     greatShots: collectGreatShotsFromNight(),
     submittedAt: new Date().toISOString(),
-    appVersion: '1.2.1'
+    appVersion: '1.2.2'
   };
+  if (nightOps.forfeit) doc.forfeit = Object.assign({}, nightOps.forfeit);
   return { doc, path, filename };
 }
 
