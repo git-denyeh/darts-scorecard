@@ -1742,12 +1742,16 @@ button:disabled { cursor: default; }
   padding: 12px; background: transparent; border: 1px solid var(--red-dark);
   border-radius: 6px; color: var(--red-bright); width: 100%;
 }
-#lineup { padding-bottom: 130px; }
+#lineup { padding-bottom: calc(190px + env(safe-area-inset-bottom, 0px)); }
+/* 1.2.4: fixed bottom action bar (was sticky; floated mid-list on Android Chrome) */
 .lineup-footer {
-  position: sticky; bottom: 0; z-index: 20;
-  margin: 0 -16px -32px;
-  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(transparent, var(--bg) 28%);
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 600px; box-sizing: border-box; z-index: 40;
+  margin: 0;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+  border-top: 1px solid rgba(201,162,39,0.45);
+  box-shadow: 0 -6px 16px rgba(0,0,0,0.55);
   display: flex; flex-direction: column; gap: 8px;
 }
 .lineup-hint {
@@ -2129,7 +2133,7 @@ button:disabled { cursor: default; }
 /* Verify Scoresheet + Submit */
 #verify-screen {
   display: none; flex-direction: column; gap: 12px;
-  padding: 12px 16px calc(140px + env(safe-area-inset-bottom, 0px));
+  padding: 12px 16px calc(200px + env(safe-area-inset-bottom, 0px));
   min-height: 100%; min-height: 100dvh;
   max-width: none; width: 100%;
 }
@@ -2179,10 +2183,13 @@ button:disabled { cursor: default; }
 .verify-auth.ok { background: rgba(61,122,78,0.2); color: var(--cream); }
 .verify-auth.warn { background: rgba(232,168,56,0.12); color: var(--yellow); }
 .verify-footer {
-  position: sticky; bottom: 0; z-index: 20;
-  margin: 0 -16px -12px;
-  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(transparent, var(--bg) 28%);
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 600px; box-sizing: border-box; z-index: 40;
+  margin: 0;
+  padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--bg);
+  border-top: 1px solid rgba(201,162,39,0.45);
+  box-shadow: 0 -6px 16px rgba(0,0,0,0.55);
   display: flex; flex-direction: column; gap: 8px;
 }
 .verify-footer .row { display: flex; gap: 8px; }
@@ -2236,6 +2243,66 @@ button:disabled { cursor: default; }
 }
 #set-gh-hint { font-size: .72rem; color: var(--text-dim); margin-top: 6px; }
 
+
+/* ===== 1.2.5 UI polish ===== */
+/* (1) one-line lineup start + shorter fixed bar */
+#lineup-start-next { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-top: 12px; padding-bottom: 12px; }
+.lineup-footer { padding-top: 8px; gap: 6px; }
+.lineup-footer .end-night-btn { padding-top: 8px; padding-bottom: 8px; }
+#lineup { padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px)); }
+/* (2) scoring: taller keys fill phone height */
+#o1-game .o1-keys button, #o1-game .o1-shortcut { min-height: clamp(44px, 10.5svh, 100px); }
+.cricket-row { max-height: 110px; }
+.cr-num { height: clamp(50px, calc(100% - 8px), 100px); width: clamp(86px, 24vw, 120px); }
+.cr-dt  { height: clamp(44px, calc(100% - 12px), 92px); width: clamp(64px, 18vw, 92px); }
+.cr-marks { height: 100%; }
+/* (3) status inside Continue */
+#present-continue { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; line-height: 1.15; }
+#present-continue .pc-status { font-size: .72rem; letter-spacing: 1px; opacity: .9; font-weight: 600; }
+/* (4) collapsible games-per-player */
+.gpp-panel > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; }
+.gpp-panel > summary::-webkit-details-marker { display: none; }
+.gpp-panel[open] > summary { margin-bottom: 10px; }
+.gpp-panel .gpp-caret { color: #c9a227; transition: transform .15s; }
+.gpp-panel[open] .gpp-caret { transform: rotate(90deg); }
+/* (5) brass PLAY button on round cards */
+.lr-play-btn {
+  flex-shrink: 0; font-family: var(--font-display); font-size: .8rem; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 7px 14px; min-height: 34px;
+  border-radius: 5px; border: 1px solid #8a6d14; color: #1c1410;
+  background: linear-gradient(180deg, #e0bd4a 0%, #c9a227 55%, #a8851c 100%);
+  box-shadow: 0 2px 0 #6e5710, inset 0 1px 0 rgba(255,255,255,.35); cursor: pointer;
+}
+.lr-play-btn:active { transform: translateY(2px); box-shadow: 0 0 0 #6e5710; }
+/* (6) schedule: played shaded, tonight/next highlighted */
+.match-card.mc-played { opacity: .5; filter: saturate(.5); background: rgba(0,0,0,.25); }
+.match-card.mc-next, .match-card.mc-tonight { border: 2px solid #c9a227; box-shadow: 0 0 0 1px rgba(201,162,39,.35), 0 0 14px rgba(201,162,39,.25); }
+.mc-tag { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; font-size: .68rem; letter-spacing: 1px; text-transform: uppercase; vertical-align: middle; font-weight: 700; }
+.mc-tag.played { background: var(--panel2); color: var(--text-dim); border: 1px solid var(--border); }
+.mc-tag.next { color: #c9a227; border: 1px solid #c9a227; }
+.mc-tag.tonight { background: #c9a227; color: #1c1410; }
+/* (7) toasts at top */
+.toast-stub { top: calc(14px + env(safe-area-inset-top, 0px)) !important; bottom: auto !important; transform: translateX(-50%) translateY(-20px); z-index: 400; }
+.toast-stub.show { transform: translateX(-50%) translateY(0); }
+.sum-copy-toast { top: calc(14px + env(safe-area-inset-top, 0px)) !important; bottom: auto !important; }
+/* (8) welcome next-match card */
+.next-match-card { width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 6px; cursor: pointer;
+  background: var(--panel2); border: 1px solid #c9a227; text-align: center; }
+.next-match-card[hidden] { display: none; }
+.next-match-card .nm-label { font-family: var(--font-display); color: #c9a227; font-size: .8rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+.next-match-card .nm-vs { color: var(--text); font-size: 1.05rem; margin: 4px 0 2px; }
+.next-match-card .nm-vs em { color: var(--white); font-style: normal; font-weight: 700; }
+.next-match-card .nm-sub { color: var(--text-mid); font-size: .8rem; }
+/* (9) tighter gap above Leagues profile card */
+#home { padding-top: 10px; gap: 8px; }
+/* (10) summary empty state + stat labels */
+.sum-stat-label { font-size: clamp(1.1rem, 4.6vw, 1.55rem); color: #e8dcc0; font-weight: 600; letter-spacing: 1.5px; }
+.sum-empty { grid-column: 1 / -1; text-align: center; padding: 28px 12px; color: var(--text); }
+.sum-empty-icon { font-size: 2.4rem; }
+.sum-empty-title { font-family: var(--font-display); font-size: 1.4rem; color: #c9a227; margin: 8px 0 6px; letter-spacing: 1px; }
+.sum-empty-sub { color: #e8dcc0; font-size: .95rem; line-height: 1.4; }
+.sum-is-empty .sum-names, .sum-is-empty .sum-status, .sum-is-empty .sum-table-title,
+.sum-is-empty .sum-table, .sum-is-empty .sum-highlights, .sum-is-empty .sum-btn-copy { display: none !important; }
 </style>
 </head>
 <body>
@@ -2282,9 +2349,10 @@ button:disabled { cursor: default; }
     <div class="wb-label">Welcome</div>
     <div class="wb-name" id="welcome-name">Player!</div>
   </div>
+  <div class="next-match-card" id="next-match-card" hidden></div>
   <button type="button" class="nav-btn red" id="nav-play">Play</button>
   <button type="button" class="nav-btn red" id="nav-leagues">Leagues &amp; Groups</button>
-  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.3</span></div>
+  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.5</span></div>
 </div>
 
 <div class="menu-drawer" id="menu-drawer">
@@ -2872,7 +2940,7 @@ const LEAGUE_JSON_REL = 'league/2026-27.json';
 const RULES_JSON_REL = 'league/2026-27-rules.json';
 const PAGES_BASE = 'https://git-denyeh.github.io/darts-scorecard/';
 const RAW_BASE = 'https://raw.githubusercontent.com/git-denyeh/darts-scorecard/main/';
-const APP_VERSION = '1.2.3';
+const APP_VERSION = '1.2.5';
 
 function readLeagueCache() {
   try {
@@ -4673,6 +4741,17 @@ function showSummary() {
     document.getElementById('sum-new').textContent = 'New Match';
     document.getElementById('sum-exit').textContent = 'Exit';
   }
+  const sumScreen = document.getElementById('summary-screen');
+  if (!m) {
+    // 1.2.5: friendly empty state (no match loaded)
+    sumScreen.classList.add('sum-is-empty');
+    document.getElementById('sum-stats').innerHTML = '<div class="sum-empty"><div class="sum-empty-icon">🎯</div><div class="sum-empty-title">No match to summarise yet</div><div class="sum-empty-sub">Finish a game and the stats will be chalked up here. Fancy a leg? Tap New Match.</div></div>';
+    ['sum-n1','sum-n2','sum-l1','sum-l2'].forEach(id => { document.getElementById(id).textContent = ''; });
+    const tbl = document.getElementById('sum-table'); if (tbl) tbl.innerHTML = '';
+    const hl = document.getElementById('sum-highlights'); if (hl) hl.innerHTML = '';
+    return;
+  }
+  sumScreen.classList.remove('sum-is-empty');
   const s0 = sideStatBucket(0), s1 = sideStatBucket(1);
   document.getElementById('sum-n1').textContent = sideDisplayName(0);
   document.getElementById('sum-n2').textContent = sideDisplayName(1);
@@ -4876,7 +4955,38 @@ function hideNightScreens() {
     if (el) el.classList.remove('show');
   });
 }
-function refreshResumeBanner() {
+/* 1.2.5: Welcome "Next match" card — bundled LEAGUE schedule only; hidden while a resume banner is up */
+function renderNextMatchCard() {
+  const card = document.getElementById('next-match-card');
+  if (!card) return;
+  const banner = document.getElementById('resume-banner');
+  if (banner && banner.classList.contains('show')) { card.hidden = true; return; }
+  const profile = getUserProfile();
+  if (!profile) {
+    card.hidden = false;
+    card.innerHTML = '<div class="nm-label">Next match</div><div class="nm-sub">Set your league team in <strong>Leagues &amp; Groups</strong> to see your next fixture.</div>';
+    card.onclick = () => showHome();
+    return;
+  }
+  const matches = matchesForFocus(profile.teamNumber);
+  const key = nextMatchFor(matches);
+  const m = matches.find(x => x.key === key);
+  const focus = teamByNumber(profile.teamNumber);
+  card.hidden = false;
+  card.onclick = () => showHome();
+  if (!m) {
+    card.innerHTML = '<div class="nm-label">Next match</div><div class="nm-sub">No more regular-season nights in the bundled schedule.</div>';
+    return;
+  }
+  const opp = teamByNumber(m.opponent);
+  const tonight = matchDateStatus(m.dateLabel, true) === 'tonight';
+  card.innerHTML =
+    '<div class="nm-label">' + (tonight ? 'Tonight' : 'Next match') + ' · ' + escapeHtml(m.dateLabel) + ((m.isMonday && !/monday/i.test(m.dateLabel)) ? ' · Monday' : '') + '</div>' +
+    '<div class="nm-vs"><em>' + escapeHtml(teamShortName(focus)) + '</em> vs <em>' + escapeHtml(teamShortName(opp)) + '</em></div>' +
+    '<div class="nm-sub">Board ' + escapeHtml(m.board || '—') + ' · tap to open schedule</div>';
+}
+function refreshResumeBanner() { refreshResumeBannerCore(); renderNextMatchCard(); }
+function refreshResumeBannerCore() {
   const banner = document.getElementById('resume-banner');
   const saved = loadState();
   const unfinishedScore =
@@ -5176,6 +5286,35 @@ function matchesForFocus(focusNum) {
   return out;
 }
 
+/* 1.2.5: schedule date helpers — parse bundled date_label only (season 2026-27: Sep–Dec 2026, Jan–Apr 2027) */
+const MONTHS_125 = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+function parseLeagueDate(label) {
+  const m = String(label || '').match(/(\d{1,2})\s*[-–—]?\s*([A-Za-z]{3})/);
+  if (!m) return null;
+  const mon = MONTHS_125[m[2].toLowerCase()];
+  if (mon == null) return null;
+  const sid = (LEAGUE.season && LEAGUE.season.id) || '2026-2027';
+  const y0 = Number(String(sid).slice(0, 4)) || 2026;
+  return new Date(mon >= 7 ? y0 : y0 + 1, mon, Number(m[1]));
+}
+function todayMidnight() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+function nextMatchFor(matches) {
+  const t = todayMidnight().getTime();
+  const n = (matches || []).find(m => { const d = parseLeagueDate(m.dateLabel); return d && d.getTime() >= t; });
+  return n ? n.key : null;
+}
+function matchDateStatus(label, isNext) {
+  const d = parseLeagueDate(label);
+  if (!d) return '';
+  const t = todayMidnight().getTime();
+  if (d.getTime() < t) return 'played';
+  if (d.getTime() === t) return 'tonight';
+  return isNext ? 'next' : '';
+}
+function shortGameLabel(label) {
+  return String(label || '').replace(/Doubles/gi, 'Dbl').replace(/Singles/gi, 'Sgl').replace(/Triples/gi, 'Trpl').replace(/\s+/g, ' ').trim();
+}
+
 function renderHomeMatches() {
   const profile = getUserProfile();
   const focusNum = profile ? profile.teamNumber : 4;
@@ -5194,12 +5333,17 @@ function renderHomeMatches() {
     list.innerHTML = '<div class="present-meta">No schedule rows for this team in embedded JSON (only Team #4 full season + opponents of #4). Use opponent picker below.</div>';
     return;
   }
+  const nextKey = nextMatchFor(matches);
   list.innerHTML = matches.map(m => {
     const opp = teamByNumber(m.opponent);
-    const mon = m.isMonday ? ' · Monday' : '';
+    const mon = (m.isMonday && !/monday/i.test(m.dateLabel)) ? ' · Monday' : '';
+    const st = matchDateStatus(m.dateLabel, m.key === nextKey);
+    const tag = st === 'tonight' ? '<span class="mc-tag tonight">Tonight</span>'
+      : st === 'next' ? '<span class="mc-tag next">Next match</span>'
+      : st === 'played' ? '<span class="mc-tag played">Played</span>' : '';
     const note = m.note ? ('<div class="mc-board">' + escapeHtml(m.note) + '</div>') : '';
-    return '<button type="button" class="match-card" data-key="' + m.key + '" data-focus="' + m.focus + '" data-opp="' + m.opponent + '" data-date="' + escapeAttr(m.dateLabel) + '" data-board="' + escapeAttr(m.board||'') + '">' +
-      '<div class="mc-date">' + escapeHtml(m.dateLabel) + mon + '</div>' +
+    return '<button type="button" class="match-card' + (st ? ' mc-' + st : '') + '" data-key="' + m.key + '" data-focus="' + m.focus + '" data-opp="' + m.opponent + '" data-date="' + escapeAttr(m.dateLabel) + '" data-board="' + escapeAttr(m.board||'') + '">' +
+      '<div class="mc-date">' + escapeHtml(m.dateLabel) + mon + tag + '</div>' +
       '<div class="mc-vs"><em>' + escapeHtml(teamShortName(focus)) + '</em> vs <em>' + escapeHtml(teamShortName(opp)) + '</em></div>' +
       '<div class="mc-board">Board ' + escapeHtml(m.board || '—') + note + '</div>' +
     '</button>';
@@ -5329,9 +5473,12 @@ function updatePresentMeta() {
     hint = `<span class="warn">Right has &lt;${need}</span> — add players or <strong>Record forfeit</strong>`;
   }
   document.getElementById('present-meta').innerHTML =
-    `<div class="present-counts">${counts}</div><div class="present-hint">${hint}</div>`;
+    (ok ? '' : `<div class="present-counts">${counts}</div>`) + `<div class="present-hint">${hint}</div>`;
   const cont = document.getElementById('present-continue');
-  if (cont) cont.disabled = !ok;
+  if (cont) {
+    cont.disabled = !ok;
+    cont.innerHTML = '<span class="pc-main">Continue to Lineup</span><span class="pc-status">Left ' + nL + ' · Right ' + nR + ' · ' + (ok ? 'Ready' : 'Need ≥' + need + ' each') + '</span>';
+  }
   const ff = document.getElementById('present-forfeit');
   if (ff) {
     ff.hidden = ok;
@@ -5659,7 +5806,9 @@ function updateLineupFairnessBars() {
     </div>`;
   }).join('') || '<div class="present-meta">No assignments yet</div>';
   const el = document.getElementById('lineup-fairness');
-  if (el) el.innerHTML = `<div id="sched-summary"><div class="sched-sum-title">Games Per Player</div>${bars}</div>`;
+  if (!el) return;
+  const wasOpen = !!(el.querySelector('details') && el.querySelector('details').open);
+  el.innerHTML = `<details id="sched-summary" class="gpp-panel"${wasOpen ? ' open' : ''}><summary class="sched-sum-title">Games Per Player <span class="gpp-caret">▸</span></summary>${bars}</details>`;
 }
 
 function renderLineup(opts) {
@@ -5712,7 +5861,7 @@ function renderLineup(opts) {
         <span class="lr-name">${escapeHtml(r.label)}</span>
         <span class="sched-type-badge st-${r.type}">${r.type}</span>
         <button type="button" class="lr-edit-btn" data-edit-round="${r.id}">Edit</button>
-        <span class="lr-status ${st}">${stLabel}</span>
+        ${r.result ? `<span class="lr-status ${st}">${stLabel}</span>` : `<button type="button" class="lr-play-btn" data-play-round="${r.id}">▶ Play</button>`}
       </div>
       <div class="lr-sides">
         <div class="lr-side"><div class="lr-side-label">Left</div>${leftHtml}</div>
@@ -5726,6 +5875,12 @@ function renderLineup(opts) {
     el.addEventListener('click', (e) => {
       if (e.target.closest('.lr-edit-btn') || e.target.closest('.lr-player')) return;
       startNightRound(Number(el.dataset.round));
+    });
+  });
+  roundsEl.querySelectorAll('.lr-play-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      startNightRound(Number(btn.dataset.playRound));
     });
   });
   roundsEl.querySelectorAll('.lr-edit-btn').forEach(btn => {
@@ -5749,7 +5904,7 @@ function renderLineup(opts) {
   if (startBtn) {
     if (next) {
       startBtn.disabled = false;
-      startBtn.textContent = 'Start Round ' + next.id + ' — ' + next.label;
+      startBtn.textContent = '▶ Round ' + next.id + ' · ' + shortGameLabel(next.label);
       startBtn.onclick = () => startNightRound(next.id);
       if (hint) hint.textContent = 'Next up: Round ' + next.id + ' · ' + next.label + ' · tap Edit or a player to change lineup';
       const enb = document.getElementById('end-night-btn');
