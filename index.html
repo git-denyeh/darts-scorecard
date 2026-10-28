@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>TVYC Darts</title>
+<link rel="icon" href="data:,">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2352,7 +2353,7 @@ button:disabled { cursor: default; }
   <div class="next-match-card" id="next-match-card" hidden></div>
   <button type="button" class="nav-btn red" id="nav-play">Play</button>
   <button type="button" class="nav-btn red" id="nav-leagues">Leagues &amp; Groups</button>
-  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.5</span></div>
+  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.6</span></div>
 </div>
 
 <div class="menu-drawer" id="menu-drawer">
@@ -2940,7 +2941,7 @@ const LEAGUE_JSON_REL = 'league/2026-27.json';
 const RULES_JSON_REL = 'league/2026-27-rules.json';
 const PAGES_BASE = 'https://git-denyeh.github.io/darts-scorecard/';
 const RAW_BASE = 'https://raw.githubusercontent.com/git-denyeh/darts-scorecard/main/';
-const APP_VERSION = '1.2.5';
+const APP_VERSION = '1.2.6';
 
 function readLeagueCache() {
   try {
@@ -2991,7 +2992,8 @@ function pickNewerLeague(a, b) {
 }
 (function initLeagueFromCache() {
   const cached = readLeagueCache();
-  if (cached && cached.league) {
+  /* 1.2.6: ignore malformed/empty caches (no stamp or no teams) so they can never shadow the bundled league */
+  if (cached && cached.league && cached.league.sourceModifiedAt && Array.isArray(cached.league.teams) && cached.league.teams.length) {
     const newer = pickNewerLeague(LEAGUE_BUNDLED, cached.league);
     if (newer === cached.league) {
       // cached wins — assign into LEAGUE after declaration via mutation below
@@ -2999,7 +3001,7 @@ function pickNewerLeague(a, b) {
     }
   }
   const rc = readRulesCache();
-  if (rc && rc.html) {
+  if (rc && rc.html && rc.sourceModifiedAt) {
     const bootMeta = { sourceModifiedAt: rc.sourceModifiedAt, updatedAt: rc.updatedAt };
     const bundledMeta = RULES_META_BUNDLED;
     if (String(bootMeta.sourceModifiedAt || '') + '|' + String(bootMeta.updatedAt || '') >
@@ -3477,13 +3479,15 @@ populateQuickPlayDropdowns();
 
 /* Restore on load — Welcome always; never force league profile */
 (function bootstrap() {
-  migrateProfileNameSpelling();
-  const saved = loadState();
-  if (saved && saved.sessionStats) sessionStats = saved.sessionStats;
-  if (saved && saved.nightOps) nightOps = saved.nightOps;
-  applyWelcomeName();
-  document.getElementById('welcome').classList.add('show');
-  refreshResumeBanner();
+  /* 1.2.6: every init step is isolated so one failure cannot kill the rest of the script (and its click handlers) */
+  try { migrateProfileNameSpelling(); } catch (e) {}
+  let saved = null;
+  try { saved = loadState(); } catch (e) {}
+  try { if (saved && saved.sessionStats) sessionStats = saved.sessionStats; } catch (e) {}
+  try { if (saved && saved.nightOps) nightOps = saved.nightOps; } catch (e) {}
+  try { applyWelcomeName(); } catch (e) {}
+  try { document.getElementById('welcome').classList.add('show'); } catch (e) {}
+  try { refreshResumeBanner(); } catch (e) {}
 })();
 
 
@@ -4985,7 +4989,11 @@ function renderNextMatchCard() {
     '<div class="nm-vs"><em>' + escapeHtml(teamShortName(focus)) + '</em> vs <em>' + escapeHtml(teamShortName(opp)) + '</em></div>' +
     '<div class="nm-sub">Board ' + escapeHtml(m.board || '—') + ' · tap to open schedule</div>';
 }
-function refreshResumeBanner() { refreshResumeBannerCore(); renderNextMatchCard(); }
+function refreshResumeBanner() {
+  /* 1.2.6: each piece isolated — a failure in one can never stop init or leave buttons dead */
+  try { refreshResumeBannerCore(); } catch (e) { try { document.getElementById('resume-banner').classList.remove('show'); } catch (e2) {} }
+  try { renderNextMatchCard(); } catch (e) { try { const c = document.getElementById('next-match-card'); if (c) c.hidden = true; } catch (e2) {} }
+}
 function refreshResumeBannerCore() {
   const banner = document.getElementById('resume-banner');
   const saved = loadState();
@@ -5007,7 +5015,7 @@ function refreshResumeBannerCore() {
     const a = teamByNumber(nightOps.leftTeamNumber);
     const b = teamByNumber(nightOps.rightTeamNumber);
     detail = teamShortName(a) + ' vs ' + teamShortName(b);
-    if (nightOps.dateLabel) detail += ' · ' + nightOps.dateLabel;
+    if (nightOps.dateLabel) detail += ' · ' + cleanDateLabel(nightOps.dateLabel);
     if (nightOps.board) detail += ' · Board ' + nightOps.board;
     detail += ' · ' + (nightOps.phase || 'night');
   }
@@ -5250,7 +5258,7 @@ function matchesForFocus(focusNum) {
         if (a !== focus && b !== focus) return;
         out.push({
           key: 'n' + i + '-' + j,
-          dateLabel: night.date_label,
+          dateLabel: cleanDateLabel(night.date_label),
           board: m.board || '',
           focus: focus,
           opponent: a === focus ? b : a,
@@ -5266,7 +5274,7 @@ function matchesForFocus(focusNum) {
     if (focus === 4) {
       out.push({
         key: 't4-' + i,
-        dateLabel: n.date_label,
+        dateLabel: cleanDateLabel(n.date_label),
         board: n.board || '',
         focus: 4,
         opponent: n.opponent,
@@ -5275,7 +5283,7 @@ function matchesForFocus(focusNum) {
     } else if (Number(n.opponent) === focus) {
       out.push({
         key: 'vs4-' + i,
-        dateLabel: n.date_label,
+        dateLabel: cleanDateLabel(n.date_label),
         board: n.board || '',
         focus: focus,
         opponent: 4,
@@ -5286,9 +5294,12 @@ function matchesForFocus(focusNum) {
   return out;
 }
 
+/* 1.2.6: strip markdown asterisks from schedule labels ("2- Nov *Monday*" showed literal * on screen) */
+function cleanDateLabel(x) { return String(x == null ? '' : x).replace(/\*/g, '').replace(/\s+/g, ' ').trim(); }
 /* 1.2.5: schedule date helpers — parse bundled date_label only (season 2026-27: Sep–Dec 2026, Jan–Apr 2027) */
-const MONTHS_125 = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
 function parseLeagueDate(label) {
+  /* 1.2.6: month table lives inside the function (was a top-level const declared AFTER bootstrap() ran → TDZ ReferenceError that killed every handler for users with a saved profile) */
+  const MONTHS_125 = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
   const m = String(label || '').match(/(\d{1,2})\s*[-–—]?\s*([A-Za-z]{3})/);
   if (!m) return null;
   const mon = MONTHS_125[m[2].toLowerCase()];
@@ -5400,7 +5411,7 @@ function showPresent() {
   const R = teamByNumber(nightOps.rightTeamNumber);
   document.getElementById('present-chip').innerHTML =
     `<strong>${escapeHtml(teamShortName(L))}</strong> vs <strong>${escapeHtml(teamShortName(R))}</strong>` +
-    (nightOps.dateLabel ? ` · ${escapeHtml(nightOps.dateLabel)}` : '') +
+    (nightOps.dateLabel ? ` · ${escapeHtml(cleanDateLabel(nightOps.dateLabel))}` : '') +
     (nightOps.board ? ` · Bd ${escapeHtml(nightOps.board)}` : '');
   document.getElementById('present-left-title').textContent =
     'LEFT · ' + teamShortName(L) + (nightOps.leftTeamNumber === nightOps.focusTeamNumber ? ' ★' : '');
@@ -5578,7 +5589,7 @@ function showLineup() {
   const R = teamByNumber(nightOps.rightTeamNumber);
   document.getElementById('lineup-chip').innerHTML =
     `<strong>${escapeHtml(teamShortName(L))}</strong> vs <strong>${escapeHtml(teamShortName(R))}</strong>` +
-    (nightOps.dateLabel ? ` · ${escapeHtml(nightOps.dateLabel)}` : '');
+    (nightOps.dateLabel ? ` · ${escapeHtml(cleanDateLabel(nightOps.dateLabel))}` : '');
   if (!nightOps.rounds || nightOps.rounds.length !== 8) {
     nightOps.rounds = buildNightLineup(nightOps.presentLeft, nightOps.presentRight);
   }
@@ -6607,22 +6618,27 @@ async function syncLeagueFromMirror(opts) {
   const silent = !!opts.silent;
   try {
     if (!silent) toastStub('Checking for league updates…');
-    const leagueHit = await fetchFirstOk(leagueSyncUrls());
-    const remote = leagueHit.data;
-    if (!remote || !remote.teams) throw new Error('Invalid league JSON');
+    /* 1.2.6: league and rules are fetched independently — one missing file no longer fails the whole Sync */
+    let leagueHit = null, remote = null, leagueErr = null;
+    try {
+      leagueHit = await fetchFirstOk(leagueSyncUrls());
+      remote = leagueHit.data;
+      if (!remote || !remote.teams) { remote = null; leagueErr = new Error('Invalid league JSON'); }
+    } catch (le) { leagueErr = le; }
     const localKey = leagueStamp(LEAGUE);
-    const remoteKey = leagueStamp(remote);
+    const remoteKey = remote ? leagueStamp(remote) : '';
     let leagueUpdated = false;
-    if (remoteKey > localKey) {
+    if (remote && remoteKey > localKey) {
       LEAGUE = remote;
       writeLeagueCache(remote);
       leagueUpdated = true;
     } else if (!readLeagueCache()) {
       writeLeagueCache(LEAGUE);
     }
-    let rulesUpdated = false;
+    let rulesUpdated = false, rulesOk = false;
     try {
       const rulesHit = await fetchFirstOk(rulesSyncUrls());
+      rulesOk = true;
       const rdoc = rulesHit.data;
       if (rdoc && rdoc.html) {
         const rLocal = leagueStamp(RULES_META);
@@ -6643,17 +6659,17 @@ async function syncLeagueFromMirror(opts) {
       }
     } catch (re) {
       // Rules optional if league ok
-      if (!silent) console.warn('Rules sync skipped', re);
     }
+    if (!leagueHit && !rulesOk) throw leagueErr || new Error('Sync failed');
     refreshSyncStatusUI();
     if (leagueUpdated || rulesUpdated) {
       toastStub('Synced ✓' + (leagueUpdated ? ' league' : '') + (rulesUpdated ? ' rules' : ''));
       // Refresh schedule list if on home
       try { if (typeof renderMatchList === 'function') renderMatchList(); } catch (e) {}
-      return { ok: true, leagueUpdated: leagueUpdated, rulesUpdated: rulesUpdated, from: leagueHit.url };
+      return { ok: true, leagueUpdated: leagueUpdated, rulesUpdated: rulesUpdated, from: leagueHit ? leagueHit.url : 'rules-only' };
     }
     toastStub('Already up to date');
-    return { ok: true, leagueUpdated: false, rulesUpdated: false, from: leagueHit.url };
+    return { ok: true, leagueUpdated: false, rulesUpdated: false, from: leagueHit ? leagueHit.url : 'rules-only' };
   } catch (e) {
     toastStub('Sync failed — offline cache kept');
     return { ok: false, error: e && e.message ? e.message : String(e) };
@@ -7123,7 +7139,7 @@ function renderVerifyScoresheet() {
 
   document.getElementById('verify-chip').textContent =
     teamShortName(L) + ' vs ' + teamShortName(R) +
-    (nightOps.dateLabel ? ' · ' + nightOps.dateLabel : '') +
+    (nightOps.dateLabel ? ' · ' + cleanDateLabel(nightOps.dateLabel) : '') +
     (nightOps.board ? ' · Bd ' + nightOps.board : '');
 
   document.getElementById('verify-scoreboard').innerHTML =
