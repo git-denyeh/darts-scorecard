@@ -1324,7 +1324,7 @@ button:disabled { cursor: default; }
 
 /* FLOW SCREENS (welcome / play / league night) */
 #welcome, #profile-setup, #play-local, #play-setup, #play-bot,
-#tournaments-stub, #friends, #standings, #rules, #home, #present, #lineup {
+#tournaments-stub, #friends, #standings, #pstats, #rules, #home, #present, #lineup {
   display: none;
   flex-direction: column;
   width: 100%; max-width: 600px;
@@ -1339,7 +1339,7 @@ button:disabled { cursor: default; }
   box-sizing: border-box;
 }
 #welcome.show, #profile-setup.show, #play-local.show, #play-setup.show, #play-bot.show,
-#tournaments-stub.show, #friends.show, #standings.show, #rules.show,
+#tournaments-stub.show, #friends.show, #standings.show, #pstats.show, #rules.show,
 #home.show, #present.show, #lineup.show { display: flex; }
 #profile-setup { align-items: stretch; max-width: 480px; padding-top: 28px; }
 #present {
@@ -2134,7 +2134,7 @@ button:disabled { cursor: default; }
 /* Verify Scoresheet + Submit */
 #verify-screen {
   display: none; flex-direction: column; gap: 12px;
-  padding: 12px 16px calc(200px + env(safe-area-inset-bottom, 0px));
+  padding: 12px 16px calc(240px + env(safe-area-inset-bottom, 0px));
   min-height: 100%; min-height: 100dvh;
   max-width: none; width: 100%;
 }
@@ -2236,13 +2236,6 @@ button:disabled { cursor: default; }
 .submit-confirm-actions button { flex: 1; padding: 12px; border-radius: 6px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
 #submit-confirm-yes { background: var(--yellow); border: none; color: #1c1410; }
 #submit-confirm-no { background: transparent; border: 1px solid var(--border-light); color: var(--cream); }
-.settings-gh { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
-.settings-gh label { display: block; font-size: .72rem; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin: 8px 0 4px; }
-.settings-gh input {
-  width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border);
-  background: var(--panel2); color: var(--cream); font-size: .85rem;
-}
-#set-gh-hint { font-size: .72rem; color: var(--text-dim); margin-top: 6px; }
 
 
 /* ===== 1.2.5 UI polish ===== */
@@ -2304,6 +2297,108 @@ button:disabled { cursor: default; }
 .sum-empty-sub { color: #e8dcc0; font-size: .95rem; line-height: 1.4; }
 .sum-is-empty .sum-names, .sum-is-empty .sum-status, .sum-is-empty .sum-table-title,
 .sum-is-empty .sum-table, .sum-is-empty .sum-highlights, .sum-is-empty .sum-btn-copy { display: none !important; }
+
+/* v1.3.0 */
+.menu-item[hidden], .btn-export[hidden], .st-linkbtn[hidden] { display: none !important; }
+
+.lr-diddle { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 4px 2px 8px; }
+.lr-dd-q { font-size: .72rem; letter-spacing: 1px; text-transform: uppercase; color: var(--yellow); font-weight: 700; margin-right: 2px; }
+.lr-dd-btn { flex: 1 1 auto; min-width: 0; font-family: var(--font-ui); font-size: .78rem; font-weight: 700; padding: 7px 8px; min-height: 36px;
+  border-radius: 5px; border: 1px solid var(--border-light); background: var(--panel2); color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lr-dd-btn.sel { background: linear-gradient(180deg, #e0bd4a 0%, #c9a227 55%, #a8851c 100%); border-color: #8a6d14; color: #1c1410; }
+.lr-dd-btn:disabled { opacity: .75; }
+.lr-play-btn:disabled { opacity: .35; filter: grayscale(.6); }
+
+.end-night-btn[hidden] { display: none !important; }
+#pstats .st-card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin: 0;
+}
+
+#pstats .st-card h2 {
+  font-family: var(--font-display); letter-spacing: 2px;
+  color: var(--yellow); font-size: 1.05rem; margin-bottom: 10px;
+}
+
+#pstats .st-meta {
+  color: var(--text-dim); font-size: .78rem; margin-bottom: 8px; line-height: 1.35;
+}
+
+#pstats .st-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+
+#pstats .st-table th, #pstats .st-table td {
+  padding: 8px 6px; text-align: left; border-bottom: 1px solid var(--border);
+}
+
+#pstats .st-table th {
+  color: var(--text-dim); font-weight: 600; font-size: .72rem;
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+#pstats .st-table td.num, #pstats .st-table th.num {
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+
+#pstats .st-table tr:last-child td { border-bottom: none; }
+
+#pstats .st-rank { color: var(--text-dim); width: 2rem; }
+
+#pstats .st-name { font-weight: 600; }
+
+#pstats .st-wl { color: var(--cream, #f3e6c8); font-weight: 700; }
+
+#pstats .st-shot {
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  font-size: .88rem; color: var(--text-mid);
+}
+
+#pstats .st-shot:last-child { border-bottom: none; }
+
+#pstats .st-shot strong { color: var(--white); }
+
+#pstats .st-empty { color: var(--text-dim); font-style: italic; padding: 8px 0; }
+
+#pstats .st-actions {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;
+}
+
+#pstats .st-actions button,
+#pstats .st-actions a.st-linkbtn {
+  font-family: var(--font-ui); font-size: .8rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; text-decoration: none;
+  color: var(--cream, #f3e6c8); border: 1px solid var(--border);
+  background: var(--panel2); padding: 10px 14px; border-radius: 6px;
+  cursor: pointer; display: inline-block;
+}
+
+#pstats .st-actions button.primary {
+  background: var(--yellow); color: #1c1410; border-color: var(--yellow);
+}
+
+#pstats .st-actions button:disabled { opacity: .45; cursor: default; }
+
+#pstats .st-err { color: var(--red, #8b2a3e); font-size: .85rem; margin-top: 6px; }
+
+#pstats .ps-search { width: 100%; box-sizing: border-box; margin: 4px 0 10px; padding: 10px 12px; font-size: .95rem; color: var(--cream, #f3e6c8);
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; }
+#pstats .ps-sort { cursor: pointer; white-space: nowrap; }
+#pstats .ps-sort.on { color: var(--yellow); }
+#pstats .ps-row { cursor: pointer; }
+#pstats .ps-row.open td { background: rgba(201,162,39,0.10); }
+#pstats .ps-table td.st-name { max-width: 9.5rem; }
+#pstats .ps-detail-row td { padding: 0 6px 10px; border-bottom: 1px solid var(--border); }
+#pstats .ps-detail { background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: .82rem; color: var(--text-mid); }
+#pstats .ps-detail-team { color: var(--yellow); font-weight: 700; letter-spacing: 1px; margin-bottom: 3px; }
+#pstats .ps-detail-h { margin: 8px 0 3px; color: var(--text-dim); font-size: .72rem; letter-spacing: 1px; text-transform: uppercase; }
+#pstats .ps-shot { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border); color: var(--cream, #f3e6c8); }
+#pstats .ps-shot:last-child { border-bottom: none; }
+#pstats .ps-shot-d { color: var(--text-dim); }
+.lr-avg { margin-left: auto; font-size: .66rem; color: var(--text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: .3px;
+  background: rgba(201,162,39,0.10); border-radius: 4px; padding: 1px 5px; }
+
+.sh-fo { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.sh-fo-lab { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: .78rem; color: var(--yellow); }
+.sh-fo-cb { width: 22px; height: 22px; accent-color: #c9a227; }
 </style>
 </head>
 <body>
@@ -2353,7 +2448,7 @@ button:disabled { cursor: default; }
   <div class="next-match-card" id="next-match-card" hidden></div>
   <button type="button" class="nav-btn red" id="nav-play">Play</button>
   <button type="button" class="nav-btn red" id="nav-leagues">Leagues &amp; Groups</button>
-  <div class="welcome-version">TVYC Darts v <span class="ver">1.2.6</span></div>
+  <div class="welcome-version">TVYC Darts v <span class="ver">1.3.0</span></div>
 </div>
 
 <div class="menu-drawer" id="menu-drawer">
@@ -2362,8 +2457,11 @@ button:disabled { cursor: default; }
     <button type="button" class="menu-item" id="menu-profile">League profile / Change team</button>
     <button type="button" class="menu-item" id="menu-friends">Friends</button>
     <button type="button" class="menu-item" id="menu-standings">Standings</button>
+    <button type="button" class="menu-item" id="menu-pstats">Player Stats</button>
     <button type="button" class="menu-item" id="menu-rules">Rules</button>
     <button type="button" class="menu-item" id="menu-sync">Sync / Check for updates</button>
+    <button type="button" class="menu-item" id="menu-leaguekey">League key: enter…</button>
+    <button type="button" class="menu-item" id="menu-queue" hidden>Send queued results (0)</button>
     <button type="button" class="menu-item" id="menu-help">Help — night flow &amp; scoring</button>
     <button type="button" class="menu-item" id="menu-reset">Reset local data…</button>
     <button type="button" class="menu-close" id="menu-close">Close</button>
@@ -2558,6 +2656,26 @@ button:disabled { cursor: default; }
   </div>
 </div>
 
+<!-- PLAYER STATS (v1.3.0) -->
+<div id="pstats">
+  <div class="flow-header">
+    <button type="button" class="night-back" id="pstats-back">← HOME</button>
+    <div class="flow-title">Player Stats</div>
+    <button type="button" class="flow-x" id="pstats-close" aria-label="Close">✕</button>
+  </div>
+  <div class="flow-panel">
+    <div class="flow-panel-title" id="pstats-season">Player stats</div>
+    <div class="flow-panel-sub" id="pstats-status">Loading…</div>
+  </div>
+  <div class="section">
+    <div class="st-card">
+      <h2>Averages &amp; great shots</h2>
+      <input type="search" id="pstats-search" class="ps-search" placeholder="Find a player or team…" autocomplete="off">
+      <div id="pstats-body"><div class="st-empty">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- STANDINGS (in-app, v1.2.2) -->
 <div id="standings">
   <div class="flow-header">
@@ -2585,7 +2703,7 @@ button:disabled { cursor: default; }
     <div class="slabel">More</div>
     <div class="st-actions">
       <button type="button" class="primary" id="standings-copy-digest">Copy week digest</button>
-      <a class="st-linkbtn" id="standings-full-link" href="standings.html" target="_blank" rel="noopener">Full standings page</a>
+      <a class="st-linkbtn" id="standings-full-link" href="standings.html" target="_blank" rel="noopener" hidden>Full standings page</a>
       <button type="button" id="standings-refresh">Refresh</button>
     </div>
   </div>
@@ -2617,7 +2735,8 @@ button:disabled { cursor: default; }
   </div>
   <div class="flow-panel">
     <div class="flow-panel-title" id="home-team-title">Your Season</div>
-    <div class="flow-panel-sub">Tap a match → Present → Lineup → Score · sides set after diddle (swap on Present)</div>
+    <div class="flow-panel-sub">Tap a match → Present → Lineup → pick the diddle winner → Score</div>
+    <div class="flow-panel-sub" id="home-db-status" style="margin-top:4px"></div>
   </div>
   <div class="section">
     <div class="slabel">Season Schedule</div>
@@ -2637,7 +2756,6 @@ button:disabled { cursor: default; }
     <div class="night-match-chip" id="present-chip"></div>
   </div>
   <div class="flow-title" style="text-align:center;width:100%;">Who's Present</div>
-  <button class="swap-sides-btn" id="swap-sides-btn">⇄ Swap sides (Left = diddle winner)</button>
   <div class="present-cols">
     <div class="present-col">
       <div class="present-col-title" id="present-left-title">Left</div>
@@ -2783,6 +2901,7 @@ button:disabled { cursor: default; }
   <div class="verify-section-title">Great Shots</div>
   <div class="verify-shots" id="verify-shots"></div>
   <div class="verify-auth warn" id="verify-auth-status">Checking submit auth…</div>
+  <div class="verify-spacer" style="height:170px;flex:none" aria-hidden="true"></div>
   <div class="verify-footer">
     <div class="verify-submit-status" id="verify-submit-status"></div>
     <button type="button" class="btn-submit" id="verify-submit">Submit Scoresheet</button>
@@ -2796,7 +2915,7 @@ button:disabled { cursor: default; }
 <div id="submit-confirm-modal">
   <div class="submit-confirm-box">
     <h3>Submit Scoresheet</h3>
-    <p style="color:var(--text-mid);font-size:.9rem">Push this night to GitHub (results + season standings)?</p>
+    <p style="color:var(--text-mid);font-size:.9rem">Send this night to the league database (updates the standings for everyone)?</p>
     <pre id="submit-confirm-detail"></pre>
     <div class="submit-confirm-actions">
       <button type="button" id="submit-confirm-no">Cancel</button>
@@ -2810,16 +2929,6 @@ button:disabled { cursor: default; }
     <h3>Settings</h3>
     <div class="settings-row"><span>Sound</span><button type="button" id="set-sound" data-on="0">Off</button></div>
     <div class="settings-row"><span>Vibrate</span><button type="button" id="set-vibrate" data-on="0">Off</button></div>
-    <div class="settings-gh">
-      <div class="stub-note">League submit (optional) — PAT stored on this device only.</div>
-      <label for="set-gh-token">GitHub token</label>
-      <input type="password" id="set-gh-token" autocomplete="off" placeholder="ghp_… Contents:Write">
-      <label for="set-gh-owner">Owner</label>
-      <input type="text" id="set-gh-owner" value="git-denyeh" autocomplete="off">
-      <label for="set-gh-repo">Repo</label>
-      <input type="text" id="set-gh-repo" value="darts-scorecard" autocomplete="off">
-      <div id="set-gh-hint">Optional PAT with Contents: Write on git-denyeh/darts-scorecard.</div>
-    </div>
     <div class="settings-sync-row">
       <button type="button" class="sync-btn" id="set-sync">Sync / Check for updates</button>
       <div class="sync-status" id="set-sync-status">League data from Drive snapshot (offline Tuesday nights).</div>
@@ -2941,7 +3050,7 @@ const LEAGUE_JSON_REL = 'league/2026-27.json';
 const RULES_JSON_REL = 'league/2026-27-rules.json';
 const PAGES_BASE = 'https://git-denyeh.github.io/darts-scorecard/';
 const RAW_BASE = 'https://raw.githubusercontent.com/git-denyeh/darts-scorecard/main/';
-const APP_VERSION = '1.2.6';
+const APP_VERSION = '1.3.0';
 
 function readLeagueCache() {
   try {
@@ -3025,6 +3134,380 @@ let RULES_META = (window.__RULES_CACHE_BOOT)
       source: RULES_META_BUNDLED.source
     }
   : RULES_META_BUNDLED;
+/* ===== TVYC DB LAYER (v1.3.0) — plain fetch to Supabase REST/RPC. Casual Play never calls any of this. =====
+   Public anon key only (read-only by row-level security). The league key is NEVER embedded: the scorer types it once. */
+const TVYC_DB_URL = 'https://tgglselfbyzqahtanfhv.supabase.co';
+const TVYC_DB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnZ2xzZWxmYnl6cWFodGFuZmh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMzAwMDUsImV4cCI6MjEwODgwNjAwNX0.QGx7f3OtDRVS7LYnSXi4F0QdQ3T9jBKCAk_Y3F8F86o';
+const DB_SEASON_DEFAULT = '2026-27';
+const DB_SEASON_LS = 'tvyc-darts-db-season';        /* test/override only; absent in normal use */
+const DB_CACHE_PREFIX = 'tvyc-darts-db-cache-v1:';
+const DB_KEY_LS = 'tvyc-darts-league-key-v1';
+const DB_QUEUE_LS = 'tvyc-darts-submit-queue-v1';
+function dbSeasonId() { try { return localStorage.getItem(DB_SEASON_LS) || DB_SEASON_DEFAULT; } catch (e) { return DB_SEASON_DEFAULT; } }
+function dbCacheKey() { return DB_CACHE_PREFIX + dbSeasonId(); }
+function dbReadCache() {
+  try {
+    const o = JSON.parse(localStorage.getItem(dbCacheKey()) || 'null');
+    if (!o || !Array.isArray(o.teams) || !o.teams.length) return null;
+    return o;
+  } catch (e) { return null; }
+}
+function dbWriteCache(c) { try { localStorage.setItem(dbCacheKey(), JSON.stringify(c)); } catch (e) {} }
+async function dbFetchJson(method, path, body, timeoutMs) {
+  const ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const tm = ctl ? setTimeout(() => ctl.abort(), timeoutMs || 15000) : null;
+  try {
+    const res = await fetch(TVYC_DB_URL + path, {
+      method: method || 'GET',
+      headers: { 'apikey': TVYC_DB_ANON, 'Authorization': 'Bearer ' + TVYC_DB_ANON, 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+      cache: 'no-store',
+      signal: ctl ? ctl.signal : undefined
+    });
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch (e) { data = { message: text }; }
+    if (!res.ok) {
+      const err = new Error((data && data.message) || ('HTTP ' + res.status));
+      err.http = true; err.status = res.status; err.code = data && data.code; throw err;
+    }
+    return data;
+  } catch (e) {
+    if (!e.http) { e.network = true; }
+    throw e;
+  } finally { if (tm) clearTimeout(tm); }
+}
+const DB_MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function dbDateLabel(iso) { const p = String(iso).split('-'); return Number(p[2]) + '- ' + DB_MON3[Number(p[1]) - 1]; }
+function dbShortDate(iso) { const p = String(iso).split('-'); return DB_MON3[Number(p[1]) - 1] + ' ' + Number(p[2]); }
+const DB_KIND_OUT = { cricket_marks: 'marks', cricket_bulls: 'bulls', ton: 'ton', high_out: 'highOut', first_out: 'firstOut' };
+
+function dbBuildCache(raw) {
+  const S = raw.seasonId;
+  const teamById = {};
+  const teams = raw.teams.map(t => {
+    const pl = (raw.rosters.filter(r => r.team_id === t.id && r.players))
+      .map((r, i) => ({ print_order: r.print_order == null ? (i + 1) : r.print_order, full_name: r.players.full_name }))
+      .sort((a, b) => a.print_order - b.print_order);
+    const o = {
+      number: t.number, name_roster: t.name, name_schedule: t.schedule_name || t.name,
+      captain: (t.captain && t.captain.full_name) || '', players: pl
+    };
+    teamById[t.id] = o;
+    return o;
+  }).sort((a, b) => a.number - b.number);
+  const nightById = {};
+  raw.nights.forEach(n => { nightById[n.id] = n; });
+  const schedule = [];
+  raw.nights.slice().sort((a, b) => String(a.night_date).localeCompare(String(b.night_date))).forEach(n => {
+    const ms = raw.matches.filter(m => m.night_id === n.id)
+      .sort((a, b) => String(a.board).localeCompare(String(b.board)))
+      .map(m => ({
+        team_a: teamById[m.team_a_id] ? teamById[m.team_a_id].number : null,
+        team_b: teamById[m.team_b_id] ? teamById[m.team_b_id].number : null,
+        board: m.board, db_match_id: m.id, status: m.status,
+        wins_a: m.wins_a == null ? null : Number(m.wins_a), wins_b: m.wins_b == null ? null : Number(m.wins_b)
+      })).filter(m => m.team_a != null && m.team_b != null);
+    if (!ms.length) return;
+    schedule.push({
+      date_label: dbDateLabel(n.night_date), iso: n.night_date, db_night_id: n.id,
+      is_monday_exception: /monday/i.test(n.note || ''), matches: ms
+    });
+  });
+  /* season object in the same shape the in-app Standings view already renders */
+  const weeksMap = {};
+  function wk(nid) {
+    const n = nightById[nid]; if (!n) return null;
+    if (!weeksMap[nid]) weeksMap[nid] = { date: n.night_date, dateLabel: dbShortDate(n.night_date), weekNo: n.week_no, results: [], greatShots: [] };
+    return weeksMap[nid];
+  }
+  raw.matches.forEach(m => {
+    if (m.status !== 'final' && m.status !== 'forfeit') return;
+    const w = wk(m.night_id); if (!w) return;
+    const a = teamById[m.team_a_id], b = teamById[m.team_b_id]; if (!a || !b) return;
+    w.results.push({ board: m.board, leftTeamNumber: a.number, rightTeamNumber: b.number, leftName: a.name_roster, rightName: b.name_roster,
+      wins: { left: Number(m.wins_a), right: Number(m.wins_b) } });
+  });
+  const allShots = [];
+  raw.shots.forEach(g => {
+    const w = wk(g.night_id); if (!w) return;
+    const kind = DB_KIND_OUT[g.kind] || g.kind;
+    const row = {
+      player: g.player_name_raw, kind: kind,
+      value: (g.value == null && kind === 'ton') ? 'T' : g.value,
+      board: (g.matches && g.matches.board) || '', detail: ''
+    };
+    w.greatShots.push(row); allShots.push(Object.assign({ date: w.date }, row));
+  });
+  const weeks = Object.keys(weeksMap).map(k => weeksMap[k]).filter(w => w.results.length || w.greatShots.length)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  weeks.forEach(w => w.results.sort((a, b) => String(a.board).localeCompare(String(b.board))));
+  const asOfWeek = weeks.reduce((mx, w) => Math.max(mx, w.weekNo || 0), 0);
+  const stTeams = raw.standings.map(s => ({
+    number: s.team_number, name: s.team, wins: Number(s.wins), losses: Number(s.losses), nights: s.matches_played
+  }));
+  const season = {
+    schema: 'tvyc-darts-season/v1', seasonId: S, label: raw.label || ("Tellico Village Dart League '26-27'"),
+    teams: stTeams, weeks: weeks, greatShots: allShots, seed: { asOfWeek: asOfWeek || null }, updatedAt: new Date().toISOString()
+  };
+  const num = v => (v == null || v === '') ? null : Number(v);
+  const pstats = Array.isArray(raw.pstats) ? raw.pstats.map(x => ({
+    player_id: x.player_id, player: x.player, team_number: x.team_number, team: x.team,
+    games_01: x.games_01 == null ? 0 : Number(x.games_01), darts_01: x.darts_01 == null ? 0 : Number(x.darts_01), avg_01: num(x.avg_01),
+    games_cricket: x.games_cricket == null ? 0 : Number(x.games_cricket), darts_cricket: x.darts_cricket == null ? 0 : Number(x.darts_cricket), mpr: num(x.mpr),
+    great_shots: Number(x.great_shots || 0)
+  })) : undefined;
+  const gshots = raw.shots.map(g => ({
+    player_id: g.player_id, kind: DB_KIND_OUT[g.kind] || g.kind, value: g.value,
+    date: (nightById[g.night_id] && nightById[g.night_id].night_date) || ''
+  }));
+  return { seasonId: S, label: season.label, fetchedAt: Date.now(), teams: teams, schedule: schedule, season: season, pstats: pstats, gshots: gshots };
+}
+let _dbSyncPromise = null;
+function dbSync() {
+  if (_dbSyncPromise) return _dbSyncPromise;
+  const S = dbSeasonId(), q = encodeURIComponent(S);
+  _dbSyncPromise = (async () => {
+    const g = p => dbFetchJson('GET', '/rest/v1/' + p);
+    const r = await Promise.all([
+      g('seasons?id=eq.' + q + '&select=id,label'),
+      g('teams?season_id=eq.' + q + '&select=id,number,name,schedule_name,captain:players!captain_player_id(full_name)&order=number'),
+      g('team_rosters?season_id=eq.' + q + '&left_on=is.null&select=team_id,print_order,players(full_name)&order=print_order'),
+      g('nights?season_id=eq.' + q + '&select=id,week_no,night_date,phase,status,note&order=night_date'),
+      g('matches?season_id=eq.' + q + '&select=id,night_id,board,team_a_id,team_b_id,status,wins_a,wins_b&order=id'),
+      g('standings?season_id=eq.' + q + '&select=team,team_number,matches_played,wins,losses,rank&order=wins.desc,team_number'),
+      g('great_shots?season_id=eq.' + q + '&select=night_id,player_id,player_name_raw,kind,value,matches(board)&order=night_id.desc,id.asc'),
+      g('player_stats?season_id=eq.' + q + '&select=player_id,player,team_number,team,games_01,darts_01,avg_01,games_cricket,darts_cricket,mpr,great_shots').catch(() => null)
+    ]);
+    if (!r[1] || !r[1].length) throw new Error('No teams for season ' + S);
+    const cache = dbBuildCache({ seasonId: S, label: r[0][0] && r[0][0].label, teams: r[1], rosters: r[2], nights: r[3], matches: r[4], standings: r[5], shots: r[6], pstats: r[7] });
+    dbWriteCache(cache);
+    dbApplyOverlay(cache);
+    try { dbAfterSyncRefresh(); } catch (e) {}
+    return cache;
+  })();
+  const clear = () => { _dbSyncPromise = null; };
+  _dbSyncPromise.then(clear, clear);
+  return _dbSyncPromise;
+}
+/* Overlay DB teams + schedule onto the in-memory LEAGUE (bundled data stays as the offline fallback). */
+function dbApplyOverlay(c) {
+  if (!c || !Array.isArray(c.teams) || !c.teams.length) return false;
+  const sn = LEAGUE.schedule_notes || {};
+  LEAGUE = Object.assign({}, LEAGUE, {
+    teams: c.teams,
+    schedule_notes: Object.assign({}, sn, { regular_season_nights: (c.schedule && c.schedule.length) ? c.schedule : sn.regular_season_nights }),
+    dbOverlay: { seasonId: c.seasonId, fetchedAt: c.fetchedAt }
+  });
+  return true;
+}
+function dbAfterSyncRefresh() {
+  /* refresh league-only screens; never touches Play state */
+  const hs = document.getElementById('home');
+  if (document.getElementById('profile-setup') && document.getElementById('profile-setup').classList.contains('show')) populateProfileTeamSelect();
+  if (hs && hs.classList.contains('show')) renderHomeMatches();
+  populateTeamSelectsKeepValues();
+  renderNextMatchCard();
+  dbRenderHomeStatus();
+}
+function populateTeamSelectsKeepValues() {
+  const names = leagueTeams().map(t => t.name_roster);
+  ['team1-select', 'team2-select'].forEach(id => {
+    const sel = document.getElementById(id); if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '';
+    names.forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; if (n === cur) o.selected = true; sel.appendChild(o); });
+  });
+}
+function dbRenderHomeStatus() {
+  const el = document.getElementById('home-db-status'); if (!el) return;
+  const c = dbReadCache();
+  el.textContent = c ? ('League data (database) · last updated ' + new Date(c.fetchedAt).toLocaleString()) : 'League data: bundled schedule (not yet synced with the database)';
+}
+(function dbBootOverlay() { try { dbApplyOverlay(dbReadCache()); } catch (e) {} try { localStorage.removeItem('tvyc-darts-settings-v1'); /* old GitHub token slot */ } catch (e) {} })();
+
+/* ---- match lookup (schedule match → DB match id) ---- */
+function dbLookupMatchId(n) {
+  const c = dbReadCache(); if (!c || !n) return null;
+  const lab = cleanDateLabel(n.dateLabel);
+  const a = Number(n.leftTeamNumber), b = Number(n.rightTeamNumber);
+  for (let i = 0; i < c.schedule.length; i++) {
+    const night = c.schedule[i];
+    if (cleanDateLabel(night.date_label) !== lab) continue;
+    for (let j = 0; j < night.matches.length; j++) {
+      const m = night.matches[j];
+      if (String(m.board || '') !== String(n.board || '')) continue;
+      if ((m.team_a === a && m.team_b === b) || (m.team_a === b && m.team_b === a)) return m.db_match_id;
+    }
+  }
+  return null;
+}
+function dbMatchInfo(id) {
+  const c = dbReadCache(); if (!c) return null;
+  for (const night of c.schedule) for (const m of night.matches) if (m.db_match_id === id) return m;
+  return null;
+}
+
+/* ---- league key (typed once by the scorer; kept on this device only) ---- */
+function dbGetKey() { try { return localStorage.getItem(DB_KEY_LS) || ''; } catch (e) { return ''; } }
+function dbSetKey(k) { try { localStorage.setItem(DB_KEY_LS, k); } catch (e) {} }
+function dbClearKey() { try { localStorage.removeItem(DB_KEY_LS); } catch (e) {} }
+function dbPromptKey(msg) {
+  const k = window.prompt(msg || 'Enter the league key (ask the organizer). It is saved on this device only; clear it any time from ☰ Menu.', '');
+  const v = (k || '').trim();
+  if (v) dbSetKey(v);
+  return v;
+}
+
+/* ---- payload: the app's night JSON → what submit_match_result expects ---- */
+function dbBuildPayload(doc, opts) {
+  opts = opts || {};
+  const p = {
+    schema: doc.schema, appVersion: doc.appVersion,
+    leftTeamNumber: doc.leftTeamNumber, rightTeamNumber: doc.rightTeamNumber,
+    present: { left: (doc.present && doc.present.left) || [], right: (doc.present && doc.present.right) || [] }
+  };
+  if (doc.forfeit) {
+    /* league rule: forfeiter gets 2, opponent 6 (the DB takes totals + the forfeiting team; no per-game rows) */
+    const fl = Number(doc.forfeit.forfeitSide) === 0;
+    p.forfeit = true;
+    p.forfeitTeamNumber = fl ? doc.leftTeamNumber : doc.rightTeamNumber;
+    p.games = [];
+    p.totalWins = { left: fl ? 2 : 6, right: fl ? 6 : 2 };   /* same 6–2 the app now shows */
+    p.greatShots = [];
+    return p;
+  }
+  p.games = (doc.games || []).map(g => {
+    const o = {
+      round: g.round, label: g.label, wins: { left: Number(g.wins.left), right: Number(g.wins.right) },
+      left: (g.left || []).slice(), right: (g.right || []).slice()
+    };
+    /* who won the diddle for THIS round = threw first (the app puts that team on the scoring screen's left) */
+    if (g.diddle != null) o.first = Number(g.diddle) === Number(doc.leftTeamNumber) ? 'left' : (Number(g.diddle) === Number(doc.rightTeamNumber) ? 'right' : undefined);
+    return o;
+  });
+  p.totalWins = { left: Number(doc.totalWins.left), right: Number(doc.totalWins.right) };
+  /* turn ledger (player averages): who threw each turn is the lineup seat, so the full roster name comes straight from the round's lineup */
+  p.turns = [];
+  if (!opts.dropTurns) (doc.games || []).forEach(g => {
+    (g.turns || []).forEach(t => {
+      const arr = Number(t.side) === 1 ? (g.right || []) : (g.left || []);
+      const nm = arr[Number(t.seat) - 1];
+      if (!nm || !(t.d >= 1 && t.d <= 3)) return;
+      const o = { round: g.round, side: Number(t.side), player: nm, turn: t.n, darts: t.d };
+      if (t.k === 'cr') o.marks = t.v; else o.points = t.v;
+      p.turns.push(o);
+    });
+  });
+  /* The app logs a "firstOut" on EVERY checkout (it cannot know if it is the player's first ever), and the database allows one
+     first-out per player for life — so only the ones the scorer ticks "First ever out?" on the Verify screen are sent.
+     Great-shot names on the scoring screen are first names only ("ERIC"): resolve to the full roster name using that round's lineup. */
+  const skip = opts.skipPlayers || [];
+  const fullName = s => {
+    const g = (doc.games || []).find(x => Number(x.round) === Number(s.round));
+    if (g) {
+      const arr = Number(s.side) === 1 ? (g.right || []) : (g.left || []);
+      const want = String(s.player || '').trim().toUpperCase();
+      const hit = arr.find(n => String(n).toUpperCase() === want) || arr.find(n => firstName(n).toUpperCase() === want);
+      if (hit) return hit;
+    }
+    return s.player;
+  };
+  const seenFirst = {};
+  p.greatShots = (doc.greatShots || []).filter(s => s && (s.kind !== 'firstOut' || s.confirmedFirst)).map(s => {
+    const o = { player: fullName(s), kind: s.kind, round: s.round, side: s.side };
+    if (s.value != null && s.value !== '') o.value = s.value;
+    if (s.detail) o.detail = s.detail;
+    return o;
+  }).filter(o => {
+    if (skip.indexOf(o.player) >= 0) return false;
+    if (o.kind === 'firstOut') {
+      if (opts.dropAllFirstOut) return false;
+      const k = String(o.player).toLowerCase();
+      if ((opts.dropFirstOut || []).indexOf(k) >= 0 || seenFirst[k]) return false;   /* one first-ever out per player */
+      seenFirst[k] = true;
+    }
+    return true;
+  });
+  return p;
+}
+
+/* ---- send queue (offline) ---- */
+function dbQueueRead() { try { const q = JSON.parse(localStorage.getItem(DB_QUEUE_LS) || '[]'); return Array.isArray(q) ? q : []; } catch (e) { return []; } }
+function dbQueueWrite(q) { try { localStorage.setItem(DB_QUEUE_LS, JSON.stringify(q)); } catch (e) {} dbRefreshMenuLabels(); }
+function dbQueueAdd(item) {
+  const q = dbQueueRead().filter(x => !(x.seasonId === item.seasonId && x.matchId === item.matchId));
+  q.push(item); dbQueueWrite(q);
+}
+/* returns {ok:true,data} or {ok:false,kind:'network'|'key'|'match'|'player'|'other', message, player?} */
+async function dbRpcSubmit(seasonId, key, matchId, payload) {
+  try {
+    const data = await dbFetchJson('POST', '/rest/v1/rpc/submit_match_result',
+      { p_season_id: seasonId, p_key: key, p_match_id: matchId, p_payload: payload }, 25000);
+    return { ok: true, data: data };
+  } catch (e) {
+    if (e.network) return { ok: false, kind: 'network', message: 'No connection to the league database.' };
+    const msg = e.message || ('HTTP ' + e.status);
+    if (e.code === '28000' || /invalid key/i.test(msg)) return { ok: false, kind: 'key', message: 'That league key was not accepted.' };
+    if (e.code === 'P0002' || /unknown match/i.test(msg)) return { ok: false, kind: 'match', message: 'This match was not found in the database schedule for ' + seasonId + '.' };
+    if (e.code === '23505' && /first_out/i.test(msg)) return { ok: false, kind: 'firstout', message: 'A first-ever out was already on record for one of those players.' };
+    const m = msg.match(/great shot has no known player: (.*)$/i);
+    if (m) return { ok: false, kind: 'player', player: m[1], message: 'Great shot player "' + m[1] + '" is not in the league player list.' };
+    if (e.status >= 500 || e.status === 0) return { ok: false, kind: 'network', message: 'League database is unavailable (HTTP ' + e.status + ').' };
+    return { ok: false, kind: 'other', message: msg };
+  }
+}
+let _dbFlushing = false;
+async function dbFlushQueue(opts) {
+  opts = opts || {};
+  if (_dbFlushing) return { sent: 0 };
+  const q = dbQueueRead(); if (!q.length) return { sent: 0 };
+  const key = dbGetKey();
+  if (!key) { if (!opts.silent) toastStub('Queued results waiting — enter the league key (☰ Menu)'); return { sent: 0, needKey: true }; }
+  _dbFlushing = true;
+  let sent = 0; const left = []; let stop = false; const errors = [];
+  try {
+    for (let i = 0; i < q.length; i++) {
+      const it = q[i];
+      if (stop) { left.push(it); continue; }
+      const r = await dbRpcSubmit(it.seasonId, key, it.matchId, it.payload);
+      if (r.ok) { sent++; continue; }
+      if (r.kind === 'network') { stop = true; left.push(it); continue; }
+      if (r.kind === 'firstout') { it.payload.greatShots = (it.payload.greatShots || []).filter(s => s.kind !== 'firstOut'); toastStub('A first-ever out was already on record and was dropped; sending the rest'); const r2 = await dbRpcSubmit(it.seasonId, key, it.matchId, it.payload); if (r2.ok) { sent++; } else { left.push(it); errors.push((it.label || 'A queued result') + ': ' + r2.message); } continue; }
+      if (r.kind === 'key') { dbClearKey(); stop = true; left.push(it); errors.push('League key not accepted — re-enter it from ☰ Menu.'); continue; }
+      if (r.kind === 'other' && /turn/i.test(r.message || '') && it.payload.turns && it.payload.turns.length) { it.payload.turns = []; const r3 = await dbRpcSubmit(it.seasonId, key, it.matchId, it.payload); if (r3.ok) { sent++; continue; } }
+      it.lastError = r.message; left.push(it); errors.push((it.label || 'A queued result') + ': ' + r.message);
+    }
+  } finally { _dbFlushing = false; dbQueueWrite(left); }
+  if (sent) { toastStub('Sent ' + sent + ' queued result' + (sent > 1 ? 's' : '') + ' ✓'); try { dbSync(); } catch (e) {} }
+  if (errors.length && !opts.silent) alert('Queued result problem:\n\n' + errors.join('\n'));
+  return { sent: sent, errors: errors, remaining: left.length };
+}
+window.addEventListener('online', () => { if (dbQueueRead().length) dbFlushQueue({ silent: true }); });
+function dbRefreshMenuLabels() {
+  try {
+    const mk = document.getElementById('menu-leaguekey');
+    if (mk) mk.textContent = dbGetKey() ? 'League key: saved — clear…' : 'League key: enter…';
+    const mq = document.getElementById('menu-queue');
+    if (mq) { const n = dbQueueRead().length; mq.hidden = !n; mq.textContent = 'Send queued results (' + n + ')'; }
+  } catch (e) {}
+}
+
+/* ---- "First ever out?" helpers (Verify screen) ---- */
+function foKey(s) { return [s.round, s.side, String(s.player || '').toUpperCase(), s.value].join('|'); }
+function dbShotDisplayName(s) {
+  try {
+    const r = (nightOps && nightOps.rounds || []).find(x => Number(x.id) === Number(s.round));
+    if (r) {
+      const arr = Number(s.side) === 1 ? (r.right || []) : (r.left || []);
+      const want = String(s.player || '').trim().toUpperCase();
+      const hit = arr.find(n => String(n).toUpperCase() === want) || arr.find(n => firstName(n).toUpperCase() === want);
+      if (hit) return hit;
+    }
+  } catch (e) {}
+  return s.player;
+}
+
 const SCHED_GAMES = [
   { id:1, label:"Doubles Cricket", type:"Cricket", slots:2 },
   { id:2, label:"Doubles Cricket", type:"Cricket", slots:2 },
@@ -4439,6 +4922,7 @@ function o1Miss() {
 }
 
 function advanceO1Turn() {
+  tlO1(match.leg.current);
   match.leg.current = (match.leg.current + 1) % match.players.length;
   render();
   scheduleBotIfNeeded();
@@ -4566,6 +5050,7 @@ function cricketHit(ni, hits, label) {
 }
 function cricketEndTurn() {
   const leg = match.leg;
+  tlCr(leg.current);
   maybeRecordCricketMarksHighlight();
   leg.turns[leg.current]++;
   leg.currentTurnLog = [];
@@ -4599,6 +5084,7 @@ function cricketCheckWin() {
       if (leg.points[s2] > myScore) { everyoneElseLower = false; break; }
     }
     if (everyoneElseLower) {
+      tlCr(leg.current);
       // Winning visit may end mid-turn — still count 5–9 marks (individual thrower)
       if (scoreIndex(leg.current) === si) {
         maybeRecordCricketMarksHighlight();
@@ -4616,6 +5102,7 @@ function cricketCheckWin() {
 /* FINISH */
 function finishLeg(winnerIdx) {
   // winnerIdx is a side/score index (0|1). In 1v1 that equals the player index.
+  tlFinish();
   const m = match;
   const leg = m.leg;
   if (isTeamMatch()) {
@@ -4954,7 +5441,7 @@ function showBust() {
 /* NAV */
 function hideNightScreens() {
   ['welcome','profile-setup','play-local','play-setup','play-bot',
-   'tournaments-stub','friends','standings','rules','home','present','lineup','verify-screen'].forEach(id => {
+   'tournaments-stub','friends','standings','pstats','rules','home','present','lineup','verify-screen'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('show');
   });
@@ -5158,20 +5645,29 @@ function returnToLineupAfterRound(winnerIdx) {
   const rid = nightOps.currentRoundId;
   const round = nightOps.rounds.find(r => r.id === rid);
   if (round) {
-    const hl = (match && Array.isArray(match.highlights)) ? match.highlights.slice() : [];
+    let hl = (match && Array.isArray(match.highlights)) ? match.highlights.slice() : [];
+    /* the scoring screen had the diddle winner on its left; store everything in the night's fixed left/right (team columns) */
+    const swp = !!nightOps.currentRoundSwap;
+    if (swp) {
+      hl = hl.map(h => Object.assign({}, h, { side: (h.side === 0 || h.side === 1) ? 1 - h.side : h.side }));
+      if (winnerIdx === 0 || winnerIdx === 1) winnerIdx = 1 - winnerIdx;
+    }
     round.result = {
-      winnerSide: winnerIdx, // 0 left, 1 right
-      leftName: match ? sideDisplayName(0) : '',
-      rightName: match ? sideDisplayName(1) : '',
+      winnerSide: winnerIdx, // 0 = night's left team, 1 = right team
+      firstTeam: round.diddle == null ? null : Number(round.diddle),
+      leftName: match ? sideDisplayName(swp ? 1 : 0) : '',
+      rightName: match ? sideDisplayName(swp ? 0 : 1) : '',
       mode: match ? match.mode : round.type,
       ts: Date.now(),
-      highlights: hl
+      highlights: hl,
+      turns: tlForResult(match, swp)
     };
     if (!Array.isArray(nightOps.highlights)) nightOps.highlights = [];
     stripNightHighlightsForRound(rid);
     hl.forEach(h => nightOps.highlights.push(Object.assign({}, h, { roundId: rid })));
   }
   nightOps.currentRoundId = null;
+  nightOps.currentRoundSwap = false;
   nightOps.phase = 'lineup';
   nightFromScore = false;
   clearMatchState();
@@ -5262,7 +5758,9 @@ function matchesForFocus(focusNum) {
           board: m.board || '',
           focus: focus,
           opponent: a === focus ? b : a,
-          isMonday: !!night.is_monday_exception
+          isMonday: !!night.is_monday_exception,
+          dbMatchId: m.db_match_id || null,
+          iso: night.iso || ''
         });
       });
     });
@@ -5353,7 +5851,7 @@ function renderHomeMatches() {
       : st === 'next' ? '<span class="mc-tag next">Next match</span>'
       : st === 'played' ? '<span class="mc-tag played">Played</span>' : '';
     const note = m.note ? ('<div class="mc-board">' + escapeHtml(m.note) + '</div>') : '';
-    return '<button type="button" class="match-card' + (st ? ' mc-' + st : '') + '" data-key="' + m.key + '" data-focus="' + m.focus + '" data-opp="' + m.opponent + '" data-date="' + escapeAttr(m.dateLabel) + '" data-board="' + escapeAttr(m.board||'') + '">' +
+    return '<button type="button" class="match-card' + (st ? ' mc-' + st : '') + '" data-key="' + m.key + '" data-focus="' + m.focus + '" data-opp="' + m.opponent + '" data-date="' + escapeAttr(m.dateLabel) + '" data-board="' + escapeAttr(m.board||'') + '" data-dbid="' + (m.dbMatchId || '') + '">' +
       '<div class="mc-date">' + escapeHtml(m.dateLabel) + mon + tag + '</div>' +
       '<div class="mc-vs"><em>' + escapeHtml(teamShortName(focus)) + '</em> vs <em>' + escapeHtml(teamShortName(opp)) + '</em></div>' +
       '<div class="mc-board">Board ' + escapeHtml(m.board || '—') + note + '</div>' +
@@ -5365,7 +5863,8 @@ function renderHomeMatches() {
         focusTeamNumber: Number(btn.dataset.focus),
         opponentTeamNumber: Number(btn.dataset.opp),
         dateLabel: btn.dataset.date,
-        board: btn.dataset.board || ''
+        board: btn.dataset.board || '',
+        dbMatchId: btn.dataset.dbid ? Number(btn.dataset.dbid) : null
       });
     });
   });
@@ -5378,7 +5877,7 @@ function escapeAttr(s) {
   return String(s||'').replace(/"/g, '&quot;');
 }
 
-function beginNight({ focusTeamNumber, opponentTeamNumber, dateLabel, board }) {
+function beginNight({ focusTeamNumber, opponentTeamNumber, dateLabel, board, dbMatchId }) {
   // Default: focus team is left (diddle winner)
   nightOps = {
     phase: 'present',
@@ -5388,6 +5887,7 @@ function beginNight({ focusTeamNumber, opponentTeamNumber, dateLabel, board }) {
     rightTeamNumber: opponentTeamNumber,
     dateLabel: dateLabel || '',
     board: board || '',
+    dbMatchId: dbMatchId || null,
     presentLeft: [],
     presentRight: [],
     subsLeft: [],
@@ -5414,9 +5914,9 @@ function showPresent() {
     (nightOps.dateLabel ? ` · ${escapeHtml(cleanDateLabel(nightOps.dateLabel))}` : '') +
     (nightOps.board ? ` · Bd ${escapeHtml(nightOps.board)}` : '');
   document.getElementById('present-left-title').textContent =
-    'LEFT · ' + teamShortName(L) + (nightOps.leftTeamNumber === nightOps.focusTeamNumber ? ' ★' : '');
+    teamShortName(L) + (nightOps.leftTeamNumber === nightOps.focusTeamNumber ? ' ★' : '');
   document.getElementById('present-right-title').textContent =
-    'RIGHT · ' + teamShortName(R) + (nightOps.rightTeamNumber === nightOps.focusTeamNumber ? ' ★' : '');
+    teamShortName(R) + (nightOps.rightTeamNumber === nightOps.focusTeamNumber ? ' ★' : '');
   renderPresentLists();
   saveState();
 }
@@ -5519,16 +6019,18 @@ function applyPresentForfeit() {
     'League rule: fewer than 4 present = forfeit.\n\n' +
     'Left: ' + nL + ' · Right: ' + nR + '\n\n' +
     forfeitName + ' forfeits.\n' +
-    winnerName + ' wins 8–0.\n\n' +
+    winnerName + ' wins 6–2 (league rule: 6 wins to 2).\n\n' +
     'Record forfeit and open Verify?';
   if (!confirm(msg)) return;
   const leftPool = nightOps.presentLeft.length ? nightOps.presentLeft : ['(forfeit)'];
   const rightPool = nightOps.presentRight.length ? nightOps.presentRight : ['(forfeit)'];
   nightOps.rounds = buildNightLineup(leftPool, rightPool);
-  nightOps.rounds.forEach(r => {
+  /* league rule: forfeiting team 2 wins, opponent 6 — games 1-6 to the winner, 7-8 to the forfeiter so every total reads 6–2 */
+  nightOps.rounds.forEach((r, i) => {
+    const ws = i < 6 ? winnerSide : forfeitSide;
     r.result = {
-      winnerSide: winnerSide,
-      wins: winnerSide === 0 ? { left: 1, right: 0 } : { left: 0, right: 1 },
+      winnerSide: ws,
+      wins: ws === 0 ? { left: 1, right: 0 } : { left: 0, right: 1 },
       highlights: [],
       forfeit: true
     };
@@ -5647,7 +6149,8 @@ function buildNightLineup(leftPlayers, rightPlayers) {
     slots: g.slots,
     left: L.schedule[i].assigned.slice(),
     right: R.schedule[i].assigned.slice(),
-    result: (nightOps.rounds && nightOps.rounds[i] && nightOps.rounds[i].result) || null
+    result: (nightOps.rounds && nightOps.rounds[i] && nightOps.rounds[i].result) || null,
+    diddle: (nightOps.rounds && nightOps.rounds[i] && nightOps.rounds[i].diddle != null) ? nightOps.rounds[i].diddle : null
   }));
 }
 
@@ -5855,16 +6358,17 @@ function renderLineup(opts) {
   roundsEl.innerHTML = nightOps.rounds.map(r => {
     let st = 'pending', stLabel = 'Play', cls = '';
     if (r.result) {
-      if (r.result.winnerSide === 0) { st = 'won'; stLabel = 'Left'; cls = 'done'; }
-      else { st = 'lost'; stLabel = 'Right'; cls = 'done-loss'; }
+      if (r.result.winnerSide === 0) { st = 'won'; stLabel = teamShortName(L); cls = 'done'; }
+      else { st = 'lost'; stLabel = teamShortName(R); cls = 'done-loss'; }
     }
+    const oppSides = lineupOpponentSides(L, R);
     const leftHtml = r.left.map((p,i)=>
       `<div class="lr-player" data-round="${r.id}" data-side="left" data-slot="${i}" role="button" tabindex="0">` +
-      `<span class="sched-pos-badge sp${i}">P${i+1}</span><span class="lr-name-txt">${escapeHtml(p)}</span></div>`
+      `<span class="sched-pos-badge sp${i}">P${i+1}</span><span class="lr-name-txt">${escapeHtml(p)}</span>${oppSides.left ? lineupStatChip(p, r.type) : ''}</div>`
     ).join('');
     const rightHtml = r.right.map((p,i)=>
       `<div class="lr-player" data-round="${r.id}" data-side="right" data-slot="${i}" role="button" tabindex="0">` +
-      `<span class="sched-pos-badge sp${i}">P${i+1}</span><span class="lr-name-txt">${escapeHtml(p)}</span></div>`
+      `<span class="sched-pos-badge sp${i}">P${i+1}</span><span class="lr-name-txt">${escapeHtml(p)}</span>${oppSides.right ? lineupStatChip(p, r.type) : ''}</div>`
     ).join('');
     return `<div class="lineup-round ${cls}" data-round="${r.id}">
       <div class="lr-top">
@@ -5872,20 +6376,32 @@ function renderLineup(opts) {
         <span class="lr-name">${escapeHtml(r.label)}</span>
         <span class="sched-type-badge st-${r.type}">${r.type}</span>
         <button type="button" class="lr-edit-btn" data-edit-round="${r.id}">Edit</button>
-        ${r.result ? `<span class="lr-status ${st}">${stLabel}</span>` : `<button type="button" class="lr-play-btn" data-play-round="${r.id}">▶ Play</button>`}
+        ${r.result ? `<span class="lr-status ${st}">${stLabel}</span>` : `<button type="button" class="lr-play-btn" data-play-round="${r.id}"${r.diddle == null ? ' disabled' : ''}>▶ Play</button>`}
       </div>
+      <div class="lr-diddle" data-round="${r.id}"><span class="lr-dd-q">${r.result ? 'Diddle winner:' : 'Diddle winner?'}</span>${[L, R].map(t =>
+        `<button type="button" class="lr-dd-btn${Number(r.diddle) === Number(t.number) ? ' sel' : ''}" data-dd-round="${r.id}" data-dd-team="${t.number}"${r.result ? ' disabled' : ''}>${escapeHtml(teamShortName(t))}</button>`).join('')}</div>
       <div class="lr-sides">
-        <div class="lr-side"><div class="lr-side-label">Left</div>${leftHtml}</div>
+        <div class="lr-side"><div class="lr-side-label">${escapeHtml(teamShortName(L))}</div>${leftHtml}</div>
         <div class="lr-vs">VS</div>
-        <div class="lr-side"><div class="lr-side-label">Right</div>${rightHtml}</div>
+        <div class="lr-side"><div class="lr-side-label">${escapeHtml(teamShortName(R))}</div>${rightHtml}</div>
       </div>
     </div>`;
   }).join('');
 
   roundsEl.querySelectorAll('.lineup-round').forEach(el => {
     el.addEventListener('click', (e) => {
-      if (e.target.closest('.lr-edit-btn') || e.target.closest('.lr-player')) return;
+      if (e.target.closest('.lr-edit-btn') || e.target.closest('.lr-player') || e.target.closest('.lr-diddle')) return;
       startNightRound(Number(el.dataset.round));
+    });
+  });
+  roundsEl.querySelectorAll('.lr-dd-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const rd = nightOps.rounds.find(x => x.id === Number(btn.dataset.ddRound));
+      if (!rd || rd.result) return;
+      rd.diddle = Number(btn.dataset.ddTeam);
+      saveState();
+      renderLineup({ keepPicker: true });
     });
   });
   roundsEl.querySelectorAll('.lr-play-btn').forEach(btn => {
@@ -5915,18 +6431,18 @@ function renderLineup(opts) {
   if (startBtn) {
     if (next) {
       startBtn.disabled = false;
-      startBtn.textContent = '▶ Round ' + next.id + ' · ' + shortGameLabel(next.label);
+      startBtn.textContent = next.diddle == null ? ('◆ Pick diddle winner · Round ' + next.id) : ('▶ Round ' + next.id + ' · ' + shortGameLabel(next.label));
       startBtn.onclick = () => startNightRound(next.id);
       if (hint) hint.textContent = 'Next up: Round ' + next.id + ' · ' + next.label + ' · tap Edit or a player to change lineup';
       const enb = document.getElementById('end-night-btn');
-      if (enb) enb.textContent = 'End Night';
+      if (enb) { enb.textContent = 'End Night'; enb.hidden = !nightOps.forfeit; }
     } else {
       startBtn.disabled = false;
       startBtn.textContent = 'Verify Scoresheet';
       startBtn.onclick = () => showVerifyScoresheet();
       if (hint) hint.textContent = 'Night complete — Verify Scoresheet, then Submit.';
       const enb = document.getElementById('end-night-btn');
-      if (enb) enb.textContent = 'Verify Scoresheet';
+      if (enb) { enb.textContent = 'Verify Scoresheet'; enb.hidden = false; }
     }
   }
 }
@@ -5934,6 +6450,11 @@ function renderLineup(opts) {
 function startNightRound(roundId) {
   const round = nightOps.rounds.find(r => r.id === roundId);
   if (!round) return;
+  if (round.diddle == null) {
+    toastStub('Pick the diddle winner for Round ' + roundId + ' first');
+    try { const el = document.querySelector('.lineup-round[data-round="' + roundId + '"]'); if (el) el.scrollIntoView({ block: 'center' }); } catch (e) {}
+    return;
+  }
   if (round.result && !confirm('This round is already scored. Replay and overwrite?')) return;
   if (round.result) {
     stripNightHighlightsForRound(roundId);
@@ -5947,9 +6468,11 @@ function startNightRound(roundId) {
   document.querySelectorAll('.mode-btn[data-mode]').forEach(b => {
     b.classList.toggle('active', b.dataset.mode === gameMode);
   });
+  /* diddle winner goes on the scoring screen's LEFT and throws first (L1,R1,L2,R2…) for this round only */
+  nightOps.currentRoundSwap = Number(round.diddle) === Number(nightOps.rightTeamNumber);
   saveState();
-  const left = (round.left || []).filter(Boolean);
-  const right = (round.right || []).filter(Boolean);
+  const left = ((nightOps.currentRoundSwap ? round.right : round.left) || []).filter(Boolean);
+  const right = ((nightOps.currentRoundSwap ? round.left : round.right) || []).filter(Boolean);
   // Singles 1v1 unchanged; multi-slot → team score + zip throw order (L1,R1,L2,R2…)
   if (left.length <= 1 && right.length <= 1) {
     startMatch([sideLabel(left), sideLabel(right)]);
@@ -5975,7 +6498,11 @@ document.getElementById('custom-match-btn').addEventListener('click', () => {
 });
 /* Welcome / Play / Leagues — Play never needs league profile; Leagues asks if unset */
 document.getElementById('nav-play').addEventListener('click', showPlayLocal);
-document.getElementById('nav-leagues').addEventListener('click', showHome);
+document.getElementById('nav-leagues').addEventListener('click', function () {
+  showHome();
+  /* v1.3.0: league-only read of teams/schedule/standings; Play screens never sync */
+  try { dbRenderHomeStatus(); dbSync().catch(function () {}); if (dbQueueRead().length && dbGetKey()) dbFlushQueue({ silent: true }); } catch (e) {}
+});
 
 document.getElementById('local-back').addEventListener('click', showWelcome);
 document.getElementById('local-close').addEventListener('click', showWelcome);
@@ -6313,7 +6840,7 @@ document.getElementById('bot-continue').addEventListener('click', () => {
 });
 
 
-function openMenu() { document.getElementById('menu-drawer').classList.add('open'); }
+function openMenu() { try { dbRefreshMenuLabels(); } catch (e) {} document.getElementById('menu-drawer').classList.add('open'); }
 function closeMenu() { document.getElementById('menu-drawer').classList.remove('open'); }
 document.getElementById('welcome-menu-btn').addEventListener('click', openMenu);
 document.getElementById('menu-close').addEventListener('click', closeMenu);
@@ -6340,13 +6867,13 @@ function showHelp() {
     'Play — Local hub: display name / Friends, then Quick/Extended 501, Cricket, Chicago, Jarvis, Custom.\n' +
     '  Custom Match: pick Friends or League teams. No league team required.\n\n' +
     'Friends (☰) — house/casual names on this device; anyone can add/remove; Export/Import JSON.\n\n' +
-    'Standings (☰) — season W–L + Great Shots (cached offline from Pages).\n\n' +
+    'Standings (☰) — season W–L + Great Shots from the league database (last good copy cached for offline).\n\n' +
     'Rules (☰) — Tellico Village Dart League rules (bundled; Sync updates from Pages).\n\n' +
     'Sync (☰ / ↻) — fetch league JSON + rules from GitHub Pages if newer than cache.\n\n' +
     'Leagues & Groups — pick team+player if unset, then night flow: schedule → present → lineup → score.\n\n' +
     '01: D/T then number; type visit totals (e.g. 180) + ENTER; side shortcuts (no 100/140/180 keys).\n' +
     'Cricket: D / number / T; BACK; MISS.\n\n' +
-    'All scoring is local on this device.'
+    'Casual Play is 100% local on this device. League nights send the final scoresheet to the league database when you Submit (needs the league key; ☰ Menu → League key).'
   );
 }
 document.getElementById('menu-help').addEventListener('click', showHelp);
@@ -6495,20 +7022,6 @@ document.getElementById('present-back').addEventListener('click', () => {
   saveState();
   showHome();
 });
-document.getElementById('swap-sides-btn').addEventListener('click', () => {
-  if (!nightOps) return;
-  const tmpT = nightOps.leftTeamNumber;
-  nightOps.leftTeamNumber = nightOps.rightTeamNumber;
-  nightOps.rightTeamNumber = tmpT;
-  const tmpP = nightOps.presentLeft;
-  nightOps.presentLeft = nightOps.presentRight;
-  nightOps.presentRight = tmpP;
-  const tmpS = nightOps.subsLeft;
-  nightOps.subsLeft = nightOps.subsRight;
-  nightOps.subsRight = tmpS;
-  nightOps.rounds = []; // force rebuild on continue
-  showPresent();
-});
 document.getElementById('sub-left-btn').addEventListener('click', () => addSub('left'));
 document.getElementById('sub-right-btn').addEventListener('click', () => addSub('right'));
 document.getElementById('sub-left-input').addEventListener('keydown', e => { if (e.key==='Enter') addSub('left'); });
@@ -6555,6 +7068,7 @@ document.getElementById('lineup-edit-present').addEventListener('click', () => {
 })();
 document.getElementById('lineup-reshuffle').addEventListener('click', reshuffleLineup);
 document.getElementById('end-night-btn').addEventListener('click', () => {
+  if (!allRoundsScored() && !(nightOps && nightOps.forfeit)) return;   /* v1.3.0: only after round 8 (or a forfeit) */
   if (allRoundsScored()) {
     showVerifyScoresheet();
     return;
@@ -6631,6 +7145,7 @@ async function syncLeagueFromMirror(opts) {
     if (remote && remoteKey > localKey) {
       LEAGUE = remote;
       writeLeagueCache(remote);
+      try { dbApplyOverlay(dbReadCache()); } catch (e) {}
       leagueUpdated = true;
     } else if (!readLeagueCache()) {
       writeLeagueCache(LEAGUE);
@@ -6692,6 +7207,7 @@ function wireLeagueSyncUI() {
     const sm = document.getElementById('settings-modal');
     if (sm) sm.classList.remove('open');
     syncLeagueFromMirror({ silent: false });
+    try { dbSync().then(function () { toastStub('League data updated from database ✓'); }, function () { /* offline: keep cache */ }); } catch (e) {}
   };
   const ms = document.getElementById('menu-sync');
   if (ms) ms.addEventListener('click', run);
@@ -6811,7 +7327,7 @@ function renderStandingsView(season, meta) {
   if (meta.fetchedAt) {
     try {
       const d = new Date(meta.fetchedAt);
-      status += (status ? ' · ' : '') + 'updated ' + d.toLocaleString();
+      status += (status ? ' · ' : '') + 'last updated ' + d.toLocaleString();
     } catch (e) {}
   }
   if (season && season.seed && season.seed.asOfWeek) {
@@ -6863,6 +7379,25 @@ function renderStandingsView(season, meta) {
   window._standingsWeek = week || null;
 }
 async function loadStandingsSeason(force) {
+  /* v1.3.0: standings + great shots come from the league database; last good copy is cached for offline use.
+     The old GitHub season.json path below is only a fallback when the database was never reachable on this device. */
+  const dbc = dbReadCache();
+  if (dbc && dbc.season && !force) renderStandingsView(dbc.season, { fromCache: true, fetchedAt: dbc.fetchedAt });
+  try {
+    const fresh = await dbSync();
+    renderStandingsView(fresh.season, { fresh: true, fetchedAt: fresh.fetchedAt });
+    return fresh.season;
+  } catch (e) {
+    if (dbc && dbc.season) {
+      renderStandingsView(dbc.season, { fromCache: true, fetchedAt: dbc.fetchedAt });
+      const st = document.getElementById('standings-status');
+      if (st) st.textContent = (st.textContent || '') + ' · live update failed (offline?)';
+      return dbc.season;
+    }
+  }
+  return loadStandingsSeasonLegacy(force);
+}
+async function loadStandingsSeasonLegacy(force) {
   const cached = readSeasonCache();
   if (cached && cached.season && !force) {
     renderStandingsView(cached.season, { fromCache: true, fetchedAt: cached.fetchedAt });
@@ -6940,23 +7475,6 @@ document.getElementById('standings-copy-digest').addEventListener('click', copyS
 /* ===== TVYC LEAGUE SUBMIT + VERIFY (v1.2.0) / STANDINGS VIEW (v1.2.2) ===== */
 const NIGHT_SCHEMA = 'tvyc-darts-night/v1';
 const SEASON_ID = '2026-27';
-const GH_DEFAULT_OWNER = 'git-denyeh';
-const GH_DEFAULT_REPO = 'darts-scorecard';
-const SETTINGS_KEY = 'tvyc-darts-settings-v1';
-
-function loadAppSettings() {
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if (raw) return Object.assign({ ghToken: '', ghOwner: GH_DEFAULT_OWNER, ghRepo: GH_DEFAULT_REPO }, JSON.parse(raw));
-  } catch (e) {}
-  return { ghToken: '', ghOwner: GH_DEFAULT_OWNER, ghRepo: GH_DEFAULT_REPO };
-}
-function saveAppSettings(partial) {
-  const cur = loadAppSettings();
-  const next = Object.assign(cur, partial || {});
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
-  return next;
-}
 
 function slugTeamName(name) {
   return String(name || 'team')
@@ -7062,11 +7580,13 @@ function serializeNightJSON() {
       round: r.id,
       label: r.label,
       type: r.type,
+      diddle: r.diddle == null ? null : Number(r.diddle),
       left: (r.left || []).slice(),
       right: (r.right || []).slice(),
       winnerSide: winnerSide,
       wins: wins,
-      highlights: ((r.result && r.result.highlights) || []).map(h => Object.assign({}, h))
+      highlights: ((r.result && r.result.highlights) || []).map(h => Object.assign({}, h)),
+      turns: ((r.result && r.result.turns) || []).map(t => Object.assign({}, t))
     };
   });
   const totalWins = games.reduce((acc, g) => {
@@ -7097,7 +7617,7 @@ function serializeNightJSON() {
     },
     games: games,
     totalWins: totalWins,
-    greatShots: collectGreatShotsFromNight(),
+    greatShots: collectGreatShotsFromNight().map(g => g.kind === 'firstOut' ? Object.assign({}, g, { confirmedFirst: !!(nightOps.firstOutChecked || {})[foKey(g)] }) : g),
     submittedAt: new Date().toISOString(),
     appVersion: APP_VERSION
   };
@@ -7165,10 +7685,10 @@ function renderVerifyScoresheet() {
       '<div class="vg-vs">VS</div>' +
       '<div class="vg-side' + (rightWin ? ' won' : '') + '"><div class="vg-w">' + (rightWin ? 'W' : (half ? '½' : '')) + '</div>' + rightHtml + '</div>' +
       '</div>' +
-      '<div class="vg-fix">' +
-      '<button type="button" class="vg-fix-btn" data-fix="' + r.id + '" data-side="0">Left W</button>' +
+      (nightOps.forfeit ? '<div class="vg-fix" style="display:none">' : '<div class="vg-fix">') +
+      '<button type="button" class="vg-fix-btn" data-fix="' + r.id + '" data-side="0">' + escapeHtml(teamShortName(L)) + ' W</button>' +
       '<button type="button" class="vg-fix-btn" data-fix="' + r.id + '" data-side="0.5">½–½</button>' +
-      '<button type="button" class="vg-fix-btn" data-fix="' + r.id + '" data-side="1">Right W</button>' +
+      '<button type="button" class="vg-fix-btn" data-fix="' + r.id + '" data-side="1">' + escapeHtml(teamShortName(R)) + ' W</button>' +
       '<button type="button" class="vg-fix-btn replay" data-replay="' + r.id + '">Replay</button>' +
       '</div></div>';
   }).join('');
@@ -7208,27 +7728,39 @@ function renderVerifyScoresheet() {
     shotsEl.innerHTML = '<div class="sh-empty">No great shots recorded</div>';
   } else {
     shotsEl.innerHTML = shots.map(s => {
-      let line = escapeHtml(s.player || '?');
+      let line = escapeHtml(dbShotDisplayName(s) || '?');
       if (s.kind === 'ton') line += ' — ' + s.value;
       else if (s.kind === 'marks') line += ' — ' + s.value + ' count' + (s.detail ? ' (' + escapeHtml(s.detail) + ')' : '');
       else if (s.kind === 'bulls') line += ' — ' + s.value + ' bulls';
       else if (s.kind === 'highOut') line += ' — out ' + s.value;
-      else if (s.kind === 'firstOut') line += ' — first out ' + s.value;
+      else if (s.kind === 'firstOut') line += ' — checkout ' + s.value;
       else line += ' — ' + escapeHtml(s.kind) + ' ' + (s.value || '');
       if (s.round) line += ' · R' + s.round;
+      if (s.kind === 'firstOut') {
+        const k = foKey(s);
+        return '<div class="sh-item sh-fo"><span>' + line + '</span><label class="sh-fo-lab"><input type="checkbox" class="sh-fo-cb" data-fokey="' + escapeAttr(k) + '"' + ((nightOps.firstOutChecked || {})[k] ? ' checked' : '') + '> First ever out?</label></div>';
+      }
       return '<div class="sh-item">' + line + '</div>';
     }).join('');
   }
 
-  const settings = loadAppSettings();
   const status = document.getElementById('verify-auth-status');
-  if (settings.ghToken) {
-    status.textContent = 'GitHub token set — Submit will push to ' + settings.ghOwner + '/' + settings.ghRepo;
+  const qn = dbQueueRead().length;
+  if (dbGetKey()) {
+    status.textContent = 'League key saved on this device — Submit sends to the league database (' + dbSeasonId() + ')' + (qn ? ' · ' + qn + ' queued' : '');
     status.className = 'verify-auth ok';
   } else {
-    status.textContent = 'No GitHub token — Verify + Export JSON still work. Add token in Settings to Submit.';
+    status.textContent = 'No league key yet — you will be asked for it when you tap Submit (saved on this device only).' + (qn ? ' · ' + qn + ' queued' : '');
     status.className = 'verify-auth warn';
   }
+  const vss = document.getElementById('verify-submit-status'); if (vss) { vss.textContent = ''; vss.className = 'verify-submit-status'; }
+  const vtt = document.querySelector('.verify-title');
+  if (vtt) vtt.textContent = nightOps.forfeit ? 'Verify Scoresheet · Forfeit 6–2' : 'Verify Scoresheet';
+  document.querySelectorAll('#verify-shots .sh-fo-cb').forEach(cb => cb.addEventListener('change', () => {
+    if (!nightOps.firstOutChecked) nightOps.firstOutChecked = {};
+    nightOps.firstOutChecked[cb.dataset.fokey] = cb.checked;
+    saveState();
+  }));
 }
 
 function closeVerifyToLineup() {
@@ -7248,211 +7780,6 @@ function exportNightJSONFile() {
     toastStub('Exported ' + filename);
   } catch (e) {
     alert('Export failed: ' + e.message);
-  }
-}
-
-function b64utf8(str) {
-  return btoa(unescape(encodeURIComponent(str)));
-}
-
-async function ghApi(path, method, body, token) {
-  const res = await fetch('https://api.github.com' + path, {
-    method: method || 'GET',
-    headers: {
-      'Accept': 'application/vnd.github+json',
-      'Authorization': 'Bearer ' + token,
-      'X-GitHub-Api-Version': '2022-11-28',
-      'Content-Type': 'application/json'
-    },
-    body: body ? JSON.stringify(body) : undefined
-  });
-  const text = await res.text();
-  let data = null;
-  try { data = text ? JSON.parse(text) : null; } catch (e) { data = { raw: text }; }
-  if (!res.ok) {
-    const msg = (data && (data.message || data.error)) || ('HTTP ' + res.status);
-    throw new Error(msg);
-  }
-  return data;
-}
-
-async function ghPutFile(owner, repo, path, contentStr, message, token, sha) {
-  const body = {
-    message: message,
-    content: b64utf8(contentStr),
-    branch: 'main'
-  };
-  if (sha) body.sha = sha;
-  return ghApi('/repos/' + owner + '/' + repo + '/contents/' + path, 'PUT', body, token);
-}
-
-async function ghGetFile(owner, repo, path, token) {
-  try {
-    return await ghApi('/repos/' + owner + '/' + repo + '/contents/' + path + '?ref=main', 'GET', null, token);
-  } catch (e) {
-    if (/404|Not Found/i.test(e.message)) return null;
-    throw e;
-  }
-}
-
-function rollupNightsClient(nights) {
-  // Minimal inline rollup (mirrors scripts/rollup-season.js)
-  const teams = {};
-  const weeksMap = {};
-  const allShots = [];
-  function ensure(num, name) {
-    const k = 't' + num;
-    if (!teams[k]) teams[k] = { number: Number(num), name: name || ('Team ' + num), wins: 0, losses: 0, nights: 0, gameWins: 0, gameLosses: 0 };
-    else if (name) teams[k].name = name;
-    return teams[k];
-  }
-  function nameFor(night, num) {
-    if (night.focusTeam && Number(night.focusTeam.number) === Number(num)) return night.focusTeam.name;
-    if (night.opponentTeam && Number(night.opponentTeam.number) === Number(num)) return night.opponentTeam.name;
-    return '#' + num;
-  }
-  (nights || []).forEach(night => {
-    if (!night || night.schema !== NIGHT_SCHEMA) return;
-    const left = ensure(night.leftTeamNumber, nameFor(night, night.leftTeamNumber));
-    const right = ensure(night.rightTeamNumber, nameFor(night, night.rightTeamNumber));
-    const mw = night.totalWins || { left: 0, right: 0 };
-    left.gameWins += Number(mw.left) || 0;
-    left.gameLosses += Number(mw.right) || 0;
-    right.gameWins += Number(mw.right) || 0;
-    right.gameLosses += Number(mw.left) || 0;
-    left.nights++; right.nights++;
-    if (mw.left > mw.right) { left.wins++; right.losses++; }
-    else if (mw.right > mw.left) { right.wins++; left.losses++; }
-    else { left.wins += 0.5; left.losses += 0.5; right.wins += 0.5; right.losses += 0.5; }
-    const wk = night.date || 'unknown';
-    if (!weeksMap[wk]) weeksMap[wk] = { date: night.date, dateLabel: night.dateLabel || night.date, results: [], greatShots: [] };
-    weeksMap[wk].results.push({
-      board: night.board || '',
-      leftTeamNumber: night.leftTeamNumber,
-      rightTeamNumber: night.rightTeamNumber,
-      leftName: nameFor(night, night.leftTeamNumber),
-      rightName: nameFor(night, night.rightTeamNumber),
-      wins: { left: Number(mw.left) || 0, right: Number(mw.right) || 0 },
-      path: night._path || null
-    });
-    (night.greatShots || []).forEach(gs => {
-      const row = Object.assign({}, gs, { date: night.date, board: night.board || '' });
-      weeksMap[wk].greatShots.push(row);
-      allShots.push(row);
-    });
-  });
-  const teamList = Object.keys(teams).map(k => teams[k]);
-  teamList.sort((a, b) => (b.wins - a.wins) || (a.losses - b.losses) || (a.number - b.number));
-  const weeks = Object.keys(weeksMap).sort().reverse().map(k => weeksMap[k]);
-  return {
-    schema: 'tvyc-darts-season/v1',
-    seasonId: SEASON_ID,
-    label: "Tellico Village Dart League '26-27'",
-    teams: teamList,
-    weeks: weeks,
-    greatShots: allShots,
-    updatedAt: new Date().toISOString()
-  };
-}
-
-function buildStandingsHtml(season) {
-  // Lightweight regenerated page — standings.html in repo is the full UI;
-  // on submit we only refresh season.json; standings.html reads it live.
-  // Kept as no-op generator for future; returns null to skip overwrite.
-  return null;
-}
-
-async function submitScoresheetToGitHub() {
-  const settings = loadAppSettings();
-  if (!settings.ghToken) {
-    alert('No GitHub token in Settings. Export JSON instead, or add a PAT (repo contents:write) in Settings.');
-    return;
-  }
-  if (!confirm('Submit Scoresheet to GitHub?\n\nThis will write the night JSON, update the season index, and rebuild season standings.')) return;
-
-  const statusEl = document.getElementById('verify-submit-status');
-  const setStatus = (t, cls) => {
-    if (!statusEl) return;
-    statusEl.textContent = t;
-    statusEl.className = 'verify-submit-status ' + (cls || '');
-  };
-  setStatus('Submitting…', 'busy');
-
-  try {
-    const { doc, path } = serializeNightJSON();
-    const owner = settings.ghOwner || GH_DEFAULT_OWNER;
-    const repo = settings.ghRepo || GH_DEFAULT_REPO;
-    const token = settings.ghToken;
-
-    // 1. Night file
-    const existingNight = await ghGetFile(owner, repo, path, token);
-    await ghPutFile(owner, repo, path, JSON.stringify(doc, null, 2) + '\n',
-      'night: ' + doc.date + ' ' + doc.focusTeam.name + ' vs ' + doc.opponentTeam.name + ' Bd' + boardSlug(doc.board),
-      token, existingNight && existingNight.sha);
-
-    // 2. Index
-    const indexPath = 'results/' + SEASON_ID + '/index.json';
-    let indexDoc = { schema: 'tvyc-darts-results-index/v1', seasonId: SEASON_ID, nights: [], updatedAt: null };
-    const existingIndex = await ghGetFile(owner, repo, indexPath, token);
-    if (existingIndex && existingIndex.content) {
-      try { indexDoc = JSON.parse(atob(existingIndex.content.replace(/\n/g, ''))); } catch (e) {}
-    }
-    if (!Array.isArray(indexDoc.nights)) indexDoc.nights = [];
-    const meta = {
-      path: path,
-      date: doc.date,
-      dateLabel: doc.dateLabel,
-      board: doc.board,
-      focusTeamNumber: doc.focusTeam.number,
-      opponentTeamNumber: doc.opponentTeam.number,
-      focusName: doc.focusTeam.name,
-      opponentName: doc.opponentTeam.name,
-      totalWins: doc.totalWins,
-      submittedAt: doc.submittedAt
-    };
-    const ix = indexDoc.nights.findIndex(n => n.path === path);
-    if (ix >= 0) indexDoc.nights[ix] = meta;
-    else indexDoc.nights.push(meta);
-    indexDoc.nights.sort((a, b) => String(b.date).localeCompare(String(a.date)) || String(a.board).localeCompare(String(b.board)));
-    indexDoc.updatedAt = new Date().toISOString();
-    await ghPutFile(owner, repo, indexPath, JSON.stringify(indexDoc, null, 2) + '\n',
-      'index: update ' + SEASON_ID + ' nights', token, existingIndex && existingIndex.sha);
-
-    // 3. Fetch all nights listed and rebuild season.json
-    const nights = [];
-    for (let i = 0; i < indexDoc.nights.length; i++) {
-      const entry = indexDoc.nights[i];
-      try {
-        const f = await ghGetFile(owner, repo, entry.path, token);
-        if (f && f.content) {
-          const n = JSON.parse(atob(f.content.replace(/\n/g, '')));
-          n._path = entry.path;
-          nights.push(n);
-        }
-      } catch (e) {
-        console.warn('skip night', entry.path, e);
-      }
-    }
-    // Ensure current doc is included
-    if (!nights.some(n => n.date === doc.date && n.focusTeam.number === doc.focusTeam.number && n.opponentTeam.number === doc.opponentTeam.number && String(n.board) === String(doc.board))) {
-      doc._path = path;
-      nights.push(doc);
-    }
-    const season = rollupNightsClient(nights);
-    const seasonPath = 'stats/' + SEASON_ID + '/season.json';
-    const existingSeason = await ghGetFile(owner, repo, seasonPath, token);
-    await ghPutFile(owner, repo, seasonPath, JSON.stringify(season, null, 2) + '\n',
-      'season: rebuild ' + SEASON_ID + ' standings', token, existingSeason && existingSeason.sha);
-
-    setStatus('Submitted ✓ — standings updated', 'ok');
-    toastStub('Scoresheet submitted to GitHub');
-    if (confirm('Submitted successfully.\n\nOpen standings page and clear this night from the scorer?')) {
-      finishNightAfterSubmit();
-      window.open('https://git-denyeh.github.io/darts-scorecard/standings.html', '_blank');
-    }
-  } catch (e) {
-    setStatus('Submit failed: ' + e.message, 'err');
-    alert('Submit failed: ' + e.message);
   }
 }
 
@@ -7480,21 +7807,18 @@ function discardNightLocal() {
   finishNightAfterSubmit();
 }
 
+/* confirm modal now describes the DB submit */
 function openSubmitConfirm() {
   const modal = document.getElementById('submit-confirm-modal');
-  if (!modal) {
-    submitScoresheetToGitHub();
-    return;
-  }
+  if (!modal) { submitScoresheetToDb(); return; }
   try {
-    const { doc, path } = serializeNightJSON();
+    const { doc } = serializeNightJSON();
+    const w = doc.forfeit ? ('Forfeit · ' + doc.totalWins.left + '–' + doc.totalWins.right) : (doc.totalWins.left + '–' + doc.totalWins.right);
+    const note = dbExistingResultNote();
     document.getElementById('submit-confirm-detail').textContent =
-      doc.focusTeam.name + ' vs ' + doc.opponentTeam.name +
-      ' · ' + doc.totalWins.left + '–' + doc.totalWins.right +
-      ' · Bd ' + doc.board + '\n→ ' + path;
-  } catch (e) {
-    document.getElementById('submit-confirm-detail').textContent = e.message;
-  }
+      doc.focusTeam.name + ' vs ' + doc.opponentTeam.name + ' · ' + w + ' · Bd ' + doc.board +
+      '\n→ league database (' + dbSeasonId() + ')' + (note ? '\n⚠ ' + note : '');
+  } catch (e) { document.getElementById('submit-confirm-detail').textContent = e.message; }
   modal.classList.add('open');
 }
 function closeSubmitConfirm() {
@@ -7513,58 +7837,280 @@ function wireVerifyUI() {
   if (discard) discard.addEventListener('click', discardNightLocal);
   const scYes = document.getElementById('submit-confirm-yes');
   const scNo = document.getElementById('submit-confirm-no');
-  if (scYes) scYes.addEventListener('click', () => { closeSubmitConfirm(); submitScoresheetToGitHub(); });
+  if (scYes) scYes.addEventListener('click', () => { closeSubmitConfirm(); submitScoresheetToDb(); });
   if (scNo) scNo.addEventListener('click', closeSubmitConfirm);
   const modal = document.getElementById('submit-confirm-modal');
   if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeSubmitConfirm(); });
 }
 wireVerifyUI();
 
-function refreshSettingsUI() {
-  const s = loadAppSettings();
-  const tok = document.getElementById('set-gh-token');
-  const own = document.getElementById('set-gh-owner');
-  const rep = document.getElementById('set-gh-repo');
-  if (tok) tok.value = s.ghToken || '';
-  if (own) own.value = s.ghOwner || GH_DEFAULT_OWNER;
-  if (rep) rep.value = s.ghRepo || GH_DEFAULT_REPO;
-  const hint = document.getElementById('set-gh-hint');
-  if (hint) hint.textContent = s.ghToken ? 'Token saved on this device only.' : 'Optional PAT with Contents: Write on git-denyeh/darts-scorecard.';
+/* ===== v1.3.0: SUBMIT TO LEAGUE DATABASE (replaces GitHub push as the primary Submit; GitHub JSON kept as manual fallback) ===== */
+let _dbSubmitBusy = false;
+function dbExistingResultNote() {
+  try {
+    const id = nightOps && (nightOps.dbMatchId || dbLookupMatchId(nightOps));
+    const m = id ? dbMatchInfo(id) : null;
+    if (m && (m.status === 'final' || m.status === 'forfeit') && m.wins_a != null) {
+      return 'This match already has a result (' + m.wins_a + '–' + m.wins_b + ') — submitting replaces it.';
+    }
+  } catch (e) {}
+  return '';
 }
-document.getElementById('settings-close').addEventListener('click', () => {
-  const tok = document.getElementById('set-gh-token');
-  const own = document.getElementById('set-gh-owner');
-  const rep = document.getElementById('set-gh-repo');
-  if (tok || own || rep) {
-    saveAppSettings({
-      ghToken: tok ? tok.value.trim() : '',
-      ghOwner: own ? own.value.trim() || GH_DEFAULT_OWNER : GH_DEFAULT_OWNER,
-      ghRepo: rep ? rep.value.trim() || GH_DEFAULT_REPO : GH_DEFAULT_REPO
-    });
+async function submitScoresheetToDb() {
+  if (_dbSubmitBusy) return;
+  const statusEl = document.getElementById('verify-submit-status');
+  const setStatus = (t, cls) => { if (statusEl) { statusEl.textContent = t; statusEl.className = 'verify-submit-status ' + (cls || ''); } };
+  const subBtn = document.getElementById('verify-submit');
+  if (!nightOps) return;
+  let doc;
+  try { doc = serializeNightJSON().doc; } catch (e) { setStatus('Cannot build scoresheet: ' + e.message, 'err'); alert('Cannot build scoresheet: ' + e.message); return; }
+  const season = dbSeasonId();
+  let mid = nightOps.dbMatchId || dbLookupMatchId(nightOps);
+  if (!mid) { try { await dbSync(); } catch (e) {} mid = dbLookupMatchId(nightOps); }
+  if (!mid) {
+    const msg = 'This night is not on the league schedule in the database (custom night, or schedule not loaded yet). Open ☰ Menu → Sync once while online, or use Export JSON.';
+    setStatus(msg, 'err'); alert(msg); return;
   }
-});
-// Also save on blur
-['set-gh-token','set-gh-owner','set-gh-repo'].forEach(id => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.addEventListener('change', () => {
-    saveAppSettings({
-      ghToken: (document.getElementById('set-gh-token') || {}).value || '',
-      ghOwner: ((document.getElementById('set-gh-owner') || {}).value || GH_DEFAULT_OWNER).trim() || GH_DEFAULT_OWNER,
-      ghRepo: ((document.getElementById('set-gh-repo') || {}).value || GH_DEFAULT_REPO).trim() || GH_DEFAULT_REPO
-    });
-    refreshSettingsUI();
+  let key = dbGetKey();
+  if (!key) { key = dbPromptKey(); if (!key) { setStatus('Not sent — league key needed.', 'err'); return; } }
+  _dbSubmitBusy = true; if (subBtn) subBtn.disabled = true;
+  setStatus('Submitting…', 'busy');
+  try {
+    const skip = [];
+    const bo = { skipPlayers: skip, dropFirstOut: [], dropAllFirstOut: false };
+    const notes = [];
+    let payload = dbBuildPayload(doc, bo);
+    /* "First ever out?" ticks: if the database already has a first-out for that player (from another match), drop that one now */
+    const foNames = payload.greatShots.filter(x => x.kind === 'firstOut').map(x => x.player);
+    if (foNames.length) {
+      try {
+        const rows = await dbFetchJson('GET', '/rest/v1/great_shots?kind=eq.first_out&select=match_id,player_name_raw,players(full_name)', null, 8000);
+        const have = {};
+        (rows || []).forEach(x => { if (x.match_id !== mid) have[String((x.players && x.players.full_name) || x.player_name_raw).toLowerCase()] = true; });
+        foNames.forEach(n => { if (have[String(n).toLowerCase()]) { bo.dropFirstOut.push(String(n).toLowerCase()); notes.push(n + ' already has a first-ever out on record, so that one was not saved.'); } });
+        if (bo.dropFirstOut.length) payload = dbBuildPayload(doc, bo);
+      } catch (e) { /* offline/blocked: the server check below still protects the data */ }
+    }
+    let r = null;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      r = await dbRpcSubmit(season, key, mid, payload);
+      if (r.ok) break;
+      if (r.kind === 'firstout' && !bo.dropAllFirstOut) {
+        bo.dropAllFirstOut = true; notes.push('A checked first-ever out was already on record for that player, so the first-out marks were not saved (everything else was).');
+        payload = dbBuildPayload(doc, bo); continue;
+      }
+      if (r.kind === 'other' && /turn/i.test(r.message || '') && !bo.dropTurns) {
+        bo.dropTurns = true; notes.push("Player averages for this night couldn't be saved, but the result itself was.");
+        payload = dbBuildPayload(doc, bo); continue;
+      }
+      if (r.kind === 'player' && confirm(r.message + '\n\nSend the scoresheet without that great shot?\n(OK = send without it, Cancel = stop and fix the name)')) {
+        skip.push(r.player); payload = dbBuildPayload(doc, bo); continue;
+      }
+      break;
+    }
+    if (r.ok) {
+      const rev = r.data && r.data.revision;
+      nightOps.dbSubmitted = { matchId: mid, revision: rev, at: Date.now() };
+      saveState();
+      const noteTxt = notes.length ? ('\n\nNote: ' + notes.join(' ')) : '';
+      setStatus('Submitted ✓ — ' + (rev > 1 ? 'updated the earlier result (revision ' + rev + ')' : 'standings updated') + (notes.length ? ' · ' + notes.join(' ') : ''), 'ok');
+      toastStub('Scoresheet submitted ✓');
+      try { dbSync(); } catch (e) {}
+      if (confirm('Submitted to the league database' + (rev > 1 ? ' (replaced the earlier version)' : '') + '.' + noteTxt + '\n\nOpen Standings and clear this night from the scorer?')) {
+        finishNightAfterSubmit();
+        showStandings();
+      }
+    } else if (r.kind === 'network') {
+      dbQueueAdd({ seasonId: season, matchId: mid, payload: payload, queuedAt: Date.now(),
+        label: teamShortName(teamByNumber(doc.leftTeamNumber)) + ' vs ' + teamShortName(teamByNumber(doc.rightTeamNumber)) + ' · ' + cleanDateLabel(nightOps.dateLabel) });
+      setStatus('Offline — saved in the send queue; it will send automatically when you are back online.', 'busy');
+      toastStub('Saved to send queue');
+      if (confirm('No connection. The scoresheet is saved in the send queue on this device and will be sent automatically when you are online (☰ Menu → Send queued results).\n\nClear this night from the scorer?')) finishNightAfterSubmit();
+    } else if (r.kind === 'key') {
+      dbClearKey(); dbRefreshMenuLabels();
+      setStatus('League key not accepted. Tap Submit again to enter the right key.', 'err');
+      alert('That league key was not accepted, so nothing was sent.\n\nThe saved key was cleared. Tap Submit Scoresheet again and enter the correct key (ask the organizer).');
+    } else {
+      setStatus('Not sent: ' + r.message, 'err');
+      alert('Not sent: ' + r.message);
+    }
+  } catch (e) {
+    setStatus('Not sent: ' + (e && e.message), 'err'); alert('Not sent: ' + (e && e.message));
+  } finally { _dbSubmitBusy = false; if (subBtn) subBtn.disabled = false; }
+}
+(function wireDbSubmitUI() {
+  const mk = document.getElementById('menu-leaguekey');
+  if (mk) mk.addEventListener('click', () => {
+    closeMenu();
+    if (dbGetKey()) {
+      if (confirm('Clear the saved league key from this device? You will be asked for it again at the next Submit.')) { dbClearKey(); toastStub('League key cleared'); }
+    } else {
+      if (dbPromptKey()) toastStub('League key saved on this device');
+    }
+    dbRefreshMenuLabels();
   });
-});
-// Refresh token fields whenever settings modal is opened
-(function hookSettingsOpen() {
-  const sm = document.getElementById('settings-modal');
-  if (!sm) return;
-  const obs = new MutationObserver(() => {
-    if (sm.classList.contains('open')) refreshSettingsUI();
+  const mq = document.getElementById('menu-queue');
+  if (mq) mq.addEventListener('click', async () => {
+    closeMenu();
+    const q = dbQueueRead();
+    const r = await dbFlushQueue({ silent: false });
+    if (!r.sent && !(r.errors && r.errors.length) && !r.needKey) toastStub('Still offline — ' + q.length + ' result(s) kept in the queue');
+    const rest = dbQueueRead().filter(x => x.lastError);
+    if (rest.length && confirm('Discard ' + rest.length + ' queued result(s) the database rejected?')) {
+      dbQueueWrite(dbQueueRead().filter(x => !x.lastError));
+    }
   });
-  obs.observe(sm, { attributes: true, attributeFilter: ['class'] });
+  dbRefreshMenuLabels();
+  /* league-only: retry any queued results shortly after launch (does nothing when the queue is empty) */
+  setTimeout(() => { if (dbQueueRead().length && dbGetKey()) dbFlushQueue({ silent: true }); }, 4000);
 })();
+
+/* ===== v1.3.0 player averages: turn ledger (league nights) + Player Stats page + lineup opponent averages ===== */
+/* -- turn ledger: logged on the match object (so Undo/resume restore it); copied into the round result at round end -- */
+function tlLog(pi, k, v, d) {
+  const leg = match && match.leg;
+  if (!leg || !(d > 0) || !match.players[pi]) return;
+  const side = scoreIndex(pi);
+  let seat = 0;
+  for (let i = 0; i < pi; i++) { if (scoreIndex(i) === side) seat++; }
+  if (!leg.tl) leg.tl = [];
+  leg.tl.push({ seat: seat + 1, side: side, k: k, v: v, d: d });
+}
+function tlO1(pi) {
+  const leg = match && match.leg;
+  if (!leg || !match.players[pi]) return;
+  const h = leg.turnHistory[scoreIndex(pi)] || [];
+  const e = h[h.length - 1] || {};
+  if (!leg.tlD) leg.tlD = {};
+  const d = leg.darts[pi] - (leg.tlD[pi] || 0);
+  leg.tlD[pi] = leg.darts[pi];
+  tlLog(pi, 'o1', (typeof e.score === 'number' && !e.bust && !e.miss) ? e.score : 0, d);
+}
+function tlCr(pi) {
+  const leg = match && match.leg;
+  if (!leg) return;
+  tlLog(pi, 'cr', leg.turnMarks || 0, leg.dart || 0);
+}
+function tlFinish() {          /* called at the start of finishLeg: log the finishing turn, then bank the leg's turns on the match */
+  const leg = match && match.leg;
+  if (!leg) return;
+  if (match.mode !== 'cricket') {
+    for (let pi = 0; pi < match.players.length; pi++) {
+      if (leg.darts[pi] > ((leg.tlD || {})[pi] || 0)) tlO1(pi);
+    }
+  }
+  match.turnLog = (match.turnLog || []).concat(leg.tl || []);
+  leg.tl = [];
+}
+function tlForResult(m, swp) {
+  return ((m && m.turnLog) || []).map((t, i) => ({ n: i + 1, seat: t.seat, side: swp ? 1 - t.side : t.side, k: t.k, v: t.v, d: t.d }));
+}
+
+/* -- lookups from the cached league database (no network) -- */
+function pstatCache() { const c = dbReadCache(); return (c && Array.isArray(c.pstats)) ? c.pstats : null; }
+let _pstatIdx = null, _pstatIdxFor = 0;
+function pstatLookup(fullName) {
+  const c = dbReadCache(); if (!c || !Array.isArray(c.pstats)) return undefined;
+  if (!_pstatIdx || _pstatIdxFor !== c.fetchedAt) {
+    _pstatIdx = {}; c.pstats.forEach(p => { _pstatIdx[String(p.player).toLowerCase()] = p; }); _pstatIdxFor = c.fetchedAt;
+  }
+  return _pstatIdx[String(fullName || '').toLowerCase()] || null;
+}
+function fmtAvg(v) { return (v == null || v === '') ? '—' : Number(v).toFixed(1); }
+function fmtMpr(v) { return (v == null || v === '') ? '—' : Number(v).toFixed(2); }
+/* small chip next to an OPPONENT's name on Lineup: 01 average for 301/501 games, MPR for Cricket */
+function lineupStatChip(fullName, roundType) {
+  const ps = pstatLookup(fullName);
+  if (ps === undefined) return '';                       /* nothing cached yet: show nothing */
+  const cricket = /cricket/i.test(String(roundType || ''));
+  const val = ps ? (cricket ? fmtMpr(ps.mpr) : fmtAvg(ps.avg_01)) : '—';
+  return '<span class="lr-avg" title="' + (cricket ? 'Cricket marks per round (MPR)' : '3-dart average (01)') + '">' + (cricket ? 'MPR ' : 'avg ') + val + '</span>';
+}
+function lineupOpponentSides(L, R) {
+  const prof = (typeof getUserProfile === 'function') ? getUserProfile() : null;
+  const t = prof && Number(prof.teamNumber);
+  if (t && L && Number(L.number) === t) return { left: false, right: true };
+  if (t && R && Number(R.number) === t) return { left: true, right: false };
+  return { left: true, right: true };
+}
+
+/* -- Player Stats page -- */
+const PS = { key: 'avg', dir: -1, q: '', open: null };
+const PS_SHOT_LABEL = { marks: n => (n || '5+') + ' marks (Cricket)', bulls: n => (n || '3+') + ' bulls (Cricket)', ton: n => (n && n !== 'T') ? 'Ton ' + n : 'Ton', highOut: n => 'High out ' + (n || ''), firstOut: n => 'First-ever out ' + (n || '') };
+function psRows() {
+  const c = dbReadCache(); if (!c || !Array.isArray(c.pstats)) return [];
+  const kw = PS.q.trim().toLowerCase();
+  let rows = c.pstats.filter(p => !kw || String(p.player).toLowerCase().indexOf(kw) >= 0 || String(p.team || '').toLowerCase().indexOf(kw) >= 0);
+  const val = p => PS.key === 'avg' ? p.avg_01 : PS.key === 'mpr' ? p.mpr : PS.key === 'shots' ? p.great_shots : PS.key === 'team' ? p.team_number : String(p.player).toLowerCase();
+  rows = rows.slice().sort((a, b) => {
+    const x = val(a), y = val(b);
+    const xn = (x == null || x === ''), yn = (y == null || y === '');
+    if (xn !== yn) return xn ? 1 : -1;                     /* '—' always sinks to the bottom */
+    if (!xn && x !== y) return (x > y ? 1 : -1) * PS.dir * ((PS.key === 'player') ? 1 : 1);
+    return String(a.player).toLowerCase() < String(b.player).toLowerCase() ? -1 : 1;
+  });
+  return rows;
+}
+function psShotsFor(p) {
+  const c = dbReadCache(); const all = (c && c.gshots) || [];
+  return all.filter(g => g.player_id === p.player_id).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+function renderPlayerStats() {
+  const body = document.getElementById('pstats-body'); if (!body) return;
+  const c = dbReadCache();
+  if (!c || !Array.isArray(c.pstats)) { body.innerHTML = '<div class="st-empty">No player data yet — connect once to load it.</div>'; return; }
+  const rows = psRows();
+  const th = (k, label, cls) => '<th class="' + (cls || '') + ' ps-sort' + (PS.key === k ? ' on' : '') + '" data-pskey="' + k + '">' + label + (PS.key === k ? (PS.dir < 0 ? ' ▾' : ' ▴') : '') + '</th>';
+  let h = '<table class="st-table ps-table"><thead><tr>' + th('player', 'Player') + th('team', 'Team', 'num') + th('avg', '01 Avg', 'num') + th('mpr', 'MPR', 'num') + th('shots', 'Shots', 'num') + '</tr></thead><tbody>';
+  rows.forEach(p => {
+    const open = PS.open === p.player_id;
+    h += '<tr class="ps-row' + (open ? ' open' : '') + '" data-pid="' + p.player_id + '"><td class="st-name">' + escapeHtml(p.player) + '</td><td class="num">' + (p.team_number == null ? '—' : p.team_number) + '</td>' +
+      '<td class="num">' + fmtAvg(p.avg_01) + '</td><td class="num">' + fmtMpr(p.mpr) + '</td><td class="num">' + (p.great_shots || 0) + '</td></tr>';
+    if (open) {
+      const shots = psShotsFor(p);
+      let d = '<div class="ps-detail"><div class="ps-detail-team">' + escapeHtml(p.team || 'No team this season') + '</div>';
+      d += '<div class="ps-detail-line">01: ' + (p.avg_01 == null ? 'no scored games yet' : fmtAvg(p.avg_01) + ' avg over ' + p.games_01 + ' game' + (p.games_01 == 1 ? '' : 's') + ' (' + p.darts_01 + ' darts)') +
+        ' · Cricket: ' + (p.mpr == null ? 'no scored games yet' : fmtMpr(p.mpr) + ' MPR over ' + p.games_cricket + ' game' + (p.games_cricket == 1 ? '' : 's')) + '</div>';
+      d += '<div class="ps-detail-h">Great shots (' + shots.length + ')</div>';
+      d += shots.length ? shots.map(g => '<div class="ps-shot"><span>' + escapeHtml((PS_SHOT_LABEL[g.kind] || (n => g.kind + ' ' + (n || '')))(g.value)) + '</span><span class="ps-shot-d">' + escapeHtml(dbShortDate(g.date)) + '</span></div>').join('') : '<div class="st-empty">None recorded yet.</div>';
+      d += '</div>';
+      h += '<tr class="ps-detail-row"><td colspan="5">' + d + '</td></tr>';
+    }
+  });
+  h += '</tbody></table>';
+  if (!rows.length) h = '<div class="st-empty">No players match “' + escapeHtml(PS.q) + '”.</div>';
+  body.innerHTML = h;
+  body.querySelectorAll('.ps-sort').forEach(el => el.addEventListener('click', () => {
+    const k = el.dataset.pskey;
+    if (PS.key === k) PS.dir = -PS.dir; else { PS.key = k; PS.dir = (k === 'player' || k === 'team') ? 1 : -1; }
+    renderPlayerStats();
+  }));
+  body.querySelectorAll('.ps-row').forEach(el => el.addEventListener('click', () => {
+    const id = Number(el.dataset.pid); PS.open = (PS.open === id) ? null : id; renderPlayerStats();
+  }));
+  const st = document.getElementById('pstats-status');
+  if (st && c.fetchedAt) st.textContent = rows.length + ' players · 01 average = points ÷ darts × 3 · MPR = Cricket marks ÷ darts × 3 · updated ' + new Date(c.fetchedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+async function showPlayerStats() {
+  showFlow('pstats');
+  const sl = document.getElementById('pstats-season'); if (sl) sl.textContent = 'Player stats · ' + dbSeasonId();
+  renderPlayerStats();
+  try { await dbSync(); renderPlayerStats(); }
+  catch (e) {
+    const st = document.getElementById('pstats-status');
+    if (st) st.textContent = (dbReadCache() ? 'Showing the last saved copy — ' : 'No data — ') + 'could not reach the league database (offline?)';
+  }
+}
+(function wirePlayerStatsUI() {
+  const mi = document.getElementById('menu-pstats');
+  if (mi) mi.addEventListener('click', () => { closeMenu(); showPlayerStats(); });
+  const b = document.getElementById('pstats-back'), x = document.getElementById('pstats-close'), q = document.getElementById('pstats-search');
+  if (b) b.addEventListener('click', showWelcome);
+  if (x) x.addEventListener('click', showWelcome);
+  if (q) q.addEventListener('input', () => { PS.q = q.value; renderPlayerStats(); });
+})();
+
+
 
 </script>
 </body>
