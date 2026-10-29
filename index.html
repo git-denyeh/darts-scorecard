@@ -2399,6 +2399,29 @@ button:disabled { cursor: default; }
 .sh-fo { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .sh-fo-lab { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: .78rem; color: var(--yellow); }
 .sh-fo-cb { width: 22px; height: 22px; accent-color: #c9a227; }
+
+/* ===== TVYC themed dialogs (v1.3.1) ===== */
+.tv-modal-back { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center;
+  padding: 16px; background: rgba(12,7,4,0.78); overscroll-behavior: contain; }
+.tv-modal { width: 100%; max-width: 420px; max-height: calc(100dvh - 32px); display: flex; flex-direction: column; overflow: hidden;
+  background: linear-gradient(180deg, var(--cream) 0%, var(--parchment) 100%); color: #2a1f16;
+  border: 2px solid var(--yellow); border-radius: 10px; box-shadow: 0 14px 40px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(107,30,46,0.25); }
+.tv-modal-title { flex: none; padding: 11px 16px; background: linear-gradient(180deg, var(--red-bright), var(--red)); color: var(--yellow);
+  font-family: var(--font-display); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: 1.02rem;
+  border-bottom: 2px solid var(--yellow); }
+.tv-modal-msg { padding: 16px 16px 6px; font-family: var(--font-ui); font-size: 1rem; line-height: 1.42; white-space: pre-wrap; overflow-y: auto; color: #2a1f16; }
+.tv-modal-input { margin: 8px 16px 2px; padding: 12px; font-size: 1.05rem; font-family: var(--font-ui); color: #2a1f16; background: #fbf4e2;
+  border: 2px solid var(--border-light); border-radius: 6px; width: calc(100% - 32px); }
+.tv-modal-input:focus { outline: 3px solid rgba(201,162,39,0.55); border-color: var(--red); }
+.tv-modal-btns { flex: none; display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; padding: 14px 16px 16px; }
+.tv-btn { flex: 1 1 130px; min-height: 46px; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-family: var(--font-ui); font-weight: 700;
+  font-size: .92rem; letter-spacing: 1px; text-transform: uppercase; border: 2px solid transparent; }
+.tv-btn-primary { background: var(--yellow); color: #1c1410; border-color: #a68728; }
+.tv-btn-danger { background: var(--red); color: var(--cream); border-color: var(--red-dark); }
+.tv-btn-secondary { background: transparent; color: #4a1420; border-color: var(--border-light); }
+.tv-btn:focus-visible { outline: 3px solid #1c1410; outline-offset: 2px; box-shadow: 0 0 0 5px rgba(201,162,39,0.8); }
+.tv-btn:active { transform: translateY(1px); }
+@media (max-width: 420px) { .tv-modal-btns { flex-direction: column-reverse; } .tv-btn { flex-basis: auto; width: 100%; } }
 </style>
 </head>
 <body>
@@ -2448,7 +2471,7 @@ button:disabled { cursor: default; }
   <div class="next-match-card" id="next-match-card" hidden></div>
   <button type="button" class="nav-btn red" id="nav-play">Play</button>
   <button type="button" class="nav-btn red" id="nav-leagues">Leagues &amp; Groups</button>
-  <div class="welcome-version">TVYC Darts v <span class="ver">1.3.0</span></div>
+  <div class="welcome-version">TVYC Darts v <span class="ver">1.3.1</span></div>
 </div>
 
 <div class="menu-drawer" id="menu-drawer">
@@ -3041,6 +3064,103 @@ button:disabled { cursor: default; }
 <div class="sum-copy-toast" id="sum-copy-toast">Copied to clipboard ✓</div>
 
 <script>
+/* ===== TVYC themed dialogs (v1.3.1) — in-app replacements for the browser's native dialogs, which show the site's address ===== */
+const _tvQueue = [];
+let _tvActive = null;
+function tvDialog(o) {
+  return new Promise(resolve => { _tvQueue.push({ o: o, resolve: resolve }); if (!_tvActive) _tvNext(); });
+}
+function _tvNext() {
+  const item = _tvQueue.shift();
+  if (!item) { _tvActive = null; return; }
+  const o = item.o, uid = 'tvm' + Date.now().toString(36);
+  const prevFocus = document.activeElement;
+  const back = document.createElement('div');
+  back.className = 'tv-modal-back';
+  const box = document.createElement('div');
+  box.className = 'tv-modal'; box.setAttribute('role', o.kind === 'alert' ? 'alertdialog' : 'dialog'); box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-labelledby', uid + 't'); box.setAttribute('aria-describedby', uid + 'm');
+  const h = document.createElement('div'); h.className = 'tv-modal-title'; h.id = uid + 't'; h.textContent = o.title || 'TVYC Darts';
+  const m = document.createElement('div'); m.className = 'tv-modal-msg'; m.id = uid + 'm'; m.textContent = o.message == null ? '' : String(o.message);
+  box.appendChild(h); box.appendChild(m);
+  let inp = null;
+  if (o.input) {
+    inp = document.createElement('input');
+    inp.className = 'tv-modal-input'; inp.type = o.input.password ? 'password' : 'text';
+    inp.value = o.input.value || ''; inp.placeholder = o.input.placeholder || '';
+    inp.autocomplete = 'off'; inp.autocapitalize = 'off'; inp.spellcheck = false;
+    inp.setAttribute('aria-label', o.input.label || o.title || 'Value'); inp.setAttribute('aria-describedby', uid + 'm');
+    box.appendChild(inp);
+  }
+  const row = document.createElement('div'); row.className = 'tv-modal-btns';
+  const btns = [];
+  (o.buttons || []).forEach(b => {
+    const el = document.createElement('button'); el.type = 'button';
+    el.className = 'tv-btn tv-btn-' + (b.kind || 'secondary'); el.textContent = b.label;
+    el.addEventListener('click', () => finish(b.value === '__input__' ? (inp ? inp.value : '') : b.value));
+    row.appendChild(el); btns.push({ el: el, b: b });
+  });
+  box.appendChild(row); back.appendChild(box);
+  const primary = btns.find(x => x.b.primary) || btns[btns.length - 1];
+  let done = false;
+  function finish(v) {
+    if (done) return; done = true;
+    document.removeEventListener('keydown', onKey, true);
+    if (back.parentNode) back.parentNode.removeChild(back);
+    try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {}
+    item.resolve(v);
+    _tvNext();
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); finish(o.cancelValue); return; }
+    if (e.key === 'Enter') {
+      const a = document.activeElement;
+      if (a && a.tagName === 'BUTTON' && box.contains(a)) return;      /* Enter on a focused button = that button */
+      e.preventDefault(); e.stopPropagation();
+      if (primary) primary.el.click();
+      return;
+    }
+    if (e.key === 'Tab') {                                              /* focus trap */
+      const f = [].slice.call(box.querySelectorAll('button, input')).filter(x => !x.disabled);
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1], a = document.activeElement;
+      if (!box.contains(a)) { e.preventDefault(); first.focus(); }
+      else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+  _tvActive = back;
+  document.body.appendChild(back);
+  document.addEventListener('keydown', onKey, true);
+  const focusEl = inp || ((btns.find(x => x.b.focus) || primary || btns[0]) || {}).el;
+  setTimeout(() => { try { if (focusEl) focusEl.focus(); if (inp) inp.select(); } catch (e) {} }, 0);
+}
+/* tvAlert('text', {title, ok}) → Promise<void> */
+function tvAlert(message, opts) {
+  opts = opts || {};
+  return tvDialog({ kind: 'alert', title: opts.title, message: message, cancelValue: undefined,
+    buttons: [{ label: opts.ok || 'Got it', value: undefined, kind: 'primary', primary: true }] });
+}
+/* tvConfirm('text', {title, yes, no, danger}) → Promise<boolean>. danger = the yes action is destructive (burgundy) and "no" gets focus. */
+function tvConfirm(message, opts) {
+  opts = opts || {};
+  return tvDialog({ kind: 'confirm', title: opts.title, message: message, cancelValue: false,
+    buttons: [
+      { label: opts.no || 'Cancel', value: false, kind: 'secondary', focus: !!opts.danger, primary: false },
+      { label: opts.yes || 'Continue', value: true, kind: opts.danger ? 'danger' : 'primary', primary: !opts.danger }
+    ] });
+}
+/* tvPrompt('text', {title, value, placeholder, password, ok, cancel}) → Promise<string|null> */
+function tvPrompt(message, opts) {
+  opts = opts || {};
+  return tvDialog({ kind: 'prompt', title: opts.title, message: message, cancelValue: null,
+    input: { password: !!opts.password, value: opts.value || '', placeholder: opts.placeholder || '', label: opts.label },
+    buttons: [
+      { label: opts.cancel || 'Cancel', value: null, kind: 'secondary' },
+      { label: opts.ok || 'Save', value: '__input__', kind: 'primary', primary: true }
+    ] });
+}
+
 const LEAGUE_BUNDLED = {"schema":"tvyc-darts-league/v1","updatedAt":"2026-10-02T15:46:55.000Z","sourceModifiedAt":"2026-09-29T00:00:00.000Z","season":{"id":"2026-2027","label":"Tellico Village Dart League ’26-27’","roster_as_of":"2026-09-16","subs_as_of":"2026-09-29"},"branding":{"product":"TVYC Darts","club":"Tellico Village Yacht Club"},"rounds_per_match":8,"data_model":{"entities":["Season","Team","Player","ScheduleNight","Match","NightOpsSession","Round"],"night_flow":["Resolve Match for focus_team_number on tonight's ScheduleNight","Load both teams' Player lists (print_order)","Create NightOpsSession","Fill eight Round rows from those rosters only"],"fields":{"Team":["number","name_roster","name_schedule","captain"],"Player":["team_number","full_name","print_order"],"Match":["date_label","board","team_a","team_b"],"NightOpsSession":["date","focus_team_number","match_id","opponent_team_number","our_roster","opponent_roster"],"Round":["session_id","round_number (1-8)","our_player_ids","opponent_player_ids"]}},"tvra_no_darts_2nd_tuesdays":["Sept 8","Oct 13","Nov 10","Dec 8","Jan 12","Feb 9","Mar 9","Apr 13"],"teams":[{"number":1,"name_roster":"Cold Darted","name_schedule":"Cold Darted","captain":"Brett Petersen","players":[{"print_order":1,"full_name":"Brett Petersen"},{"print_order":2,"full_name":"Debbie Petersen"},{"print_order":3,"full_name":"Eric Ready"},{"print_order":4,"full_name":"Andrea Nielsen"},{"print_order":5,"full_name":"Ed Hanley"},{"print_order":6,"full_name":"Lori Hanley"},{"print_order":7,"full_name":"Allen Arnett"},{"print_order":8,"full_name":"Sarah Arnett"},{"print_order":9,"full_name":"Sylvia Astrop"},{"print_order":10,"full_name":"Justin Olson"},{"print_order":11,"full_name":"Kelly Olson"},{"print_order":12,"full_name":"John Astrop"}]},{"number":2,"name_roster":"Game of Throws","name_schedule":"Game of Throws","captain":"Allan Abney","players":[{"print_order":1,"full_name":"Allan Abney"},{"print_order":2,"full_name":"Lisa Abney"},{"print_order":3,"full_name":"Endre Pekarik"},{"print_order":4,"full_name":"Jeff Bell"},{"print_order":5,"full_name":"Richard Abney"},{"print_order":6,"full_name":"Mike Price"},{"print_order":7,"full_name":"Lloyd Langdon"},{"print_order":8,"full_name":"Derik Sandstrom"},{"print_order":9,"full_name":"Dan Bendik"},{"print_order":10,"full_name":"Terry Wilks"}]},{"number":3,"name_roster":"Darty Deeds","name_schedule":"Darty Deeds","captain":"Darin Johnson","players":[{"print_order":1,"full_name":"Darin Johnson"},{"print_order":2,"full_name":"Shannon Johnson"},{"print_order":3,"full_name":"Kim Rasiner"},{"print_order":4,"full_name":"Russ Rasiner"},{"print_order":5,"full_name":"Tim Waters"},{"print_order":6,"full_name":"Cath Waters"},{"print_order":7,"full_name":"Jeff May"},{"print_order":8,"full_name":"Sandra May"},{"print_order":9,"full_name":"Tim Figiel"},{"print_order":10,"full_name":"Dolly Figiel"}]},{"number":4,"name_roster":"Dartaholics","name_schedule":"Dart-A-Holics","captain":"Tom Dieter","players":[{"print_order":1,"full_name":"Tom Dieter"},{"print_order":2,"full_name":"Christian Malagon"},{"print_order":3,"full_name":"Louis Robles"},{"print_order":4,"full_name":"Jamie Griffin"},{"print_order":5,"full_name":"Matt Peery"},{"print_order":6,"full_name":"Jeff Griffin"},{"print_order":7,"full_name":"Chris Walters"},{"print_order":8,"full_name":"Chelsea Peery"},{"print_order":9,"full_name":"Jack Walters"},{"print_order":10,"full_name":"Rick Desnoyers"},{"print_order":11,"full_name":"Diana Kadel"},{"print_order":12,"full_name":"Jared Kadel"},{"print_order":13,"full_name":"Justin Walters"}]},{"number":5,"name_roster":"Down and Darty","name_schedule":"Down & Darty","captain":"Trisha Smith","players":[{"print_order":1,"full_name":"Trisha Smith"},{"print_order":2,"full_name":"Ron Cook"},{"print_order":3,"full_name":"Spencer Smith"},{"print_order":4,"full_name":"Jim Roccasalva"},{"print_order":5,"full_name":"Matt Eastman"},{"print_order":6,"full_name":"Paul Press"},{"print_order":7,"full_name":"Nilda Mitchell"},{"print_order":8,"full_name":"Eric Schultz"}]},{"number":6,"name_roster":"Snail Darters","name_schedule":"Snail Darters","captain":"Glenn Sheffield","players":[{"print_order":1,"full_name":"Glenn Sheffield"},{"print_order":2,"full_name":"David Egan"},{"print_order":3,"full_name":"Cortney Bell"},{"print_order":4,"full_name":"Scott Shapiro"},{"print_order":5,"full_name":"Mike Murphy"},{"print_order":6,"full_name":"Ken Camp"}]},{"number":7,"name_roster":"We're Sexy and We Throw It","name_schedule":"We're Sexy & We Throw It","captain":"Ken Moutvic","players":[{"print_order":1,"full_name":"Ken Moutvic"},{"print_order":2,"full_name":"Randy Zimnowski"},{"print_order":3,"full_name":"Steve Cossey"},{"print_order":4,"full_name":"Lee Smith"},{"print_order":5,"full_name":"Sandy Smith"},{"print_order":6,"full_name":"Greg Scaperlanda"},{"print_order":7,"full_name":"Eric Forbeck"},{"print_order":8,"full_name":"Tina Forbeck"},{"print_order":9,"full_name":"Bill Rickert"},{"print_order":10,"full_name":"Deb Rickert"}]},{"number":8,"name_roster":"Shooting Stars","name_schedule":"Shooting Stars","captain":"Kim Ferriter","players":[{"print_order":1,"full_name":"Kim Ferriter"},{"print_order":2,"full_name":"Bob Schlosser"},{"print_order":3,"full_name":"Don Kalenick Sr."},{"print_order":4,"full_name":"Don Kalenick"},{"print_order":5,"full_name":"Angie Guderjan"},{"print_order":6,"full_name":"Ron Gentile"},{"print_order":7,"full_name":"Lori Schlosser"},{"print_order":8,"full_name":"Marisella Kalenick"},{"print_order":9,"full_name":"Richard Moore"}]},{"number":9,"name_roster":"Snipers","name_schedule":"Snipers","captain":"Lisa Jackson","players":[{"print_order":1,"full_name":"Lisa Jackson"},{"print_order":2,"full_name":"Dave Roberts"},{"print_order":3,"full_name":"Mary Overland"},{"print_order":4,"full_name":"Scott Christiansen"},{"print_order":5,"full_name":"Herb Hanke"},{"print_order":6,"full_name":"Bryon Moses"},{"print_order":7,"full_name":"Rick Peare"}]},{"number":10,"name_roster":"Flighty","name_schedule":"Flighty","captain":"Richard Sciarretta","players":[{"print_order":1,"full_name":"Richard Sciarretta"},{"print_order":2,"full_name":"Deb Sciarretta"},{"print_order":3,"full_name":"Colleen Fitch"},{"print_order":4,"full_name":"Dan Mooney"},{"print_order":5,"full_name":"Dennis Fitch"},{"print_order":6,"full_name":"Cindy Hegle"},{"print_order":7,"full_name":"Kristie Rouse"},{"print_order":8,"full_name":"John Loomis"}]},{"number":11,"name_roster":"Flight Risk","name_schedule":"Flight Risk","captain":"Dave Hoernig","players":[{"print_order":1,"full_name":"Dave Hoernig"},{"print_order":2,"full_name":"Susan Murray"},{"print_order":3,"full_name":"Michelle Ham"},{"print_order":4,"full_name":"Jeff Ham"},{"print_order":5,"full_name":"Beth Hritz"},{"print_order":6,"full_name":"Dave Doucey"},{"print_order":7,"full_name":"Tom Stiff"},{"print_order":8,"full_name":"Ted Sherry"}]},{"number":12,"name_roster":"Whats the Point","name_schedule":"What's the Point?","captain":"Todd Elliott","players":[{"print_order":1,"full_name":"Todd Elliott"},{"print_order":2,"full_name":"Elizabeth Luckhardt"},{"print_order":3,"full_name":"Ryan Moreno"},{"print_order":4,"full_name":"Mesha Elliott"},{"print_order":5,"full_name":"Sam Moreno"},{"print_order":6,"full_name":"Yvette Moreno"},{"print_order":7,"full_name":"Jacob Moreno"},{"print_order":8,"full_name":"Brad Norris"},{"print_order":9,"full_name":"Cindy Norris"},{"print_order":10,"full_name":"Chris Layshot"},{"print_order":11,"full_name":"Melissa Layshot"},{"print_order":12,"full_name":"Jan Krusick"},{"print_order":13,"full_name":"John Krusick"}]},{"number":13,"name_roster":"Pointless","name_schedule":"Pointless","captain":"Mike Lackey","players":[{"print_order":1,"full_name":"Mike Lackey"},{"print_order":2,"full_name":"Tena Mathis"},{"print_order":3,"full_name":"Barry Mathis"},{"print_order":4,"full_name":"Wally Whitaker"},{"print_order":5,"full_name":"Sylvia Harwell"},{"print_order":6,"full_name":"Kari Lackey"},{"print_order":7,"full_name":"Martin Biter"},{"print_order":8,"full_name":"Denise Biter"}]},{"number":14,"name_roster":"Armed and Hazardous","name_schedule":"Armed & Hazardous","captain":"Randy Wilson","players":[{"print_order":1,"full_name":"Randy Wilson"},{"print_order":2,"full_name":"Ron Shoultz"},{"print_order":3,"full_name":"Carl Nordman"},{"print_order":4,"full_name":"Shawn Smith"},{"print_order":5,"full_name":"Tom Peterson"},{"print_order":6,"full_name":"Bret Corey"},{"print_order":7,"full_name":"Dan Campion"},{"print_order":8,"full_name":"Doug Stephens"},{"print_order":9,"full_name":"John Hennessy"}]},{"number":15,"name_roster":"Hit or Miss","name_schedule":"Hit or Miss","captain":"Karen Adame","players":[{"print_order":1,"full_name":"Karen Adame"},{"print_order":2,"full_name":"Harry Humbert"},{"print_order":3,"full_name":"Rob Knox"},{"print_order":4,"full_name":"Sue Rogers"},{"print_order":5,"full_name":"Linda Humbert"},{"print_order":6,"full_name":"Dave Proulx"},{"print_order":7,"full_name":"Karen Proulx"},{"print_order":8,"full_name":"Bill Cooley"},{"print_order":9,"full_name":"Pam Cooley"},{"print_order":10,"full_name":"Sandy Keilman"},{"print_order":11,"full_name":"Dave Keilman"},{"print_order":12,"full_name":"Jeri Krieg"}]},{"number":16,"name_roster":"Rat Pack","name_schedule":"Rat Pack","captain":"Jack Galvin","players":[{"print_order":1,"full_name":"Jack Galvin"},{"print_order":2,"full_name":"Shawna Galvin"},{"print_order":3,"full_name":"Ray Hoppenjans"},{"print_order":4,"full_name":"Bob Park"},{"print_order":5,"full_name":"Gail Henn"},{"print_order":6,"full_name":"Bob Brochetti"},{"print_order":7,"full_name":"Dave Webb"},{"print_order":8,"full_name":"Todd Haupt"}]},{"number":17,"name_roster":"Who Darted?","name_schedule":"Who Darted?","captain":"Pat Phee","players":[{"print_order":1,"full_name":"Pat Phee"},{"print_order":2,"full_name":"Tom Lahowetz"},{"print_order":3,"full_name":"Lou Dubois"},{"print_order":4,"full_name":"Tom Bradley"},{"print_order":5,"full_name":"Mike Gavin"},{"print_order":6,"full_name":"Shelley Phee"},{"print_order":7,"full_name":"Greg Stoker"},{"print_order":8,"full_name":"Clint Dubois"},{"print_order":9,"full_name":"Tom Brauer"}]},{"number":18,"name_roster":"Darty Dogs","name_schedule":"Darty Dogs","captain":"Bruce Lavoie","players":[{"print_order":1,"full_name":"Bruce Lavoie"},{"print_order":2,"full_name":"Craig Wilson"},{"print_order":3,"full_name":"Peter Daly"},{"print_order":4,"full_name":"Glenn Gallington"},{"print_order":5,"full_name":"Finbar Keenan"},{"print_order":6,"full_name":"Dwayne Elliot"},{"print_order":7,"full_name":"Bob VanVogelpoel"},{"print_order":8,"full_name":"Lori VanVogelpoel"}]}],"subs":[{"print_order":1,"full_name":"Tom Archakis"},{"print_order":2,"full_name":"Brad Ashton"},{"print_order":3,"full_name":"Nancy Ashton"},{"print_order":4,"full_name":"David Baum"},{"print_order":5,"full_name":"Ron Blust"},{"print_order":6,"full_name":"Chris Bogle"},{"print_order":7,"full_name":"Terry Brauer"},{"print_order":8,"full_name":"Tim Brinlee"},{"print_order":9,"full_name":"Tammy Brochetti"},{"print_order":10,"full_name":"Barb Campion"},{"print_order":11,"full_name":"Bob Cohan"},{"print_order":12,"full_name":"Jackie Colon"},{"print_order":13,"full_name":"Mike Colon"},{"print_order":14,"full_name":"Chris Conciat"},{"print_order":15,"full_name":"Jacquie Connor"},{"print_order":16,"full_name":"Jody Connor"},{"print_order":17,"full_name":"Evon Engelhaupt"},{"print_order":18,"full_name":"Mike Engelhaupt"},{"print_order":19,"full_name":"Bob Gaul"},{"print_order":20,"full_name":"Bruce Gibbons"},{"print_order":21,"full_name":"Rick Halpin"},{"print_order":22,"full_name":"Todd Harris"},{"print_order":23,"full_name":"Laura Haupt"},{"print_order":24,"full_name":"Mike Hormel"},{"print_order":25,"full_name":"John Hunt"},{"print_order":26,"full_name":"Terry Hunter"},{"print_order":27,"full_name":"Tom Hunter"},{"print_order":28,"full_name":"Donnie Iverson"},{"print_order":29,"full_name":"Brad Jones"},{"print_order":30,"full_name":"Donna Jones"},{"print_order":31,"full_name":"Justin Kesterson"},{"print_order":32,"full_name":"Tim Krantz"},{"print_order":33,"full_name":"Dan Langlois"},{"print_order":34,"full_name":"Kevin Laurence"},{"print_order":35,"full_name":"Kevin Lionarons"},{"print_order":36,"full_name":"Jim Long"},{"print_order":37,"full_name":"Colleen Marley"},{"print_order":38,"full_name":"Mark Matiszik"},{"print_order":39,"full_name":"John May"},{"print_order":40,"full_name":"John McDonough"},{"print_order":41,"full_name":"Alex McGuinness"},{"print_order":42,"full_name":"Brandi Milsaps"},{"print_order":43,"full_name":"Margaret Moutvic"},{"print_order":44,"full_name":"Rich Murphy"},{"print_order":45,"full_name":"Kevin Naughton"},{"print_order":46,"full_name":"Jim Nold"},{"print_order":47,"full_name":"Nancy Parikh"},{"print_order":48,"full_name":"Lori Joe Peterson"},{"print_order":49,"full_name":"Kimberly Press"},{"print_order":50,"full_name":"Rob Reed"},{"print_order":51,"full_name":"Kevin Roe"},{"print_order":52,"full_name":"Ron Roe"},{"print_order":53,"full_name":"Kevin Rouse"},{"print_order":54,"full_name":"Terry Schultheiss"},{"print_order":55,"full_name":"Doug Sloan"},{"print_order":56,"full_name":"Dan Stewart"},{"print_order":57,"full_name":"Michelle Stewart"},{"print_order":58,"full_name":"Matt Stone"},{"print_order":59,"full_name":"Jeff Strange"},{"print_order":60,"full_name":"Bob Sullivan"},{"print_order":61,"full_name":"Ann Tinker"},{"print_order":62,"full_name":"Tim Tinker"},{"print_order":63,"full_name":"Jose Voto"},{"print_order":64,"full_name":"Kim Walters"},{"print_order":65,"full_name":"Rick Wilkes"},{"print_order":66,"full_name":"Cathy Woodman"},{"print_order":67,"full_name":"Ron Woodman"},{"print_order":68,"full_name":"Pete Young"}],"schedule_notes":{"start_time":null,"home_away":"not labeled in PDF; format is Team# — Board — Team#","boards":"A-I","regular_season_nights":[{"date_label":"1 - Sept","matches":[{"team_a":6,"board":"A","team_b":11},{"team_a":7,"board":"B","team_b":10},{"team_a":2,"board":"C","team_b":15},{"team_a":1,"board":"D","team_b":16},{"team_a":4,"board":"E","team_b":13},{"team_a":18,"board":"F","team_b":17},{"team_a":8,"board":"G","team_b":9},{"team_a":5,"board":"H","team_b":12},{"team_a":3,"board":"I","team_b":14}]},{"date_label":"15-Sept","matches":[{"team_a":7,"board":"A","team_b":8},{"team_a":5,"board":"B","team_b":10},{"team_a":18,"board":"C","team_b":16},{"team_a":2,"board":"D","team_b":13},{"team_a":1,"board":"E","team_b":14},{"team_a":17,"board":"F","team_b":15},{"team_a":4,"board":"G","team_b":11},{"team_a":6,"board":"H","team_b":9},{"team_a":3,"board":"I","team_b":12}]},{"date_label":"22 – Sept","matches":[{"team_a":3,"board":"A","team_b":10},{"team_a":16,"board":"B","team_b":14},{"team_a":4,"board":"C","team_b":9},{"team_a":5,"board":"D","team_b":8},{"team_a":2,"board":"E","team_b":11},{"team_a":6,"board":"F","team_b":7},{"team_a":18,"board":"G","team_b":15},{"team_a":17,"board":"H","team_b":13},{"team_a":1,"board":"I","team_b":12}]},{"date_label":"29 - Sept","matches":[{"team_a":16,"board":"A","team_b":12},{"team_a":1,"board":"B","team_b":10},{"team_a":18,"board":"C","team_b":14},{"team_a":15,"board":"D","team_b":13},{"team_a":3,"board":"E","team_b":8},{"team_a":4,"board":"F","team_b":7},{"team_a":5,"board":"G","team_b":6},{"team_a":17,"board":"H","team_b":11},{"team_a":2,"board":"I","team_b":9}]},{"date_label":"6-Oct","matches":[{"team_a":1,"board":"A","team_b":8},{"team_a":2,"board":"B","team_b":7},{"team_a":16,"board":"C","team_b":10},{"team_a":15,"board":"D","team_b":11},{"team_a":4,"board":"E","team_b":5},{"team_a":18,"board":"F","team_b":13},{"team_a":14,"board":"G","team_b":12},{"team_a":17,"board":"H","team_b":9},{"team_a":3,"board":"I","team_b":6}]},{"date_label":"20- Oct","matches":[{"team_a":16,"board":"A","team_b":8},{"team_a":2,"board":"B","team_b":5},{"team_a":14,"board":"C","team_b":10},{"team_a":17,"board":"D","team_b":7},{"team_a":18,"board":"E","team_b":12},{"team_a":15,"board":"F","team_b":9},{"team_a":13,"board":"G","team_b":11},{"team_a":3,"board":"H","team_b":4},{"team_a":1,"board":"I","team_b":6}]},{"date_label":"27 - Oct","matches":[{"team_a":14,"board":"A","team_b":8},{"team_a":17,"board":"B","team_b":5},{"team_a":16,"board":"C","team_b":6},{"team_a":13,"board":"D","team_b":9},{"team_a":2,"board":"E","team_b":3},{"team_a":15,"board":"F","team_b":7},{"team_a":12,"board":"G","team_b":10},{"team_a":1,"board":"H","team_b":4},{"team_a":18,"board":"I","team_b":11}]},{"date_label":"2- Nov *Monday*","matches":[{"team_a":16,"board":"A","team_b":4},{"team_a":13,"board":"B","team_b":7},{"team_a":1,"board":"C","team_b":2},{"team_a":17,"board":"D","team_b":3},{"team_a":11,"board":"E","team_b":9},{"team_a":14,"board":"F","team_b":6},{"team_a":12,"board":"G","team_b":8},{"team_a":18,"board":"H","team_b":10},{"team_a":15,"board":"I","team_b":5}],"is_monday_exception":true},{"date_label":"17 – Nov","matches":[{"team_a":18,"board":"A","team_b":9},{"team_a":14,"board":"B","team_b":4},{"team_a":17,"board":"C","team_b":1},{"team_a":11,"board":"D","team_b":7},{"team_a":12,"board":"E","team_b":6},{"team_a":16,"board":"F","team_b":2},{"team_a":15,"board":"G","team_b":3},{"team_a":10,"board":"H","team_b":8},{"team_a":13,"board":"I","team_b":5}]},{"date_label":"24 - Nov","matches":[{"team_a":11,"board":"A","team_b":5},{"team_a":18,"board":"B","team_b":8},{"team_a":13,"board":"C","team_b":3},{"team_a":9,"board":"D","team_b":7},{"team_a":16,"board":"E","team_b":17},{"team_a":12,"board":"F","team_b":4},{"team_a":14,"board":"G","team_b":2},{"team_a":15,"board":"H","team_b":1},{"team_a":10,"board":"I","team_b":6}]},{"date_label":"1 - Dec","matches":[{"team_a":12,"board":"A","team_b":2},{"team_a":14,"board":"B","team_b":17},{"team_a":13,"board":"C","team_b":1},{"team_a":10,"board":"D","team_b":4},{"team_a":9,"board":"E","team_b":5},{"team_a":11,"board":"F","team_b":3},{"team_a":18,"board":"G","team_b":7},{"team_a":15,"board":"H","team_b":16},{"team_a":8,"board":"I","team_b":6}]},{"date_label":"15 - Dec","matches":[{"team_a":11,"board":"A","team_b":1},{"team_a":13,"board":"B","team_b":16},{"team_a":18,"board":"C","team_b":6},{"team_a":9,"board":"D","team_b":3},{"team_a":10,"board":"E","team_b":2},{"team_a":7,"board":"F","team_b":5},{"team_a":12,"board":"G","team_b":17},{"team_a":14,"board":"H","team_b":15},{"team_a":8,"board":"I","team_b":4}]},{"date_label":"5 - Jan","matches":[{"team_a":10,"board":"A","team_b":17},{"team_a":6,"board":"B","team_b":4},{"team_a":11,"board":"C","team_b":16},{"team_a":12,"board":"D","team_b":15},{"team_a":18,"board":"E","team_b":5},{"team_a":8,"board":"F","team_b":2},{"team_a":13,"board":"G","team_b":7},{"team_a":9,"board":"H","team_b":1},{"team_a":7,"board":"I","team_b":3}]},{"date_label":"19 - Jan","matches":[{"team_a":8,"board":"A","team_b":17},{"team_a":7,"board":"B","team_b":1},{"team_a":10,"board":"C","team_b":15},{"team_a":12,"board":"D","team_b":13},{"team_a":9,"board":"E","team_b":16},{"team_a":6,"board":"F","team_b":2},{"team_a":5,"board":"G","team_b":3},{"team_a":18,"board":"H","team_b":4},{"team_a":11,"board":"I","team_b":14}]},{"date_label":"26 - Jan","matches":[{"team_a":9,"board":"A","team_b":14},{"team_a":8,"board":"B","team_b":15},{"team_a":11,"board":"C","team_b":12},{"team_a":5,"board":"D","team_b":1},{"team_a":18,"board":"E","team_b":3},{"team_a":6,"board":"F","team_b":17},{"team_a":4,"board":"G","team_b":2},{"team_a":10,"board":"H","team_b":13},{"team_a":7,"board":"I","team_b":16}]},{"date_label":"2 - Feb","matches":[{"team_a":3,"board":"A","team_b":1},{"team_a":7,"board":"B","team_b":14},{"team_a":9,"board":"C","team_b":12},{"team_a":10,"board":"D","team_b":11},{"team_a":5,"board":"E","team_b":16},{"team_a":8,"board":"F","team_b":13},{"team_a":18,"board":"G","team_b":2},{"team_a":4,"board":"H","team_b":17},{"team_a":6,"board":"I","team_b":15}]},{"date_label":"16 - Feb","matches":[{"team_a":18,"board":"A","team_b":1},{"team_a":5,"board":"B","team_b":14},{"team_a":9,"board":"C","team_b":10},{"team_a":2,"board":"D","team_b":17},{"team_a":8,"board":"E","team_b":11},{"team_a":3,"board":"F","team_b":16},{"team_a":7,"board":"G","team_b":12},{"team_a":4,"board":"H","team_b":15},{"team_a":6,"board":"I","team_b":13}]}],"playoff_nights":[{"date_label":"23 - Feb","phase":"playoffs","note":"Red/Blue/Green seed brackets per schedule PDF"},{"date_label":"2 - Mar","phase":"playoffs"},{"date_label":"16– Mar","phase":"playoffs"},{"date_label":"23- Mar","phase":"playoffs"},{"date_label":"30 - Mar","phase":"playoffs"},{"date_label":"6 - Apr","phase":"playoffs","note":"TBD"},{"date_label":"20 - Apr","phase":"playoffs","note":"TBD"},{"date_label":"27 - Apr","phase":"playoffs","note":"TBD"}],"team_4_regular_season":[{"date_label":"1 - Sept","opponent":13,"board":"E"},{"date_label":"15-Sept","opponent":11,"board":"G"},{"date_label":"22 – Sept","opponent":9,"board":"C"},{"date_label":"29 - Sept","opponent":7,"board":"F"},{"date_label":"6-Oct","opponent":5,"board":"E"},{"date_label":"20- Oct","opponent":3,"board":"H"},{"date_label":"27 - Oct","opponent":1,"board":"H"},{"date_label":"2- Nov *Monday*","opponent":16,"board":"A","is_monday_exception":true},{"date_label":"17 – Nov","opponent":14,"board":"B"},{"date_label":"24 - Nov","opponent":12,"board":"F"},{"date_label":"1 - Dec","opponent":10,"board":"D"},{"date_label":"15 - Dec","opponent":8,"board":"I"},{"date_label":"5 - Jan","opponent":6,"board":"B"},{"date_label":"19 - Jan","opponent":18,"board":"H"},{"date_label":"26 - Jan","opponent":2,"board":"G"},{"date_label":"2 - Feb","opponent":17,"board":"H"},{"date_label":"16 - Feb","opponent":15,"board":"H"}],"notes":["We play Monday night Nov 2nd.","NO Darts on TVRA Nights (2nd Tuesday each month).","5-Jan PDF lists team #1 on both boards G and H; preserved as printed."]},"sources":{"roster":{"fileId":"1lRiivuR8B_Fmjclnp5CSbARfIF8YBumo","name":"YC Team Roster 26-27.pdf","modifiedTime":"2026-09-23T00:00:00.000Z","asOf":"2026-09-16"},"schedule":{"fileId":"1yymSf_bEmPLYypRxgzfuLEP9h2qDswc7","name":"YC Schedule 26-27.pdf","modifiedTime":"2026-06-11T00:00:00.000Z"},"subs":{"fileId":"1SrVJxHlGeZCKRU39NKAYjB8-P72RCBjS","name":"YC Sub's List.pdf","modifiedTime":"2026-09-29T00:00:00.000Z","asOf":"2026-09-29"},"rules":{"fileId":"1UFIPbiS-m5dvtuNHO6qyVe_lzQPtD929","name":"Dart League Rules 2026.pdf","modifiedTime":"2026-09-17T00:00:00.000Z","asOf":"2026-09-06"}}};
 const RULES_HTML_BUNDLED = "<section class=\"league-rules\" data-source=\"Dart League Rules 2026.pdf\" data-as-of=\"2026-09-06\" data-drive-modified=\"2026-09-17\">\n  <header>\n    <h1>Tellico Village Dart League Rules</h1>\n    <p class=\"rules-meta\">As of 9/6/2026 · Source: Dart League Rules 2026.pdf (Drive modified 2026-09-17)</p>\n  </header>\n\n  <h2>Goals</h2>\n  <ol>\n    <li>Meet new people</li>\n    <li>Provide the opportunity to learn the game of darts and improve</li>\n    <li>Have FUN!</li>\n  </ol>\n\n  <h2>Mission Statement</h2>\n  <p>The league seeks to promote the playing and enjoyment of darts in a social environment. All players should realize we are guests of the Yacht Club and the Kahite Pub: we need to start and finish games promptly in order to vacate the premises on time. In addition, the players are responsible for setting up the boards, taking down and storing the equipment and cleaning up their space after their match.</p>\n\n  <h2>Rules</h2>\n  <ul>\n    <li>The Tellico Village Dart League has zero tolerance concerning physical and/or verbal abuse. Any violation will result in immediate ejection from the league.</li>\n    <li>Excessive swearing or badgering of players will not be tolerated. Violators may be subject to disciplinary action.</li>\n    <li>Only Tellico Village residents are permitted to play in the league. Non-residents currently in the league are grandfathered into the league.</li>\n    <li>Play will be at the Yacht Club on Tuesday from 6 – 9 pm and at the Kahite Pub on Thursday from 2 – 5 pm unless otherwise noted.</li>\n    <li>Any games not started by 9 pm or 5 pm, respectively will be considered a loss for both teams.</li>\n    <li>To compete in the league a team must have 4 or more players.</li>\n    <li>If a team has fewer than 4 players for a match, they will forfeit the 4 person game.</li>\n    <li>Each team should designate a captain. Captains will be responsible for:\n      <ul>\n        <li>Ensuring their team behaves in a sportsmanlike manner.</li>\n        <li>Obtain subs as needed.</li>\n        <li>Resolve minor disputes during a match with the opposing captain. If the team captains cannot come to a final resolution, the matter should be brought to either Kevin Lionarons or Ray Hoppenjans.</li>\n        <li>Team communications throughout the season.</li>\n        <li>Creating the roster for a match.</li>\n        <li>Keeping track of score sheet data.</li>\n      </ul>\n    </li>\n    <li>A “match” will consist of 8 games made up of ‘01 and cricket.</li>\n    <li>One sub list will be maintained for the Tellico Village Dart League. Anyone on the sub list can participate in either location. Only subs currently on the sub list can participate. To get on the list, an email must be sent to Kevin Lionarons (seaswallow@yahoo.com) or Ray Hoppenjans (ray.hoppenjans@gmail.com) containing the person’s name, phone number and email address. No one will be added to the list until all three pieces of information are provided.</li>\n    <li>To be eligible to play in a match, a sub must be added to the sub list by midnight of the previous Sunday. Subs cannot be added on the day of a match.</li>\n    <li>Use of a sub in a game that is not on the sub list will result in the loss of that game.</li>\n    <li>Anyone currently on a team roster can act as a sub at the other location, even if they are not listed on the sub list. Roster players may not sub at their own location.</li>\n    <li>Each player should play a minimum of 3 games in a match. A player has “right of refusal”, meaning he/she can opt out of their games, if desired.</li>\n  </ul>\n\n  <h3>Forfeit Rules</h3>\n  <ul>\n    <li>If a team cannot play, the captain must notify the other captain and Kevin Lionarons or Ray Hoppenjans as soon as possible. Failure to notify will result in a forfeiture.</li>\n    <li>The notifying captain is responsible for rescheduling the match. The match must be completed as soon as is practical, but must be completed before the final match of the season or the team will forfeit.</li>\n    <li>Both captains must do their best to find a time to play the match. Someone always gets hurt when a forfeit occurs; please try to play the match.</li>\n    <li>In the event of a forfeit, the forfeiting team will receive 2 wins and 6 losses; the opposing team will receive 6 wins and 2 losses.</li>\n  </ul>\n\n  <h3>Diddle / Starting</h3>\n  <ul>\n    <li>Each game starts with one player from each team throwing at the bullseye (the diddle).</li>\n    <li>Closest to the bull goes first.</li>\n    <li>If the first player throws a bull or double bull, the second player has the option of removing the dart prior to his/her throw or leaving it in the board.</li>\n    <li>If both players hit a single bull, double bull or if both throws are approximately the same distance from the bullseye, the players must re-throw in reverse order.</li>\n  </ul>\n\n  <h3>During Play</h3>\n  <ul>\n    <li>During play, players should leave the darts in the board until the score has been recognized by the scorekeeper and agreed to by the player.</li>\n    <li>Players may not touch any dart in the board during a turn. If a player touches his/her dart in the board during a turn before all three darts are thrown, the player’s turn will be considered complete. Subsequent darts thrown in that turn will not count.</li>\n    <li>Darts must stick in the board to be counted. If a dart falls out of the board prior to the scorekeeper recognizing the total score for the turn, it will not count.</li>\n  </ul>\n\n  <h3>Great Shots</h3>\n  <p>The Score Sheet includes a section to record “Great Shots.” Please clearly write the person’s name and describe the shot. Great shots include:</p>\n  <ul>\n    <li>5 or more marks in Cricket</li>\n    <li>Throwing three bulls in a single turn in Cricket</li>\n    <li>100 or more points in ’01</li>\n    <li>High out shots in ’01 (ie. 50 or more)</li>\n    <li>A person’s first time hitting the double for an out shot in ‘01</li>\n  </ul>\n\n  <h3>Long Games</h3>\n  <ul>\n    <li>If a game is running too long, the captains can decide to end the game.</li>\n    <li>The teams can split the point.</li>\n    <li>Another option for 301/501 is to allow play to continue until the current round is completed. If there is no winner, play continues with a “single” out, meaning the game will end when a team reaches zero (hitting a double is not required). All three darts can be used in a turn.</li>\n  </ul>\n</section>";
 const RULES_META_BUNDLED = {"updatedAt":"2026-10-02T15:46:55.000Z","sourceModifiedAt":"2026-09-17T00:00:00.000Z","asOf":"2026-09-06","source":{"fileId":"1UFIPbiS-m5dvtuNHO6qyVe_lzQPtD929","name":"Dart League Rules 2026.pdf","modifiedTime":"2026-09-17T00:00:00.000Z"}};
@@ -3050,7 +3170,7 @@ const LEAGUE_JSON_REL = 'league/2026-27.json';
 const RULES_JSON_REL = 'league/2026-27-rules.json';
 const PAGES_BASE = 'https://git-denyeh.github.io/darts-scorecard/';
 const RAW_BASE = 'https://raw.githubusercontent.com/git-denyeh/darts-scorecard/main/';
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.3.1';
 
 function readLeagueCache() {
   try {
@@ -3352,8 +3472,9 @@ function dbMatchInfo(id) {
 function dbGetKey() { try { return localStorage.getItem(DB_KEY_LS) || ''; } catch (e) { return ''; } }
 function dbSetKey(k) { try { localStorage.setItem(DB_KEY_LS, k); } catch (e) {} }
 function dbClearKey() { try { localStorage.removeItem(DB_KEY_LS); } catch (e) {} }
-function dbPromptKey(msg) {
-  const k = window.prompt(msg || 'Enter the league key (ask the organizer). It is saved on this device only; clear it any time from ☰ Menu.', '');
+async function dbPromptKey(msg) {
+  const k = await tvPrompt(msg || 'Enter the league key (ask the organizer). It is saved on this device only; clear it any time from ☰ Menu.',
+    { title: 'League key', password: true, placeholder: 'League key', ok: 'Save key', cancel: 'Not now', label: 'League key' });
   const v = (k || '').trim();
   if (v) dbSetKey(v);
   return v;
@@ -3480,7 +3601,7 @@ async function dbFlushQueue(opts) {
     }
   } finally { _dbFlushing = false; dbQueueWrite(left); }
   if (sent) { toastStub('Sent ' + sent + ' queued result' + (sent > 1 ? 's' : '') + ' ✓'); try { dbSync(); } catch (e) {} }
-  if (errors.length && !opts.silent) alert('Queued result problem:\n\n' + errors.join('\n'));
+  if (errors.length && !opts.silent) await tvAlert('Queued result problem:\n\n' + errors.join('\n'), { title: 'Send queue' });
   return { sent: sent, errors: errors, remaining: left.length };
 }
 window.addEventListener('online', () => { if (dbQueueRead().length) dbFlushQueue({ silent: true }); });
@@ -3998,8 +4119,8 @@ document.getElementById('rb-resume').addEventListener('click', () => {
   }
   showWelcome();
 });
-document.getElementById('rb-discard').addEventListener('click', () => {
-  if (!confirm('Discard the in-progress night/match?')) return;
+document.getElementById('rb-discard').addEventListener('click', async () => {
+  if (!(await tvConfirm('Discard the in-progress night/match?', { title: 'Discard progress?', yes: 'Discard it', no: 'Keep it', danger: true }))) return;
   clearMatchState();
   nightOps = null;
   nightFromScore = false;
@@ -4025,19 +4146,19 @@ document.querySelectorAll('.mode-btn[data-mode]').forEach(btn => {
     gameMode = btn.dataset.mode;
   });
 });
-document.getElementById('start-btn').addEventListener('click', () => {
+document.getElementById('start-btn').addEventListener('click', async () => {
   let t1, t2;
   if (playPlayerSource === 'friends') {
     t1 = normalizeFriendName(document.getElementById('friend1-input').value);
     t2 = normalizeFriendName(document.getElementById('friend2-input').value);
-    if (!t1 || !t2) { alert('Enter two player names.'); return; }
-    if (t1.toLowerCase() === t2.toLowerCase()) { alert('Pick two different players.'); return; }
+    if (!t1 || !t2) { await tvAlert('Enter two player names.', { title: 'Players needed' }); return; }
+    if (t1.toLowerCase() === t2.toLowerCase()) { await tvAlert('Pick two different players.', { title: 'Players needed' }); return; }
     mergeFriendsIntoStore([t1, t2]);
     populateFriendsDatalist();
   } else {
     t1 = document.getElementById('team1-select').value;
     t2 = document.getElementById('team2-select').value;
-    if (t1 === t2) { alert('Pick two different teams.'); return; }
+    if (t1 === t2) { await tvAlert('Pick two different teams.', { title: 'Teams needed' }); return; }
   }
   startMatch([t1, t2], pendingLegsToWin, { chicago: gameMode === 'chicago' });
 });
@@ -5601,7 +5722,7 @@ function showPlayBot() {
 function showTournaments() { showFlow('tournaments-stub'); }
 function toastStub(msg) {
   const t = document.getElementById('toast-stub');
-  if (!t) { alert(msg); return; }
+  if (!t) { tvAlert(msg); return; }
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastStub._tm);
@@ -5682,8 +5803,8 @@ function returnToLineupAfterRound(winnerIdx) {
   showLineup();
 }
 
-function exitCurrentGame() {
-  if (!confirm('Exit current game? Round progress will be lost.')) return;
+async function exitCurrentGame() {
+  if (!(await tvConfirm('Exit current game? Round progress will be lost.', { title: 'Exit game?', yes: 'Exit game', no: 'Keep playing', danger: true }))) return;
   if (nightFromScore && nightOps) {
     nightOps.currentRoundId = null;
     nightOps.phase = 'lineup';
@@ -5997,7 +6118,7 @@ function updatePresentMeta() {
   }
 }
 
-function applyPresentForfeit() {
+async function applyPresentForfeit() {
   if (!nightOps) return;
   const need = 4;
   const nL = nightOps.presentLeft.length;
@@ -6006,7 +6127,7 @@ function applyPresentForfeit() {
   const rightShort = nR < need;
   if (!leftShort && !rightShort) return;
   if (leftShort && rightShort) {
-    alert('Both sides have fewer than 4 present. Mark ≥4 on one side to claim the forfeit win, or add players on both sides.');
+    await tvAlert('Both sides have fewer than 4 present. Mark ≥4 on one side to claim the forfeit win, or add players on both sides.', { title: 'Not enough players' });
     return;
   }
   const L = teamByNumber(nightOps.leftTeamNumber);
@@ -6021,7 +6142,7 @@ function applyPresentForfeit() {
     forfeitName + ' forfeits.\n' +
     winnerName + ' wins 6–2 (league rule: 6 wins to 2).\n\n' +
     'Record forfeit and open Verify?';
-  if (!confirm(msg)) return;
+  if (!(await tvConfirm(msg, { title: 'Record forfeit?', yes: 'Record forfeit', no: 'Go back', danger: true }))) return;
   const leftPool = nightOps.presentLeft.length ? nightOps.presentLeft : ['(forfeit)'];
   const rightPool = nightOps.presentRight.length ? nightOps.presentRight : ['(forfeit)'];
   nightOps.rounds = buildNightLineup(leftPool, rightPool);
@@ -6080,7 +6201,7 @@ function showLineup() {
   const nL = (nightOps.presentLeft || []).length;
   const nR = (nightOps.presentRight || []).length;
   if ((nL < 4 || nR < 4) && !nightOps.forfeit) {
-    alert('Cannot open lineup with fewer than 4 present on a side. Add players or Record forfeit.');
+    tvAlert('Cannot open lineup with fewer than 4 present on a side. Add players or Record forfeit.', { title: 'Not enough players' });
     showPresent();
     return;
   }
@@ -6154,9 +6275,9 @@ function buildNightLineup(leftPlayers, rightPlayers) {
   }));
 }
 
-function reshuffleLineup() {
+async function reshuffleLineup() {
   if (!nightOps) return;
-  if (!confirm('Reshuffle will overwrite any manual lineup edits. Round results stay. Continue?')) return;
+  if (!(await tvConfirm('Reshuffle will overwrite any manual lineup edits. Round results stay. Continue?', { title: 'Reshuffle lineup?', yes: 'Reshuffle', no: 'Keep lineup', danger: true }))) return;
   closeLineupPicker();
   // preserve results
   const prev = (nightOps.rounds || []).map(r => r.result);
@@ -6182,9 +6303,9 @@ function ensureRoundSlots(round) {
   });
 }
 
-function confirmClearScoredRound(round) {
+async function confirmClearScoredRound(round) {
   if (!round || !round.result) return true;
-  if (!confirm('Round ' + round.id + ' is already scored. Clear that result so you can edit the lineup?')) return false;
+  if (!(await tvConfirm('Round ' + round.id + ' is already scored. Clear that result so you can edit the lineup?', { title: 'Edit a scored round?', yes: 'Clear result & edit', no: 'Leave it', danger: true }))) return false;
   stripNightHighlightsForRound(round.id);
   round.result = null;
   saveState();
@@ -6198,13 +6319,13 @@ function closeLineupPicker() {
   document.querySelectorAll('.lr-player.picking').forEach(el => el.classList.remove('picking'));
 }
 
-function openLineupPicker(roundId, side, slotIndex) {
+async function openLineupPicker(roundId, side, slotIndex) {
   if (!nightOps) return;
   const round = nightOps.rounds.find(r => r.id === roundId);
   if (!round) return;
   ensureRoundSlots(round);
   const hadResult = !!round.result;
-  if (!confirmClearScoredRound(round)) return;
+  if (!(await confirmClearScoredRound(round))) return;
   if (hadResult) {
     // Full re-render so score badges / Start Round update; then continue into picker
     renderLineup();
@@ -6212,7 +6333,7 @@ function openLineupPicker(roundId, side, slotIndex) {
 
   const present = side === 'left' ? (nightOps.presentLeft || []) : (nightOps.presentRight || []);
   if (!present.length) {
-    alert('No present players on that side. Edit Present first.');
+    await tvAlert('No present players on that side. Edit Present first.', { title: 'Nobody present' });
     return;
   }
   // re-fetch round after possible re-render
@@ -6269,7 +6390,7 @@ function applyLineupPick(name) {
   ensureRoundSlots(round);
   const present = side === 'left' ? (nightOps.presentLeft || []) : (nightOps.presentRight || []);
   if (!present.includes(name)) {
-    alert('Pick someone from that side’s present list.');
+    tvAlert('Pick someone from that side’s present list.', { title: 'Pick a player' });
     return;
   }
   const arr = round[side];
@@ -6283,11 +6404,11 @@ function applyLineupPick(name) {
   saveState();
 }
 
-function beginRoundEdit(roundId) {
+async function beginRoundEdit(roundId) {
   if (!nightOps) return;
   const round = nightOps.rounds.find(r => r.id === roundId);
   if (!round) return;
-  if (!confirmClearScoredRound(round)) return;
+  if (!(await confirmClearScoredRound(round))) return;
   renderLineup();
   const hint = document.getElementById('lineup-hint');
   if (hint) {
@@ -6447,7 +6568,7 @@ function renderLineup(opts) {
   }
 }
 
-function startNightRound(roundId) {
+async function startNightRound(roundId) {
   const round = nightOps.rounds.find(r => r.id === roundId);
   if (!round) return;
   if (round.diddle == null) {
@@ -6455,7 +6576,7 @@ function startNightRound(roundId) {
     try { const el = document.querySelector('.lineup-round[data-round="' + roundId + '"]'); if (el) el.scrollIntoView({ block: 'center' }); } catch (e) {}
     return;
   }
-  if (round.result && !confirm('This round is already scored. Replay and overwrite?')) return;
+  if (round.result && !(await tvConfirm('This round is already scored. Replay and overwrite?', { title: 'Replay round?', yes: 'Replay round', no: 'Keep result', danger: true }))) return;
   if (round.result) {
     stripNightHighlightsForRound(roundId);
     round.result = null;
@@ -6483,12 +6604,12 @@ function startNightRound(roundId) {
 }
 
 /* HOME / PRESENT / LINEUP WIRING */
-document.getElementById('custom-match-btn').addEventListener('click', () => {
+document.getElementById('custom-match-btn').addEventListener('click', async () => {
   const profile = getUserProfile();
   if (!profile) { showProfileSetup('home'); return; }
   const focus = profile.teamNumber;
   const opp = Number(document.getElementById('custom-opp-select').value);
-  if (focus === opp) { alert('Pick a different opponent.'); return; }
+  if (focus === opp) { await tvAlert('Pick a different opponent.', { title: 'Pick an opponent' }); return; }
   beginNight({
     focusTeamNumber: focus,
     opponentTeamNumber: opp,
@@ -6817,7 +6938,7 @@ function renderBotLevels() {
     if (match && match.bot && id === 'bot-nodelay') match.bot.noDelay = !!on;
   });
 });
-document.getElementById('bot-continue').addEventListener('click', () => {
+document.getElementById('bot-continue').addEventListener('click', async () => {
   const mode = botGameMode || '501';
   const legs = Math.max(1, Number(botLegsToWin) || 2);
   gameMode = mode;
@@ -6825,9 +6946,9 @@ document.getElementById('bot-continue').addEventListener('click', () => {
   let you = getPlayDisplayName();
   if (!you) {
     // Soft prompt — Play needs a display name, not a league team
-    const typed = window.prompt('Your display name for this match:', '');
+    const typed = await tvPrompt('Your display name for this match:', { title: 'Your name', ok: 'Start playing', cancel: 'Cancel', placeholder: 'Display name' });
     you = normalizeFriendName(typed || '');
-    if (!you) { alert('Enter a display name (or pick a Friend on Local Play).'); return; }
+    if (!you) { await tvAlert('Enter a display name (or pick a Friend on Local Play).', { title: 'Name needed' }); return; }
     setPlayDisplayName(you);
     addFriend(you);
   }
@@ -6861,7 +6982,7 @@ document.getElementById('menu-standings').addEventListener('click', () => {
 });
 function showHelp() {
   closeMenu();
-  alert(
+  tvAlert(
     'TVYC Darts\n\n' +
     'Welcome always shows Play + Leagues (no forced setup).\n\n' +
     'Play — Local hub: display name / Friends, then Quick/Extended 501, Cricket, Chicago, Jarvis, Custom.\n' +
@@ -6873,13 +6994,14 @@ function showHelp() {
     'Leagues & Groups — pick team+player if unset, then night flow: schedule → present → lineup → score.\n\n' +
     '01: D/T then number; type visit totals (e.g. 180) + ENTER; side shortcuts (no 100/140/180 keys).\n' +
     'Cricket: D / number / T; BACK; MISS.\n\n' +
-    'Casual Play is 100% local on this device. League nights send the final scoresheet to the league database when you Submit (needs the league key; ☰ Menu → League key).'
+    'Casual Play is 100% local on this device. League nights send the final scoresheet to the league database when you Submit (needs the league key; ☰ Menu → League key).',
+    { title: 'How TVYC Darts works', ok: 'Close' }
   );
 }
 document.getElementById('menu-help').addEventListener('click', showHelp);
-document.getElementById('menu-reset').addEventListener('click', () => {
+document.getElementById('menu-reset').addEventListener('click', async () => {
   closeMenu();
-  if (!confirm('Clear all local TVYC Darts data (profile, friends, stats, night, match)? This cannot be undone.')) return;
+  if (!(await tvConfirm('Clear all local TVYC Darts data (profile, friends, stats, night, match)? This cannot be undone.', { title: 'Reset local data?', yes: 'Erase everything', no: 'Keep my data', danger: true }))) return;
   try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
   try { localStorage.removeItem(STORAGE_KEY + '-displayname'); } catch (e) {}
   sessionStats = {};
@@ -6895,10 +7017,10 @@ document.getElementById('menu-reset').addEventListener('click', () => {
 /* Friends screen + Custom Match source */
 document.getElementById('friends-back').addEventListener('click', showWelcome);
 document.getElementById('friends-close').addEventListener('click', showWelcome);
-document.getElementById('friends-add-btn').addEventListener('click', () => {
+document.getElementById('friends-add-btn').addEventListener('click', async () => {
   const input = document.getElementById('friends-add-input');
   const n = normalizeFriendName(input && input.value);
-  if (!n) { alert('Enter a name.'); return; }
+  if (!n) { await tvAlert('Enter a name.', { title: 'Name needed' }); return; }
   addFriend(n);
   if (input) input.value = '';
   renderFriendsList();
@@ -6910,12 +7032,12 @@ document.getElementById('friends-add-input').addEventListener('keydown', e => {
     document.getElementById('friends-add-btn').click();
   }
 });
-document.getElementById('friends-list').addEventListener('click', e => {
+document.getElementById('friends-list').addEventListener('click', async e => {
   const btn = e.target.closest('[data-del]');
   if (!btn) return;
   const name = btn.getAttribute('data-del');
   if (!name) return;
-  if (!confirm('Remove "' + name + '" from Friends?')) return;
+  if (!(await tvConfirm('Remove "' + name + '" from Friends?', { title: 'Remove friend?', yes: 'Remove', no: 'Keep', danger: true }))) return;
   removeFriend(name);
   renderFriendsList();
   populateFriendsDatalist();
@@ -6946,7 +7068,7 @@ document.getElementById('friends-import-file').addEventListener('change', e => {
       let names = [];
       if (Array.isArray(data)) names = data;
       else if (data && Array.isArray(data.friends)) names = data.friends;
-      else { alert('Invalid Friends JSON (need { friends: string[] }).'); return; }
+      else { tvAlert('Invalid Friends JSON (need { friends: string[] }).', { title: 'Friends import' }); return; }
       const before = getFriends().length;
       mergeFriendsIntoStore(names);
       const after = getFriends().length;
@@ -6954,7 +7076,7 @@ document.getElementById('friends-import-file').addEventListener('change', e => {
       populateFriendsDatalist();
       toastStub('Imported — ' + (after - before) + ' new, ' + after + ' total');
     } catch (err) {
-      alert('Could not read Friends file.');
+      tvAlert('Could not read Friends file.', { title: 'Friends import' });
     }
   };
   reader.readAsText(file);
@@ -7016,8 +7138,8 @@ document.getElementById('settings-close').addEventListener('click', () => {
     el.textContent = on ? 'On' : 'Off';
   });
 });
-document.getElementById('present-back').addEventListener('click', () => {
-  if (!confirm('Leave present check-in and return to schedule? Night progress stays saved.')) return;
+document.getElementById('present-back').addEventListener('click', async () => {
+  if (!(await tvConfirm('Leave present check-in and return to schedule? Night progress stays saved.', { title: 'Leave check-in?', yes: 'Back to Schedule', no: 'Stay' }))) return;
   nightOps.phase = 'present';
   saveState();
   showHome();
@@ -7030,11 +7152,11 @@ document.getElementById('present-left-all').addEventListener('click', () => setP
 document.getElementById('present-left-none').addEventListener('click', () => setPresentAll('left', false));
 document.getElementById('present-right-all').addEventListener('click', () => setPresentAll('right', true));
 document.getElementById('present-right-none').addEventListener('click', () => setPresentAll('right', false));
-document.getElementById('present-continue').addEventListener('click', () => {
+document.getElementById('present-continue').addEventListener('click', async () => {
   const nL = nightOps.presentLeft.length;
   const nR = nightOps.presentRight.length;
   if (nL < 4 || nR < 4) {
-    alert('League rule: each side needs at least 4 players present. Use Record forfeit if a side is short.');
+    await tvAlert('League rule: each side needs at least 4 players present. Use Record forfeit if a side is short.', { title: 'League rule' });
     return;
   }
   nightOps.rounds = buildNightLineup(nightOps.presentLeft, nightOps.presentRight);
@@ -7044,15 +7166,15 @@ document.getElementById('present-continue').addEventListener('click', () => {
   const btn = document.getElementById('present-forfeit');
   if (btn) btn.addEventListener('click', applyPresentForfeit);
 })();
-document.getElementById('lineup-back').addEventListener('click', () => {
+document.getElementById('lineup-back').addEventListener('click', async () => {
   const scored = (nightOps.rounds || []).some(r => r.result);
-  if (scored && !confirm('Going back will rebuild the lineup and clear round results. Continue?')) return;
+  if (scored && !(await tvConfirm('Going back will rebuild the lineup and clear round results. Continue?', { title: 'Rebuild lineup?', yes: 'Rebuild lineup', no: 'Stay', danger: true }))) return;
   nightOps.rounds = []; // rebuild when returning after present edits
   showPresent();
 });
-document.getElementById('lineup-edit-present').addEventListener('click', () => {
+document.getElementById('lineup-edit-present').addEventListener('click', async () => {
   const scored = (nightOps.rounds || []).some(r => r.result);
-  if (scored && !confirm('Editing present will rebuild the lineup and clear round results. Continue?')) return;
+  if (scored && !(await tvConfirm('Editing present will rebuild the lineup and clear round results. Continue?', { title: 'Edit who is present?', yes: 'Rebuild lineup', no: 'Stay', danger: true }))) return;
   nightOps.rounds = [];
   showPresent();
 });
@@ -7067,7 +7189,7 @@ document.getElementById('lineup-edit-present').addEventListener('click', () => {
   }
 })();
 document.getElementById('lineup-reshuffle').addEventListener('click', reshuffleLineup);
-document.getElementById('end-night-btn').addEventListener('click', () => {
+document.getElementById('end-night-btn').addEventListener('click', async () => {
   if (!allRoundsScored() && !(nightOps && nightOps.forfeit)) return;   /* v1.3.0: only after round 8 (or a forfeit) */
   if (allRoundsScored()) {
     showVerifyScoresheet();
@@ -7077,7 +7199,7 @@ document.getElementById('end-night-btn').addEventListener('click', () => {
   const msg = scored
     ? "Not all 8 rounds are scored. End night and discard partial results?"
     : "No games scored yet. End night and return to schedule anyway?";
-  if (!confirm(msg)) return;
+  if (!(await tvConfirm(msg, { title: 'End the night?', yes: 'End night', no: 'Keep scoring', danger: true }))) return;
   finishNightAfterSubmit();
 });
 
@@ -7633,7 +7755,7 @@ function allRoundsScored() {
 function showVerifyScoresheet() {
   if (!nightOps) return;
   if (!allRoundsScored()) {
-    alert('Score all 8 rounds before verifying the scoresheet.');
+    tvAlert('Score all 8 rounds before verifying the scoresheet.', { title: 'Not finished' });
     return;
   }
   // Ensure each result has wins object for editing
@@ -7713,12 +7835,12 @@ function renderVerifyScoresheet() {
     });
   });
   gamesEl.querySelectorAll('[data-replay]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const rid = Number(btn.dataset.replay);
-      if (!confirm('Replay round ' + rid + '? Current result will be cleared.')) return;
+      if (!(await tvConfirm('Replay round ' + rid + '? Current result will be cleared.', { title: 'Replay round?', yes: 'Replay round', no: 'Keep result', danger: true }))) return;
       document.getElementById('verify-screen').classList.remove('show');
       showLineup();
-      startNightRound(rid);
+      await startNightRound(rid);
     });
   });
 
@@ -7779,7 +7901,7 @@ function exportNightJSONFile() {
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     toastStub('Exported ' + filename);
   } catch (e) {
-    alert('Export failed: ' + e.message);
+    tvAlert('Export failed: ' + e.message, { title: 'Export failed' });
   }
 }
 
@@ -7802,8 +7924,8 @@ function finishNightAfterSubmit() {
   showWelcome();
 }
 
-function discardNightLocal() {
-  if (!confirm("Discard tonight's session locally? Nothing will be submitted.")) return;
+async function discardNightLocal() {
+  if (!(await tvConfirm("Discard tonight's session locally? Nothing will be submitted.", { title: 'Discard tonight?', yes: 'Discard night', no: 'Keep it', danger: true }))) return;
   finishNightAfterSubmit();
 }
 
@@ -7863,16 +7985,16 @@ async function submitScoresheetToDb() {
   const subBtn = document.getElementById('verify-submit');
   if (!nightOps) return;
   let doc;
-  try { doc = serializeNightJSON().doc; } catch (e) { setStatus('Cannot build scoresheet: ' + e.message, 'err'); alert('Cannot build scoresheet: ' + e.message); return; }
+  try { doc = serializeNightJSON().doc; } catch (e) { setStatus('Cannot build scoresheet: ' + e.message, 'err'); await tvAlert('Cannot build scoresheet: ' + e.message, { title: 'Not sent' }); return; }
   const season = dbSeasonId();
   let mid = nightOps.dbMatchId || dbLookupMatchId(nightOps);
   if (!mid) { try { await dbSync(); } catch (e) {} mid = dbLookupMatchId(nightOps); }
   if (!mid) {
     const msg = 'This night is not on the league schedule in the database (custom night, or schedule not loaded yet). Open ☰ Menu → Sync once while online, or use Export JSON.';
-    setStatus(msg, 'err'); alert(msg); return;
+    setStatus(msg, 'err'); await tvAlert(msg, { title: 'Not on the schedule' }); return;
   }
   let key = dbGetKey();
-  if (!key) { key = dbPromptKey(); if (!key) { setStatus('Not sent — league key needed.', 'err'); return; } }
+  if (!key) { key = await dbPromptKey(); if (!key) { setStatus('Not sent — league key needed.', 'err'); return; } }
   _dbSubmitBusy = true; if (subBtn) subBtn.disabled = true;
   setStatus('Submitting…', 'busy');
   try {
@@ -7903,7 +8025,7 @@ async function submitScoresheetToDb() {
         bo.dropTurns = true; notes.push("Player averages for this night couldn't be saved, but the result itself was.");
         payload = dbBuildPayload(doc, bo); continue;
       }
-      if (r.kind === 'player' && confirm(r.message + '\n\nSend the scoresheet without that great shot?\n(OK = send without it, Cancel = stop and fix the name)')) {
+      if (r.kind === 'player' && await tvConfirm(r.message + '\n\nSend the scoresheet without that great shot, or stop and fix the name?', { title: 'Great shot name', yes: 'Send without it', no: 'Fix the name' })) {
         skip.push(r.player); payload = dbBuildPayload(doc, bo); continue;
       }
       break;
@@ -7916,7 +8038,7 @@ async function submitScoresheetToDb() {
       setStatus('Submitted ✓ — ' + (rev > 1 ? 'updated the earlier result (revision ' + rev + ')' : 'standings updated') + (notes.length ? ' · ' + notes.join(' ') : ''), 'ok');
       toastStub('Scoresheet submitted ✓');
       try { dbSync(); } catch (e) {}
-      if (confirm('Submitted to the league database' + (rev > 1 ? ' (replaced the earlier version)' : '') + '.' + noteTxt + '\n\nOpen Standings and clear this night from the scorer?')) {
+      if (await tvConfirm('Submitted to the league database' + (rev > 1 ? ' (replaced the earlier version)' : '') + '.' + noteTxt + '\n\nOpen Standings and clear this night from the scorer?', { title: 'Scoresheet submitted', yes: 'Open Standings', no: 'Stay here' })) {
         finishNightAfterSubmit();
         showStandings();
       }
@@ -7925,27 +8047,27 @@ async function submitScoresheetToDb() {
         label: teamShortName(teamByNumber(doc.leftTeamNumber)) + ' vs ' + teamShortName(teamByNumber(doc.rightTeamNumber)) + ' · ' + cleanDateLabel(nightOps.dateLabel) });
       setStatus('Offline — saved in the send queue; it will send automatically when you are back online.', 'busy');
       toastStub('Saved to send queue');
-      if (confirm('No connection. The scoresheet is saved in the send queue on this device and will be sent automatically when you are online (☰ Menu → Send queued results).\n\nClear this night from the scorer?')) finishNightAfterSubmit();
+      if (await tvConfirm('No connection. The scoresheet is saved in the send queue on this device and will be sent automatically when you are online (☰ Menu → Send queued results).\n\nClear this night from the scorer?', { title: 'Saved to the send queue', yes: 'Clear night', no: 'Keep night' })) finishNightAfterSubmit();
     } else if (r.kind === 'key') {
       dbClearKey(); dbRefreshMenuLabels();
       setStatus('League key not accepted. Tap Submit again to enter the right key.', 'err');
-      alert('That league key was not accepted, so nothing was sent.\n\nThe saved key was cleared. Tap Submit Scoresheet again and enter the correct key (ask the organizer).');
+      await tvAlert('That league key was not accepted, so nothing was sent.\n\nThe saved key was cleared. Tap Submit Scoresheet again and enter the correct key (ask the organizer).', { title: 'League key not accepted' });
     } else {
       setStatus('Not sent: ' + r.message, 'err');
-      alert('Not sent: ' + r.message);
+      await tvAlert('Not sent: ' + r.message, { title: 'Not sent' });
     }
   } catch (e) {
-    setStatus('Not sent: ' + (e && e.message), 'err'); alert('Not sent: ' + (e && e.message));
+    setStatus('Not sent: ' + (e && e.message), 'err'); await tvAlert('Not sent: ' + (e && e.message), { title: 'Not sent' });
   } finally { _dbSubmitBusy = false; if (subBtn) subBtn.disabled = false; }
 }
 (function wireDbSubmitUI() {
   const mk = document.getElementById('menu-leaguekey');
-  if (mk) mk.addEventListener('click', () => {
+  if (mk) mk.addEventListener('click', async () => {
     closeMenu();
     if (dbGetKey()) {
-      if (confirm('Clear the saved league key from this device? You will be asked for it again at the next Submit.')) { dbClearKey(); toastStub('League key cleared'); }
+      if (await tvConfirm('Clear the saved league key from this device? You will be asked for it again at the next Submit.', { title: 'Clear league key?', yes: 'Clear key', no: 'Keep key', danger: true })) { dbClearKey(); toastStub('League key cleared'); }
     } else {
-      if (dbPromptKey()) toastStub('League key saved on this device');
+      if (await dbPromptKey()) toastStub('League key saved on this device');
     }
     dbRefreshMenuLabels();
   });
@@ -7956,7 +8078,7 @@ async function submitScoresheetToDb() {
     const r = await dbFlushQueue({ silent: false });
     if (!r.sent && !(r.errors && r.errors.length) && !r.needKey) toastStub('Still offline — ' + q.length + ' result(s) kept in the queue');
     const rest = dbQueueRead().filter(x => x.lastError);
-    if (rest.length && confirm('Discard ' + rest.length + ' queued result(s) the database rejected?')) {
+    if (rest.length && await tvConfirm('Discard ' + rest.length + ' queued result(s) the database rejected?', { title: 'Rejected results', yes: 'Discard them', no: 'Keep them', danger: true })) {
       dbQueueWrite(dbQueueRead().filter(x => !x.lastError));
     }
   });
