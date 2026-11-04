@@ -2471,7 +2471,7 @@ button:disabled { cursor: default; }
   <div class="next-match-card" id="next-match-card" hidden></div>
   <button type="button" class="nav-btn red" id="nav-play">Play</button>
   <button type="button" class="nav-btn red" id="nav-leagues">Leagues &amp; Groups</button>
-  <div class="welcome-version">TVYC Darts v <span class="ver">1.3.1</span></div>
+  <div class="welcome-version">TVYC Darts v <span class="ver">1.3.2</span></div>
 </div>
 
 <div class="menu-drawer" id="menu-drawer">
@@ -3170,7 +3170,7 @@ const LEAGUE_JSON_REL = 'league/2026-27.json';
 const RULES_JSON_REL = 'league/2026-27-rules.json';
 const PAGES_BASE = 'https://git-denyeh.github.io/darts-scorecard/';
 const RAW_BASE = 'https://raw.githubusercontent.com/git-denyeh/darts-scorecard/main/';
-const APP_VERSION = '1.3.1';
+const APP_VERSION = '1.3.2';
 
 function readLeagueCache() {
   try {
@@ -3429,6 +3429,46 @@ function dbAfterSyncRefresh() {
   populateTeamSelectsKeepValues();
   renderNextMatchCard();
   dbRenderHomeStatus();
+  /* 1.3.2: an open Standings / Player Stats screen is re-rendered with the fresh data */
+  const c = dbReadCache();
+  const stEl = document.getElementById('standings');
+  if (c && c.season && stEl && stEl.classList.contains('show')) renderStandingsView(c.season, { fresh: true, fetchedAt: c.fetchedAt });
+  const psEl = document.getElementById('pstats');
+  if (psEl && psEl.classList.contains('show')) renderPlayerStats();
+}
+function fmtUpdatedTime(t) {
+  try { return new Date(t).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch (e) { return ''; }
+}
+/* 1.3.2: one refresh used by every Sync / ↻ / Refresh button. Always refetches the database (no cache),
+   re-renders whatever is on screen, and shows "Updated <time>". opts.db=false skips the database (casual Play). */
+let _refreshAllBusy = null;
+function refreshAll(opts) {
+  opts = opts || {};
+  if (_refreshAllBusy) return _refreshAllBusy;
+  toastStub('Updating…');
+  const mirror = syncLeagueFromMirror({ silent: true }).catch(() => null);
+  if (opts.db === false) {
+    _refreshAllBusy = mirror.then(r => { toastStub(r && r.ok ? 'Updated ' + fmtUpdatedTime(Date.now()) + ' ✓ (league & rules)' : 'Update failed — offline copy kept'); return r; });
+  } else {
+    _refreshAllBusy = Promise.all([dbSync().then(c => ({ ok: true, c: c }), e => ({ ok: false, e: e })), mirror]).then(rs => {
+      const r = rs[0];
+      try { dbAfterSyncRefresh(); } catch (e) {}
+      if (r.ok) {
+        const wk = r.c && r.c.season && r.c.season.seed && r.c.season.seed.asOfWeek;
+        toastStub('Updated ' + fmtUpdatedTime(r.c.fetchedAt) + ' ✓' + (wk ? ' · standings through Week ' + wk : ''));
+      } else {
+        const c = dbReadCache();
+        toastStub('Could not reach the league database — showing saved copy' + (c ? ' from ' + fmtUpdatedTime(c.fetchedAt) : ''));
+        const st = document.getElementById('standings-status');
+        const stEl = document.getElementById('standings');
+        if (st && stEl && stEl.classList.contains('show')) st.textContent = (c ? 'Saved copy from ' + fmtUpdatedTime(c.fetchedAt) + ' · ' : '') + 'update failed (offline?)';
+      }
+      return r;
+    });
+  }
+  const clr = () => { _refreshAllBusy = null; };
+  _refreshAllBusy.then(clr, clr);
+  return _refreshAllBusy;
 }
 function populateTeamSelectsKeepValues() {
   const names = leagueTeams().map(t => t.name_roster);
@@ -3442,7 +3482,7 @@ function populateTeamSelectsKeepValues() {
 function dbRenderHomeStatus() {
   const el = document.getElementById('home-db-status'); if (!el) return;
   const c = dbReadCache();
-  el.textContent = c ? ('League data (database) · last updated ' + new Date(c.fetchedAt).toLocaleString()) : 'League data: bundled schedule (not yet synced with the database)';
+  el.textContent = c ? ('League data (database) · Updated ' + fmtUpdatedTime(c.fetchedAt)) : 'League data: bundled schedule (not yet synced with the database)';
 }
 (function dbBootOverlay() { try { dbApplyOverlay(dbReadCache()); } catch (e) {} try { localStorage.removeItem('tvyc-darts-settings-v1'); /* old GitHub token slot */ } catch (e) {} })();
 
@@ -7125,8 +7165,8 @@ wireUtil('su-gear', () => document.getElementById('settings-modal').classList.ad
 wireUtil('su-gear-c', () => document.getElementById('settings-modal').classList.add('open'));
 wireUtil('su-info', () => toastStub('Info — ' + (match ? (match.mode + ' · first to ' + match.legsToWin) : 'no match')));
 wireUtil('su-info-c', () => toastStub('Info — Cricket · first to ' + (match ? match.legsToWin : '?')));
-wireUtil('su-sync', () => syncLeagueFromMirror({ silent: false }));
-wireUtil('su-sync-c', () => syncLeagueFromMirror({ silent: false }));
+wireUtil('su-sync', () => refreshAll({ db: !!nightFromScore }));
+wireUtil('su-sync-c', () => refreshAll({ db: !!nightFromScore }));
 document.getElementById('settings-close').addEventListener('click', () => {
   document.getElementById('settings-modal').classList.remove('open');
 });
@@ -7300,15 +7340,15 @@ async function syncLeagueFromMirror(opts) {
     if (!leagueHit && !rulesOk) throw leagueErr || new Error('Sync failed');
     refreshSyncStatusUI();
     if (leagueUpdated || rulesUpdated) {
-      toastStub('Synced ✓' + (leagueUpdated ? ' league' : '') + (rulesUpdated ? ' rules' : ''));
+      if (!silent) toastStub('Synced ✓' + (leagueUpdated ? ' league' : '') + (rulesUpdated ? ' rules' : ''));
       // Refresh schedule list if on home
       try { if (typeof renderMatchList === 'function') renderMatchList(); } catch (e) {}
       return { ok: true, leagueUpdated: leagueUpdated, rulesUpdated: rulesUpdated, from: leagueHit ? leagueHit.url : 'rules-only' };
     }
-    toastStub('Already up to date');
+    if (!silent) toastStub('Already up to date');
     return { ok: true, leagueUpdated: false, rulesUpdated: false, from: leagueHit ? leagueHit.url : 'rules-only' };
   } catch (e) {
-    toastStub('Sync failed — offline cache kept');
+    if (!silent) toastStub('Sync failed — offline cache kept');
     return { ok: false, error: e && e.message ? e.message : String(e) };
   }
 }
@@ -7328,8 +7368,7 @@ function wireLeagueSyncUI() {
     closeMenu();
     const sm = document.getElementById('settings-modal');
     if (sm) sm.classList.remove('open');
-    syncLeagueFromMirror({ silent: false });
-    try { dbSync().then(function () { toastStub('League data updated from database ✓'); }, function () { /* offline: keep cache */ }); } catch (e) {}
+    refreshAll();
   };
   const ms = document.getElementById('menu-sync');
   if (ms) ms.addEventListener('click', run);
@@ -7445,13 +7484,8 @@ function renderStandingsView(season, meta) {
   const copyBtn = document.getElementById('standings-copy-digest');
   if (labelEl) labelEl.textContent = (season && season.label) || "Tellico Village Dart League '26-27'";
   let status = '';
-  if (meta.fromCache) status = 'Offline / cached';
-  if (meta.fetchedAt) {
-    try {
-      const d = new Date(meta.fetchedAt);
-      status += (status ? ' · ' : '') + 'last updated ' + d.toLocaleString();
-    } catch (e) {}
-  }
+  if (meta.fetchedAt) status = (meta.fresh ? 'Updated ' : 'Saved copy from ') + fmtUpdatedTime(meta.fetchedAt);
+  else if (meta.fromCache) status = 'Saved copy';
   if (season && season.seed && season.seed.asOfWeek) {
     status += (status ? ' · ' : '') + 'through Week ' + season.seed.asOfWeek;
   }
@@ -7590,7 +7624,8 @@ function copyStandingsDigest() {
 document.getElementById('standings-back').addEventListener('click', showWelcome);
 document.getElementById('standings-close').addEventListener('click', showWelcome);
 document.getElementById('standings-refresh').addEventListener('click', function () {
-  loadStandingsSeason(true);
+  if (!dbReadCache()) { loadStandingsSeason(true); return; }
+  refreshAll();
 });
 document.getElementById('standings-copy-digest').addEventListener('click', copyStandingsDigest);
 
@@ -8211,7 +8246,7 @@ function renderPlayerStats() {
     const id = Number(el.dataset.pid); PS.open = (PS.open === id) ? null : id; renderPlayerStats();
   }));
   const st = document.getElementById('pstats-status');
-  if (st && c.fetchedAt) st.textContent = rows.length + ' players · 01 average = points ÷ darts × 3 · MPR = Cricket marks ÷ darts × 3 · updated ' + new Date(c.fetchedAt).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  if (st && c.fetchedAt) st.textContent = rows.length + ' players · 01 average = points ÷ darts × 3 · MPR = Cricket marks ÷ darts × 3 · Updated ' + fmtUpdatedTime(c.fetchedAt);
 }
 async function showPlayerStats() {
   showFlow('pstats');
